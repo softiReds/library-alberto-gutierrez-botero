@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Library.Api.Auth;
 using Library.Api.Common;
 using Library.Api.Data;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,14 +34,18 @@ var connectionString = builder.Configuration.GetConnectionString("LibraryDb")
     ?? throw new InvalidOperationException("Missing 'ConnectionStrings:LibraryDb' configuration value.");
 
 var enumNameTranslator = new SpanishEnumLabelNameTranslator();
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-dataSourceBuilder.MapEnum<BookStatus>(nameTranslator: enumNameTranslator);
-dataSourceBuilder.MapEnum<LoanStatus>(nameTranslator: enumNameTranslator);
-var dataSource = dataSourceBuilder.Build();
-builder.Services.AddSingleton(dataSource);
 
+// NOTE: MapEnum must be called *inside* the UseNpgsql npgsqlOptions delegate, not on an
+// externally built NpgsqlDataSource passed to UseNpgsql(dataSource) — the latter is a known
+// bug (npgsql/efcore.pg#2603) where the enum never gets wired into the EF Core type mapping,
+// silently falling back to plain int and breaking every read/write against the column.
 builder.Services.AddDbContext<LibraryDbContext>(options =>
-    options.UseNpgsql(dataSource).UseSnakeCaseNamingConvention());
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.MapEnum<BookStatus>(nameTranslator: enumNameTranslator);
+            npgsqlOptions.MapEnum<LoanStatus>(nameTranslator: enumNameTranslator);
+        })
+        .UseSnakeCaseNamingConvention());
 
 // --- Auth (single shared login, JWT bearer, no roles) ---
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -85,6 +89,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
     options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
 });
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
