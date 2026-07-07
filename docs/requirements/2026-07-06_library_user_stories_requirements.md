@@ -62,7 +62,12 @@
 - **Validation rules (based on real errors found in the current spreadsheet):**
   - Barcode unique and required for new books; older books without one can be flagged as "pending barcode."
   - Title and author required.
-  - Status controlled by a fixed list: Available / On loan / In-house reading / Lost / Retired.
+  - Status controlled by a fixed enum: Available / On loan / In-house reading / Lost / Retired.
+
+### 2.6 Event management
+- As a coordinator, I want to create and edit events (title, date, start time, end time, description) so they can be published on the public website.
+- As a coordinator, I want to flag an event as featured so it appears in the public website's featured section.
+- **Confirmed with the coordinator/team:** events are created and managed directly from the management system — this is a real module, not static content loaded by the dev team.
 
 ### 2.2 Memberships
 - As a coordinator, I want to register a new member with their personal data so I can lend them books.
@@ -105,5 +110,4 @@
 
 ## 3. Pending / open questions
 
-- Who creates and edits events (date, time, description)? Assumed for now: the development team loads events directly, since the rest of the public website is static. Confirm with the coordinator whether a lightweight "manage events" screen is actually needed.
 - When the Digital resources module (low priority) is actually built, confirm with the coordinator whether to use Gutendex/Open Library as a real integration or just links to the Colombian catalogs.
