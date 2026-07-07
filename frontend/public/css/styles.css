@@ -326,7 +326,7 @@ h1,h2,h3{font-family:var(--font-display);margin:0;color:var(--maroon-900);}
 .event-highlight__stat strong{font-size:.88rem;color:var(--maroon-900);font-family:var(--font-display);}
 
 /* ============ STATS ============ */
-.stats{background:var(--cream);padding:40px 0;}
+.stats{background:var(--purple-100);padding:40px 0;}
 .stats__inner{
   display:grid;grid-template-columns:1.6fr repeat(3,1fr) auto;gap:24px;align-items:center;
 }
@@ -413,4 +413,87 @@ h1,h2,h3{font-family:var(--font-display);margin:0;color:var(--maroon-900);}
   .footer-info__inner{grid-template-columns:1fr;}
   .site-footer__inner{flex-direction:column;}
   .fab{width:70px;height:70px;font-size:.65rem;}
+}
+
+/* ============ ANIMACIONES: SCROLL REVEAL ============ */
+.reveal{
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .6s ease, transform .6s ease;
+  will-change:opacity, transform;
+}
+.reveal.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ============ GALERÍA: HOVER + LIGHTBOX ============ */
+.mini-carousel--gallery .mini-carousel__track > img{
+  cursor:pointer;
+  transition:transform .35s ease, box-shadow .35s ease;
+}
+.mini-carousel--gallery .mini-carousel__track > img:hover,
+.mini-carousel--gallery .mini-carousel__track > img:focus-visible{
+  transform:scale(1.08);
+  box-shadow:0 10px 24px rgba(59,19,56,.28);
+  position:relative;
+  z-index:2;
+}
+
+.lightbox{
+  position:fixed;inset:0;background:rgba(46,27,44,.88);z-index:80;
+  display:flex;align-items:center;justify-content:center;padding:30px;
+  opacity:0;visibility:hidden;transition:opacity .25s ease, visibility 0s linear .25s;
+}
+.lightbox.is-open{
+  opacity:1;visibility:visible;transition:opacity .25s ease, visibility 0s linear 0s;
+}
+.lightbox__img{
+  max-width:min(90vw,900px);max-height:85vh;border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  transform:scale(.94);transition:transform .3s ease;
+}
+.lightbox.is-open .lightbox__img{transform:scale(1);}
+.lightbox__close{
+  position:absolute;top:22px;right:26px;background:rgba(255,255,255,.15);
+  border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;
+  display:flex;align-items:center;justify-content:center;transition:background .15s ease, transform .15s ease;
+}
+.lightbox__close:hover{background:rgba(255,255,255,.3);transform:scale(1.06);}
+
+/* ============ TARJETAS Y CARRUSELES: MICRO-INTERACCIONES ============ */
+.card{transition:transform .3s ease, box-shadow .3s ease;}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(59,19,56,.14);}
+
+.catalog-mini-card, .reco-card{transition:transform .3s ease;}
+.catalog-mini-card:hover, .reco-card:hover{transform:translateY(-6px);}
+.catalog-mini-card__cover, .reco-card__cover{transition:transform .3s ease, box-shadow .3s ease;}
+.catalog-mini-card:hover .catalog-mini-card__cover,
+.reco-card:hover .reco-card__cover{transform:scale(1.05);box-shadow:0 12px 22px rgba(0,0,0,.24);}
+
+.event-list li{transition:transform .25s ease, background-color .25s ease;border-radius:8px;}
+.event-list li:hover{transform:translateX(4px);background-color:rgba(74,25,66,.05);}
+.event-date{transition:transform .25s ease;}
+.event-list li:hover .event-date{transform:scale(1.07);}
+
+.event-highlight{transition:transform .3s ease, box-shadow .3s ease;}
+.event-highlight:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(59,19,56,.1);}
+
+.mini-carousel__nav{transition:background .15s ease, color .15s ease, transform .15s ease;}
+.mini-carousel__nav:active{transform:scale(.92);}
+
+.search-results__item{transition:background .15s ease, transform .15s ease;}
+.search-results__item:hover{transform:translateX(2px);}
+
+.tag{transition:background .15s ease, color .15s ease, transform .15s ease;}
+.tag:active{transform:scale(.96);}
+
+.stats__number strong, .stats__visits strong{font-variant-numeric:tabular-nums;}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+  .card, .catalog-mini-card, .reco-card, .event-list li, .event-highlight,
+  .mini-carousel--gallery .mini-carousel__track > img,
+  .catalog-mini-card__cover, .reco-card__cover, .event-date,
+  .lightbox, .lightbox__img{transition:none;}
 }

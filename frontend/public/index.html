@@ -78,7 +78,7 @@
   <div class="container info-grid__inner">
 
     <!-- ¿Quiénes somos? -->
-    <article class="card">
+    <article class="card reveal">
       <div class="card__head">
         <span class="badge badge--icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
@@ -92,7 +92,7 @@
     </article>
 
     <!-- Galería -->
-    <article class="card">
+    <article class="card reveal">
       <div class="card__head">
         <span class="badge badge--icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 15-5-5-9 9"/></svg>
@@ -111,7 +111,7 @@
     </article>
 
     <!-- Próximos eventos -->
-    <article class="card card--purple" id="eventos">
+    <article class="card card--purple reveal" id="eventos">
       <div class="card__head">
         <span class="badge badge--icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
@@ -126,7 +126,7 @@
     </article>
 
     <!-- Catálogo -->
-    <article class="card card--purple">
+    <article class="card card--purple reveal">
       <div class="card__head">
         <span class="badge badge--icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9a2 2 0 0 1 2 2v16l-6.5-3L4 21V5a2 2 0 0 1 2-2z"/></svg>
@@ -150,7 +150,7 @@
 <!-- ============ BÚSQUEDA DE CATÁLOGO ============ -->
 <section class="catalog-search" id="catalogo">
   <div class="container catalog-search__inner">
-    <div class="catalog-search__copy">
+    <div class="catalog-search__copy reveal">
       <h2>Explora nuestro catálogo</h2>
       <p>Encuentra libros, revistas, material audiovisual y mucho más en nuestra biblioteca.</p>
 
@@ -169,7 +169,7 @@
       <div class="search-results" id="searchResults" hidden></div>
     </div>
 
-    <div class="catalog-search__art" aria-hidden="true">
+    <div class="catalog-search__art reveal" aria-hidden="true">
       <img src="assets/logo/book.png" alt="">
     </div>
   </div>
@@ -184,17 +184,17 @@
     </div>
 
     <div class="recommended__grid">
-      <div class="mini-carousel mini-carousel--wide mini-carousel--static" data-carousel="recommended">
+      <div class="mini-carousel mini-carousel--wide mini-carousel--static reveal" data-carousel="recommended">
         <div class="mini-carousel__track mini-carousel__track--grid" id="recommendedTrack"></div>
       </div>
 
-      <div class="event-highlight" id="recommendedEvent"></div>
+      <div class="event-highlight reveal" id="recommendedEvent"></div>
     </div>
   </div>
 </section>
 
 <!-- ============ ESTADÍSTICAS ============ -->
-<section class="stats">
+<section class="stats" id="statsSection">
   <div class="container stats__inner">
     <div class="stats__label">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-5.5 7-5.5s7 2.2 7 5.5"/><circle cx="17" cy="8" r="2.5"/><path d="M16 14.5c2.7.3 5 2.2 5 5.5"/></svg>
@@ -205,21 +205,21 @@
     </div>
 
     <div class="stats__number">
-      <strong id="statBooks">0</strong>
+      <strong id="statBooks" data-target="0">0</strong>
       <span>Libros disponibles</span>
     </div>
     <div class="stats__number">
-      <strong id="statWorkshops">85</strong>
+      <strong id="statWorkshops" data-target="85">0</strong>
       <span>Talleres este año</span>
     </div>
     <div class="stats__number">
-      <strong id="statUsers">3.214</strong>
+      <strong id="statUsers" data-target="3214">0</strong>
       <span>Usuarios registrados</span>
     </div>
 
     <div class="stats__visits">
       <span>Visitas a la web</span>
-      <strong id="statVisits">0</strong>
+      <strong id="statVisits" data-target="101">0</strong>
     </div>
   </div>
 </section>
@@ -227,28 +227,28 @@
 <!-- ============ FOOTER INFO ============ -->
 <section class="footer-info" id="contacto">
   <div class="container footer-info__inner">
-    <div class="footer-info__item">
+    <div class="footer-info__item reveal">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       <div>
         <strong>Horario de atención</strong>
         <span>Lunes a viernes<br>8:00 a.m. – 4:00 p.m.</span>
       </div>
     </div>
-    <div class="footer-info__item">
+    <div class="footer-info__item reveal">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
       <div>
         <strong>¿Dónde estamos?</strong>
         <span>Cl. 9 #29A-43, Los Mártires<br>Bogotá, Colombia</span>
       </div>
     </div>
-    <div class="footer-info__item">
+    <div class="footer-info__item reveal">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
       <div>
         <strong>Contáctanos</strong>
         <span><a href="mailto:hola@fservimos.com">hola@fservimos.com</a></span>
       </div>
     </div>
-    <div class="footer-info__item">
+    <div class="footer-info__item reveal">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
       <div>
         <strong>Síguenos</strong>
@@ -275,6 +275,12 @@
       <button type="submit" class="btn btn--primary">Enviar sugerencia</button>
     </form>
   </div>
+</div>
+
+<!-- Lightbox de galería -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox__close" id="lightboxClose" aria-label="Cerrar">✕</button>
+  <img class="lightbox__img" id="lightboxImg" src="" alt="">
 </div>
 
 <!-- ============ FOOTER ============ -->

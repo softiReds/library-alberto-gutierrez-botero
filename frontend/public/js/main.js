@@ -46,6 +46,106 @@ function buildCoverImg(book, className) {
 }
 
 // ---------------------------------------------------------------------
+// Animaciones: scroll reveal
+// ---------------------------------------------------------------------
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+function makeReveal(el, delayIndex = 0) {
+  el.classList.add('reveal');
+  el.style.transitionDelay = `${Math.min(delayIndex, 6) * 70}ms`;
+  revealObserver.observe(el);
+}
+
+function initStaticReveals() {
+  document.querySelectorAll('.reveal').forEach((el, i) => {
+    if (!el.style.transitionDelay) {
+      el.style.transitionDelay = `${(i % 4) * 80}ms`;
+    }
+    revealObserver.observe(el);
+  });
+}
+
+// ---------------------------------------------------------------------
+// Animaciones: contador de estadísticas
+// ---------------------------------------------------------------------
+let statsRevealed = false;
+
+function animateCounter(el, target, duration = 1300) {
+  const start = 0;
+  const startTime = performance.now();
+
+  function tick(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const value = Math.round(start + (target - start) * eased);
+    el.textContent = value.toLocaleString('es-CO');
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = target.toLocaleString('es-CO');
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function setCounterTarget(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.dataset.target = value;
+  if (statsRevealed) {
+    animateCounter(el, value);
+  }
+}
+
+function initStatsCounter() {
+  const section = document.getElementById('statsSection');
+  if (!section) return;
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !statsRevealed) {
+        statsRevealed = true;
+        section.querySelectorAll('.stats__number strong, .stats__visits strong').forEach(el => {
+          const target = Number(el.dataset.target || 0);
+          animateCounter(el, target);
+        });
+        statsObserver.unobserve(section);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  statsObserver.observe(section);
+}
+
+// ---------------------------------------------------------------------
+// Animaciones: lightbox de galería
+// ---------------------------------------------------------------------
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxClose = document.getElementById('lightboxClose');
+
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('is-open');
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('is-open');
+}
+
+lightboxClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ---------------------------------------------------------------------
 // Carga del catálogo
 // ---------------------------------------------------------------------
 async function loadCatalog() {
@@ -65,7 +165,7 @@ async function loadCatalog() {
 }
 
 // ---------------------------------------------------------------------
-// Carga de eventos y talleres 
+// Carga de eventos y talleres
 // ---------------------------------------------------------------------
 async function loadEvents() {
   try {
@@ -83,7 +183,7 @@ async function loadEvents() {
 }
 
 // ---------------------------------------------------------------------
-// Evento destacado 
+// Evento destacado
 // ---------------------------------------------------------------------
 function renderRecommendedEvent() {
   const container = document.getElementById('recommendedEvent');
@@ -157,7 +257,7 @@ function renderEvents() {
   const upcoming = sorted.filter(ev => new Date(`${ev.date}T00:00:00`) >= today);
   const toShow = (upcoming.length ? upcoming : sorted).slice(0, 3);
 
-  toShow.forEach(ev => {
+  toShow.forEach((ev, i) => {
     const li = document.createElement('li');
     const { day, month } = formatEventDate(ev.date);
 
@@ -172,6 +272,7 @@ function renderEvents() {
     li.appendChild(dateEl);
     li.appendChild(infoEl);
     list.appendChild(li);
+    makeReveal(li, i);
   });
 }
 
@@ -179,17 +280,17 @@ function renderWorkshopsStat() {
   const currentYear = new Date().getFullYear();
   const count = EVENTS.filter(ev => new Date(`${ev.date}T00:00:00`).getFullYear() === currentYear).length;
   const value = count || STATIC_STATS.workshops;
-  document.getElementById('statWorkshops').textContent = value.toLocaleString('es-CO');
+  setCounterTarget('statWorkshops', value);
 }
 
 // ---------------------------------------------------------------------
 // Estadísticas
 // ---------------------------------------------------------------------
 function renderStats() {
-  document.getElementById('statBooks').textContent = CATALOG.length.toLocaleString('es-CO');
-  document.getElementById('statWorkshops').textContent = STATIC_STATS.workshops.toLocaleString('es-CO');
-  document.getElementById('statUsers').textContent = STATIC_STATS.users.toLocaleString('es-CO');
-  document.getElementById('statVisits').textContent = STATIC_STATS.visits.toLocaleString('es-CO');
+  setCounterTarget('statBooks', CATALOG.length);
+  setCounterTarget('statWorkshops', STATIC_STATS.workshops);
+  setCounterTarget('statUsers', STATIC_STATS.users);
+  setCounterTarget('statVisits', STATIC_STATS.visits);
 }
 
 // ---------------------------------------------------------------------
@@ -210,13 +311,22 @@ function renderGallery() {
     const img = document.createElement('img');
     img.src = src;
     img.alt = `Foto de la galería ${i + 1}`;
+    img.tabIndex = 0;
+    img.addEventListener('click', () => openLightbox(src, img.alt));
+    img.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(src, img.alt);
+      }
+    });
     track.appendChild(img);
+    makeReveal(img, i);
   });
   setupDots(track, document.getElementById('galleryDots'), GALLERY_IMAGES.length);
 }
 
 // ---------------------------------------------------------------------
-// Catálogo destacado 
+// Catálogo destacado
 // ---------------------------------------------------------------------
 function renderFeaturedBookCarousel() {
   const track = document.getElementById('featuredBookTrack');
@@ -227,7 +337,7 @@ function renderFeaturedBookCarousel() {
     return;
   }
 
-  CATALOG.forEach(book => {
+  CATALOG.forEach((book, i) => {
     const card = document.createElement('div');
     card.className = 'catalog-mini-card';
 
@@ -244,6 +354,7 @@ function renderFeaturedBookCarousel() {
     card.appendChild(title);
     card.appendChild(author);
     track.appendChild(card);
+    makeReveal(card, i);
   });
 
   setupDots(track, document.getElementById('featuredBookDots'), CATALOG.length);
@@ -263,7 +374,7 @@ function renderRecommended() {
     return;
   }
 
-  featured.forEach(book => {
+  featured.forEach((book, i) => {
     const card = document.createElement('div');
     card.className = 'reco-card';
 
@@ -277,6 +388,7 @@ function renderRecommended() {
     card.appendChild(cover);
     card.appendChild(info);
     track.appendChild(card);
+    makeReveal(card, i);
   });
 }
 
@@ -317,7 +429,7 @@ document.querySelectorAll('[data-carousel]').forEach(wrapper => {
 });
 
 // ---------------------------------------------------------------------
-// Búsqueda del catálogo 
+// Búsqueda del catálogo
 // ---------------------------------------------------------------------
 const searchInput = document.getElementById('catalogSearchInput');
 const searchResults = document.getElementById('searchResults');
@@ -369,7 +481,7 @@ function runSearch() {
 }
 
 // ---------------------------------------------------------------------
-// Botón flotante de sugerencias 
+// Botón flotante de sugerencias
 // ---------------------------------------------------------------------
 const fab = document.getElementById('suggestionFab');
 const modal = document.getElementById('suggestionModal');
@@ -382,14 +494,13 @@ modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = tr
 
 suggestionForm.addEventListener('submit', e => {
   e.preventDefault();
-  // TODO: conectar a un endpoint 
   alert('¡Gracias por tu sugerencia! La tendremos en cuenta.');
   suggestionForm.reset();
   modal.hidden = true;
 });
 
 // ---------------------------------------------------------------------
-// Toggle de búsqueda en el header 
+// Toggle de búsqueda en el header
 // ---------------------------------------------------------------------
 document.getElementById('navSearchToggle').addEventListener('click', () => {
   document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
@@ -399,5 +510,7 @@ document.getElementById('navSearchToggle').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------
+initStaticReveals();
+initStatsCounter();
 loadCatalog();
 loadEvents();
