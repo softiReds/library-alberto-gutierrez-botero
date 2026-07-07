@@ -429,3 +429,13 @@ FodyWeavers.xsd
 *.msp
 
 .DS_Store
+
+# JetBrains Rider
+.idea/
+*.iml
+*.sln.iml
+out/
+
+# Local secrets / connection strings
+appsettings.*.local.json
+appsettings.Development.json
