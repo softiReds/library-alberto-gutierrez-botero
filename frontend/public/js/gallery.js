@@ -115,6 +115,25 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------------------------------------------------------------------
+// Botón flotante de sugerencias
+// ---------------------------------------------------------------------
+const fab = document.getElementById('suggestionFab');
+const modal = document.getElementById('suggestionModal');
+const modalClose = document.getElementById('suggestionClose');
+const suggestionForm = document.getElementById('suggestionForm');
+
+fab.addEventListener('click', () => { modal.hidden = false; });
+modalClose.addEventListener('click', () => { modal.hidden = true; });
+modal.addEventListener('click', e => { if (e.target === modal) modal.hidden = true; });
+
+suggestionForm.addEventListener('submit', e => {
+  e.preventDefault();
+  alert('¡Gracias por tu sugerencia! La tendremos en cuenta.');
+  suggestionForm.reset();
+  modal.hidden = true;
+});
+
+// ---------------------------------------------------------------------
 // Controles
 // ---------------------------------------------------------------------
 document.getElementById('navSearchToggle').addEventListener('click', () => {
