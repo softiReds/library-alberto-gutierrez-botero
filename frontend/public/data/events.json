@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Club de lectura juvenil",
+    "date": "2026-07-10",
+    "start_time": "16:00",
+    "end_time": "17:30",
+    "description": "Encuentro mensual para comentar el libro del mes con jóvenes de 12 a 17 años.",
+    "featured": true
+  },
+  {
+    "title": "Taller de escritura creativa",
+    "date": "2026-07-15",
+    "start_time": "10:00",
+    "end_time": "12:00",
+    "description": "Ejercicios de escritura libre y narrativa corta, abierto a todo público.",
+    "featured": false
+  },
+  {
+    "title": "Cuentacuentos en familia",
+    "date": "2026-07-22",
+    "start_time": "10:30",
+    "end_time": "11:30",
+    "description": "Sesión de cuentacuentos pensada para niños de 3 a 8 años acompañados de un adulto.",
+    "featured": false
+  },
+  {
+    "title": "Introducción a herramientas digitales",
+    "date": "2026-08-05",
+    "start_time": "14:00",
+    "end_time": "16:00",
+    "description": "Taller práctico de navegación web, correo electrónico y ofimática básica.",
+    "featured": false
+  },
+  {
+    "title": "Círculo de poesía",
+    "date": "2026-08-19",
+    "start_time": "17:00",
+    "end_time": "18:30",
+    "description": "Lectura y discusión de poesía colombiana contemporánea.",
+    "featured": false
+  },
+  {
+    "title": "Taller de ilustración para niños",
+    "date": "2026-09-02",
+    "start_time": "10:00",
+    "end_time": "11:30",
+    "description": "Actividad de dibujo e ilustración con materiales básicos, para niños de 6 a 10 años.",
+    "featured": false
+  }
+]

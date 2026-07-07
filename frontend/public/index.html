@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca Alberto Gutiérrez Botero | Fundación Servimos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="container topbar__inner">
+    <a href="https://fundacionservimos.com/nosotros/"
+      class="topbar__brand"
+      target="_blank"
+      rel="noopener noreferrer">
+        <img src="assets/logo/logo-fundacion.png"
+            alt="Fundación Servimos"
+            class="topbar__logo">
+    </a>
+    <a href="#" class="topbar__login">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      Iniciar sesión
+    </a>
+  </div>
+</div>
+
+<!-- ============ HEADER / NAV ============ -->
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo/logo-biblioteca.png" alt="" class="brand__icon">
+      <span class="brand__text">
+        <small>Biblioteca</small>
+        Alberto Gutiérrez Botero
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="index.html" class="active">Inicio</a>
+      <a href="#">Sobre la biblioteca</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#">Recursos digitales</a>
+      <a href="#eventos">Talleres y galería</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+
+    <button class="icon-btn" id="navSearchToggle" aria-label="Buscar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <h1>Conocimiento que inspira, comunidad que transforma.</h1>
+      <p>Un espacio para leer, aprender y crecer juntos.</p>
+      <div class="hero__actions">
+        <a href="#catalogo" class="btn btn--primary">Explorar catálogo</a>
+        <a href="#" class="btn btn--outline">Conoce mas</a>
+      </div>
+    </div>
+    <div class="hero__media-wrap">
+      <div class="hero__media">
+        <img src="assets/gallery/hero-biblioteca.jpg" alt="Interior de la Biblioteca Alberto Gutiérrez Botero">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INFO CARDS ============ -->
+<section class="info-grid">
+  <div class="container info-grid__inner">
+
+    <!-- ¿Quiénes somos? -->
+    <article class="card">
+      <div class="card__head">
+        <span class="badge badge--icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        </span>
+        <h3>¿Quiénes somos?</h3>
+      </div>
+      <p class="card__text">
+        La Biblioteca Alberto Gutiérrez Botero es un espacio de la Fundación Servimos que promueve la lectura, el aprendizaje y la cultura para transformar vidas y fortalecer nuestra comunidad.
+      </p>
+      <a href="#" class="link-arrow">Conoce más sobre nosotros →</a>
+    </article>
+
+    <!-- Galería -->
+    <article class="card">
+      <div class="card__head">
+        <span class="badge badge--icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 15-5-5-9 9"/></svg>
+        </span>
+        <div>
+          <h3>Galería</h3>
+          <a href="#" class="link-arrow link-arrow--sm">Ver galería completa →</a>
+        </div>
+      </div>
+      <div class="mini-carousel mini-carousel--gallery" data-carousel="gallery">
+        <button class="mini-carousel__nav mini-carousel__nav--prev" aria-label="Anterior">‹</button>
+        <div class="mini-carousel__track" id="galleryTrack"></div>
+        <button class="mini-carousel__nav mini-carousel__nav--next" aria-label="Siguiente">›</button>
+      </div>
+      <div class="dots" id="galleryDots"></div>
+    </article>
+
+    <!-- Próximos eventos -->
+    <article class="card card--purple" id="eventos">
+      <div class="card__head">
+        <span class="badge badge--icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        </span>
+        <div>
+          <h3>Próximos eventos y talleres</h3>
+          <a href="#" class="link-arrow link-arrow--sm">Ver calendario completo →</a>
+        </div>
+      </div>
+      <ul class="event-list" id="eventsList"></ul>
+      <a href="#" class="btn btn--soft">Ver todos los eventos</a>
+    </article>
+
+    <!-- Catálogo -->
+    <article class="card card--purple">
+      <div class="card__head">
+        <span class="badge badge--icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9a2 2 0 0 1 2 2v16l-6.5-3L4 21V5a2 2 0 0 1 2-2z"/></svg>
+        </span>
+        <div>
+          <h3>Catálogo</h3>
+          <a href="#catalogo" class="link-arrow link-arrow--sm">Ir al catálogo →</a>
+        </div>
+      </div>
+      <div class="mini-carousel" data-carousel="featured-book">
+        <button class="mini-carousel__nav mini-carousel__nav--prev" aria-label="Anterior">‹</button>
+        <div class="mini-carousel__track" id="featuredBookTrack"></div>
+        <button class="mini-carousel__nav mini-carousel__nav--next" aria-label="Siguiente">›</button>
+      </div>
+      <div class="dots" id="featuredBookDots"></div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ BÚSQUEDA DE CATÁLOGO ============ -->
+<section class="catalog-search" id="catalogo">
+  <div class="container catalog-search__inner">
+    <div class="catalog-search__copy">
+      <h2>Explora nuestro catálogo</h2>
+      <p>Encuentra libros, revistas, material audiovisual y mucho más en nuestra biblioteca.</p>
+
+      <div class="search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="catalogSearchInput" placeholder="Buscar por título, autor, tema o palabra clave...">
+      </div>
+
+      <div class="filter-tags" id="filterTags">
+        <button class="tag active" data-filter="title">Libros</button>
+        <button class="tag" data-filter="author">Autores</button>
+        <button class="tag" data-filter="publisher">Editorial</button>
+        <button class="tag" data-filter="subject">Materia</button>
+      </div>
+
+      <div class="search-results" id="searchResults" hidden></div>
+    </div>
+
+    <div class="catalog-search__art" aria-hidden="true">
+      <img src="assets/logo/book.png" alt="">
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECOMENDADOS ============ -->
+<section class="recommended" id="recomendados">
+  <div class="container">
+    <div class="section-head">
+      <h2>Recomendados para ti</h2>
+      <a href="#" class="link-arrow">Ver más recomendaciones →</a>
+    </div>
+
+    <div class="recommended__grid">
+      <div class="mini-carousel mini-carousel--wide mini-carousel--static" data-carousel="recommended">
+        <div class="mini-carousel__track mini-carousel__track--grid" id="recommendedTrack"></div>
+      </div>
+
+      <div class="event-highlight" id="recommendedEvent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ESTADÍSTICAS ============ -->
+<section class="stats">
+  <div class="container stats__inner">
+    <div class="stats__label">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-5.5 7-5.5s7 2.2 7 5.5"/><circle cx="17" cy="8" r="2.5"/><path d="M16 14.5c2.7.3 5 2.2 5 5.5"/></svg>
+      <div>
+        <strong>Gracias a nuestra comunidad</strong>
+        <span>Así seguimos creciendo juntos.</span>
+      </div>
+    </div>
+
+    <div class="stats__number">
+      <strong id="statBooks">0</strong>
+      <span>Libros disponibles</span>
+    </div>
+    <div class="stats__number">
+      <strong id="statWorkshops">85</strong>
+      <span>Talleres este año</span>
+    </div>
+    <div class="stats__number">
+      <strong id="statUsers">3.214</strong>
+      <span>Usuarios registrados</span>
+    </div>
+
+    <div class="stats__visits">
+      <span>Visitas a la web</span>
+      <strong id="statVisits">0</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER INFO ============ -->
+<section class="footer-info" id="contacto">
+  <div class="container footer-info__inner">
+    <div class="footer-info__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <div>
+        <strong>Horario de atención</strong>
+        <span>Lunes a viernes<br>8:00 a.m. – 4:00 p.m.</span>
+      </div>
+    </div>
+    <div class="footer-info__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+      <div>
+        <strong>¿Dónde estamos?</strong>
+        <span>Cl. 9 #29A-43, Los Mártires<br>Bogotá, Colombia</span>
+      </div>
+    </div>
+    <div class="footer-info__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      <div>
+        <strong>Contáctanos</strong>
+        <span><a href="mailto:hola@fservimos.com">hola@fservimos.com</a></span>
+      </div>
+    </div>
+    <div class="footer-info__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+      <div>
+        <strong>Síguenos</strong>
+        <span><a href="https://fundacionservimos.com/nosotros/" target="_blank" rel="noopener">fundacionservimos.com</a></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Botón flotante de sugerencias -->
+<button class="fab" id="suggestionFab">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span>Deja tu<br>sugerencia</span>
+</button>
+
+<!-- Modal de sugerencia -->
+<div class="modal" id="suggestionModal" hidden>
+  <div class="modal__panel">
+    <button class="modal__close" id="suggestionClose" aria-label="Cerrar">✕</button>
+    <h3>Cuéntanos tu sugerencia</h3>
+    <p>Tu opinión nos ayuda a mejorar la biblioteca.</p>
+    <form id="suggestionForm">
+      <textarea rows="4" placeholder="Escribe aquí tu idea o comentario..." required></textarea>
+      <button type="submit" class="btn btn--primary">Enviar sugerencia</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__brand">
+      <img src="assets/logo/logo-biblioteca-footer.png" alt="">
+      <div>
+        <strong>Biblioteca<br>Alberto Gutiérrez Botero</strong>
+        <span>Fundación Servimos</span>
+      </div>
+      <small>© 2026 Todos los derechos reservados.</small>
+    </div>
+    <div class="site-footer__quote">
+      <span class="quote-mark">&ldquo;</span>
+      <p>La lectura es el viaje de los que no pueden tomar el tren.</p>
+      <span>— Francisco Umbral</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
