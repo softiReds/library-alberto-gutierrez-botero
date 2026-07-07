@@ -1,16 +1,31 @@
-namespace Library.Api.Domain.Entities;
+using System.ComponentModel.DataAnnotations;
 
-public class Member
+namespace Library.Api.Members;
+
+/// <summary>Replaces every editable field (everything except id and created_at).</summary>
+public class MemberUpdateRequest
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    [Required(AllowEmptyStrings = false)]
     public required string DocumentType { get; set; }
+
+    [Required(AllowEmptyStrings = false)]
     public required string DocumentNumber { get; set; }
+
     public DateOnly? BirthDate { get; set; }
     public string? NationalityCountry { get; set; }
+
+    [Required(AllowEmptyStrings = false)]
+    [EmailAddress]
     public required string Email { get; set; }
+
     public string? Gender { get; set; }
+
+    [Required(AllowEmptyStrings = false)]
     public required string FirstName { get; set; }
+
+    [Required(AllowEmptyStrings = false)]
     public required string LastName { get; set; }
+
     public string? Occupation { get; set; }
     public string? EducationLevel { get; set; }
     public string? Locality { get; set; }
@@ -22,7 +37,4 @@ public class Member
     public string? EmergencyContactPhone { get; set; }
     public bool WantsCulturalAgenda { get; set; }
     public bool AgreementAccepted { get; set; }
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-
-    public ICollection<Loan> Loans { get; set; } = new List<Loan>();
 }
