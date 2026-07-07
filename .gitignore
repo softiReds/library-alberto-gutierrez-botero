@@ -439,3 +439,6 @@ out/
 # Local secrets / connection strings
 appsettings.*.local.json
 appsettings.Development.json
+
+# Local Docker Compose overrides (may contain machine-specific credentials/ports)
+docker-compose.override.yml

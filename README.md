@@ -25,3 +25,18 @@ The project has two independent systems:
 - frontend/
   - public/ — public website (HTML/CSS/JS)
   - admin/ — management system (HTML/CSS/JS)
+
+## Local development database
+
+PostgreSQL runs in Docker for local development; the API itself runs natively (e.g. from Rider), not in a container.
+
+```bash
+# Start Postgres (from the repo root)
+docker compose up -d
+
+# Apply EF Core migrations (from backend/Library.Api)
+dotnet ef database update
+
+# Stop Postgres
+docker compose down
+```
