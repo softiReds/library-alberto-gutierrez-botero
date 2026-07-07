@@ -41,7 +41,7 @@
 
     <nav class="main-nav" aria-label="Navegación principal">
       <a href="index.html" class="active">Inicio</a>
-      <a href="#">Sobre la biblioteca</a>
+      <a href="sobre-la-biblioteca.html">Sobre la biblioteca</a>
       <a href="#catalogo">Catálogo</a>
       <a href="#">Recursos digitales</a>
       <a href="#eventos">Talleres y galería</a>
@@ -56,18 +56,18 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero">
+  <div class="hero__media-wrap" aria-hidden="true">
+    <div class="hero__media">
+      <img src="assets/gallery/hero-biblioteca.jpg" alt="">
+    </div>
+  </div>
   <div class="container hero__inner">
     <div class="hero__copy">
       <h1>Conocimiento que inspira, comunidad que transforma.</h1>
       <p>Un espacio para leer, aprender y crecer juntos.</p>
       <div class="hero__actions">
         <a href="#catalogo" class="btn btn--primary">Explorar catálogo</a>
-        <a href="#" class="btn btn--outline">Conoce mas</a>
-      </div>
-    </div>
-    <div class="hero__media-wrap">
-      <div class="hero__media">
-        <img src="assets/gallery/hero-biblioteca.jpg" alt="Interior de la Biblioteca Alberto Gutiérrez Botero">
+        <a href="sobre-la-biblioteca.html" class="btn btn--outline">Conoce más</a>
       </div>
     </div>
   </div>
@@ -88,7 +88,7 @@
       <p class="card__text">
         La Biblioteca Alberto Gutiérrez Botero es un espacio de la Fundación Servimos que promueve la lectura, el aprendizaje y la cultura para transformar vidas y fortalecer nuestra comunidad.
       </p>
-      <a href="#" class="link-arrow">Conoce más sobre nosotros →</a>
+      <a href="sobre-la-biblioteca.html" class="link-arrow">Conoce más sobre nosotros →</a>
     </article>
 
     <!-- Galería -->
@@ -170,7 +170,7 @@
     </div>
 
     <div class="catalog-search__art reveal" aria-hidden="true">
-      <img src="assets/logo/book.png" alt="">
+      <img src="assets/home/book.png" alt="">
     </div>
   </div>
 </section>
@@ -180,7 +180,6 @@
   <div class="container">
     <div class="section-head">
       <h2>Recomendados para ti</h2>
-      <a href="#" class="link-arrow">Ver más recomendaciones →</a>
     </div>
 
     <div class="recommended__grid">
@@ -302,6 +301,7 @@
   </div>
 </footer>
 
+<script src="js/animations.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

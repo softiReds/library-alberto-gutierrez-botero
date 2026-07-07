@@ -5,7 +5,11 @@
 const CATALOG_URL = 'data/catalog.json';
 const EVENTS_URL = 'data/events.json';
 
-const FALLBACK_COVER = 'assets/logo/book-cover.png';
+const FALLBACK_COVERS = [
+  'assets/home/book-cover-1.png',
+  'assets/home/book-cover-2.png',
+  'assets/home/book-cover-3.png'
+];
 
 const STATIC_STATS = {
   workshops: 85,
@@ -28,48 +32,36 @@ function firstIsbn(book) {
   return null;
 }
 
-function buildCoverImg(book, className) {
+function buildCoverWrap(book, index, imgClassName, wrapClassName) {
+  const wrap = document.createElement('div');
+  wrap.className = wrapClassName;
+
   const img = document.createElement('img');
-  img.className = className;
+  img.className = imgClassName;
   img.alt = `Portada de ${book.title}`;
   img.loading = 'lazy';
+
+  const overlay = document.createElement('span');
+  overlay.className = 'cover-fallback-title';
+  overlay.textContent = book.title;
+
+  function useFallback() {
+    img.src = FALLBACK_COVERS[index % FALLBACK_COVERS.length];
+    wrap.classList.add('cover-wrap--fallback');
+  }
 
   const isbn = firstIsbn(book);
 
   if (isbn) {
     img.src = `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false`;
-    img.onerror = () => { img.onerror = null; img.src = FALLBACK_COVER; };
+    img.onerror = () => { img.onerror = null; useFallback(); };
   } else {
-    img.src = FALLBACK_COVER;
+    useFallback();
   }
-  return img;
-}
 
-// ---------------------------------------------------------------------
-// Animaciones: scroll reveal
-// ---------------------------------------------------------------------
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      revealObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.15 });
-
-function makeReveal(el, delayIndex = 0) {
-  el.classList.add('reveal');
-  el.style.transitionDelay = `${Math.min(delayIndex, 6) * 70}ms`;
-  revealObserver.observe(el);
-}
-
-function initStaticReveals() {
-  document.querySelectorAll('.reveal').forEach((el, i) => {
-    if (!el.style.transitionDelay) {
-      el.style.transitionDelay = `${(i % 4) * 80}ms`;
-    }
-    revealObserver.observe(el);
-  });
+  wrap.appendChild(img);
+  wrap.appendChild(overlay);
+  return wrap;
 }
 
 // ---------------------------------------------------------------------
@@ -206,7 +198,7 @@ function renderRecommendedEvent() {
         <h3>${escapeHtml(event.title)}</h3>
         <p>${escapeHtml(event.description || '')}</p>
       </div>
-      <img class="event-highlight__art" src="assets/logo/event.png" alt="">
+      <img class="event-highlight__art" src="assets/home/event.png" alt="">
     </div>
     <div class="event-highlight__stats">
       <div class="event-highlight__stat">
@@ -341,7 +333,7 @@ function renderFeaturedBookCarousel() {
     const card = document.createElement('div');
     card.className = 'catalog-mini-card';
 
-    const cover = buildCoverImg(book, 'catalog-mini-card__cover');
+    const coverWrap = buildCoverWrap(book, i, 'catalog-mini-card__cover', 'catalog-mini-card__cover-wrap');
 
     const title = document.createElement('h4');
     title.textContent = book.title;
@@ -350,7 +342,7 @@ function renderFeaturedBookCarousel() {
     author.className = 'author';
     author.textContent = book.author || '';
 
-    card.appendChild(cover);
+    card.appendChild(coverWrap);
     card.appendChild(title);
     card.appendChild(author);
     track.appendChild(card);
@@ -378,14 +370,14 @@ function renderRecommended() {
     const card = document.createElement('div');
     card.className = 'reco-card';
 
-    const cover = buildCoverImg(book, 'reco-card__cover');
+    const coverWrap = buildCoverWrap(book, i, 'reco-card__cover', 'reco-card__cover-wrap');
     const info = document.createElement('div');
     info.innerHTML = `
       <h4>${escapeHtml(book.title)}</h4>
       <span class="author">${escapeHtml(book.author || '')}</span>
     `;
 
-    card.appendChild(cover);
+    card.appendChild(coverWrap);
     card.appendChild(info);
     track.appendChild(card);
     makeReveal(card, i);

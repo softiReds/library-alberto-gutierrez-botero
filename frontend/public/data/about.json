@@ -1,0 +1,66 @@
+{
+  "hero": {
+    "eyebrow": "Sobre nuestra",
+    "highlight": "biblioteca",
+    "subtitle": "Un lugar de encuentro, aprendizaje y transformación para toda la comunidad."
+  },
+  "quienesSomos": {
+    "title": "¿Quiénes somos?",
+    "paragraphs": [
+      "La Biblioteca de la Fundación Servimos, es un espacio de educación, cultura, innovación y transformación social que promueve el acceso libre y equitativo al conocimiento como un derecho fundamental y una herramienta para el desarrollo humano.",
+      "Como parte del modelo de atención integral de Servimos, la biblioteca contribuye al fortalecimiento de las capacidades individuales y colectivas mediante programas de promoción de lectura, alfabetización digital, formación cultural y participación comunitaria, dirigidos a niños, jóvenes, adultos y personas mayores de la localidad de Los Mártires.",
+      "Más allá de ofrecer servicios bibliotecarios, nos consolidamos como un espacio vivo de encuentro, bienestar y construcción de comunidad. Cada actividad, taller y proceso formativo busca generar experiencias significativas que favorezcan el aprendizaje, la creatividad, el aprovechamiento positivo del tiempo libre y el fortalecimiento de los vínculos sociales.",
+      "Reconocemos que muchas personas encuentran en la biblioteca un lugar seguro para compartir, aprender y sentirse parte de una comunidad. En este sentido, promovemos ambientes acogedores e incluyentes donde el conocimiento se convierte en una oportunidad para fortalecer la autoestima, recuperar la motivación, construir nuevas relaciones y mejorar la calidad de vida.",
+      "Nuestro compromiso es ofrecer servicios innovadores, pertinentes y de calidad que respondan a las necesidades del territorio, contribuyendo al cierre de brechas educativas, culturales y digitales, al fortalecimiento del tejido social y a la construcción de una comunidad más participativa, resiliente y solidaria."
+    ]
+  },
+  "features": [
+    { "icon": "wifi", "label": "Internet 100% gratuita" },
+    { "icon": "meeting", "label": "Sala de reuniones con equipo audiovisual" },
+    { "icon": "computer", "label": "Sala informática con 12 computadores" },
+    { "icon": "grad-cap", "label": "Talleres de formación en diferentes áreas" },
+    { "icon": "culture", "label": "Actividades culturales" }
+  ],
+  "mision": {
+    "title": "Misión",
+    "text": "Promover el acceso equitativo al conocimiento, la lectura, la cultura y las tecnologías de la información mediante programas innovadores, inclusivos y participativos que fortalezcan las capacidades educativas y sociales de la comunidad."
+  },
+  "vision": {
+    "title": "Visión",
+    "text": "Para el año 2030, ser un referente local en promoción de lectura, innovación educativa, inclusión digital y desarrollo cultural, reconocido por generar oportunidades de aprendizaje y transformación social para toda la comunidad."
+  },
+  "valores": [
+    { "icon": "users", "label": "Inclusión" },
+    { "icon": "bulb", "label": "Innovación" },
+    { "icon": "heart-hand", "label": "Solidaridad" },
+    { "icon": "handshake", "label": "Respeto" },
+    { "icon": "shield", "label": "Transparencia" },
+    { "icon": "service", "label": "Servicio" },
+    { "icon": "group", "label": "Compromiso Social" },
+    { "icon": "book", "label": "Aprendizaje Permanente" }
+  ],
+  "reglamento": {
+    "title": "Reglamento de la biblioteca",
+    "subtitle": "Reglamento de servicios — Biblioteca Alberto Gutiérrez Botero, Ricaurte",
+    "reglas": [
+      "El horario de atención es de lunes a viernes de 8:00 a.m. a 4:55 p.m. y sábados de 8:00 a.m. a 1:00 p.m.",
+      "Registra tu ingreso en el área de circulación y préstamo, y deja allí tu maleta. Se recomienda no dejar objetos de valor como cámaras, celulares, portátiles o tabletas.",
+      "La biblioteca no se hace responsable de los elementos extraviados; es responsabilidad del usuario estar pendiente de ellos.",
+      "El ingreso y la permanencia de niños menores de 8 años debe hacerse en compañía de un adulto responsable.",
+      "No se permite ingresar en estado de embriaguez o bajo el efecto de sustancias estupefacientes o psicotrópicas.",
+      "No está permitido el ingreso ni el consumo de alimentos y bebidas.",
+      "Conforme al artículo 19 de la Ley 1335 de 2009, no está permitido fumar dentro de las instalaciones.",
+      "No está permitido ingresar armas, bebidas alcohólicas ni sustancias ilícitas o estupefacientes.",
+      "Mantén un tono de voz moderado y usa audífonos para dispositivos celulares y computadores.",
+      "El uso de cámaras, videograbadoras o grabadoras requiere autorización del coordinador de la biblioteca.",
+      "Se permite el ingreso de mascotas, siempre acompañadas y bajo cuidado de su dueño; se recomienda traer bolsas, agua, collar y bozal.",
+      "No se acepta agresión física, verbal, acoso ni conductas contra la integridad o los bienes de usuarios o personal; estos casos podrán derivar en la suspensión del servicio.",
+      "La bebeteca es de uso exclusivo para primera infancia (0-4 años), acompañados por sus tutores.",
+      "El tiempo máximo de uso de computadores es de 3 horas; el acceso a páginas prohibidas causará la suspensión del servicio.",
+      "La biblioteca está monitoreada y controlada las 24 horas, los 7 días de la semana.",
+      "15 minutos antes del cierre se suspende el servicio de préstamo y el uso de computadores.",
+      "Ante un comportamiento contrario al reglamento, se solicitará al usuario modificar su conducta; en caso de reincidencia, podrá pedirse su retiro de las instalaciones."
+    ]
+  },
+  "closingNote": "Tu colaboración hace de la biblioteca un mejor lugar para todos. ¡Gracias por ser parte de nuestra comunidad!"
+}
