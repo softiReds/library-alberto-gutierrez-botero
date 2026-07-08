@@ -139,7 +139,7 @@
   gap:12px;
 }
 .filters-card__daterow .form-field label{
-  font-size:.76rem;font-weight:600;color:var(--muted);margin-bottom:4px;
+  font-size:.76rem;font-weight:500;color:var(--muted);margin-bottom:4px;
 }
 .filters-card__daterow input{
   border:1px solid var(--border);

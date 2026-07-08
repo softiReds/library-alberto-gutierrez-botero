@@ -49,7 +49,7 @@
 }
 .loans-toolbar__field label{
   font-size:.76rem;
-  font-weight:600;
+  font-weight:500;
   color:var(--muted);
 }
 .loans-toolbar__field .chart-select{width:100%;}
