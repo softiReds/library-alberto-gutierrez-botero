@@ -96,7 +96,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
-    options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+    // Deliberately no DictionaryKeyPolicy: the snake_case convention applies to schema
+    // property names, not to dictionary keys derived from actual data (e.g. report
+    // breakdowns keyed by a gender value or age range label) — those must round-trip as-is.
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
 });
 

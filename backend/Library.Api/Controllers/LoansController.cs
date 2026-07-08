@@ -21,7 +21,7 @@ public class LoansController(LibraryDbContext db) : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery(Name = "page_size")] int pageSize = 20)
     {
-        await MarkOverdueLoansAsync();
+        await LoanMaintenance.MarkOverdueLoansAsync(db);
 
         page = page < 1 ? 1 : page;
         pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
@@ -63,7 +63,7 @@ public class LoansController(LibraryDbContext db) : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<LoanDto>> GetLoan(Guid id)
     {
-        await MarkOverdueLoansAsync();
+        await LoanMaintenance.MarkOverdueLoansAsync(db);
 
         var loan = await db.Loans.Include(l => l.Book).Include(l => l.Member).FirstOrDefaultAsync(l => l.Id == id);
         if (loan is null)
@@ -152,13 +152,5 @@ public class LoansController(LibraryDbContext db) : ControllerBase
         await db.SaveChangesAsync();
 
         return Ok(LoanDto.FromEntity(loan));
-    }
-
-    private async Task MarkOverdueLoansAsync()
-    {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        await db.Loans
-            .Where(l => l.Status == LoanStatus.Prestado && l.DueDate < today)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(l => l.Status, LoanStatus.Vencido));
     }
 }
