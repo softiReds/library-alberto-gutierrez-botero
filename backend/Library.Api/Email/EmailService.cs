@@ -11,6 +11,16 @@ public class EmailService(IOptions<EmailOptions> options, ILogger<EmailService> 
 
     public async Task SendAsync(string subject, string body)
     {
+        if (string.IsNullOrWhiteSpace(_options.Host) ||
+            string.IsNullOrWhiteSpace(_options.Username) ||
+            string.IsNullOrWhiteSpace(_options.Password) ||
+            string.IsNullOrWhiteSpace(_options.FromAddress) ||
+            string.IsNullOrWhiteSpace(_options.ToAddress))
+        {
+            logger.LogWarning("SMTP is not configured; skipping email '{Subject}'.", subject);
+            return;
+        }
+
         try
         {
             var message = new MimeMessage();
