@@ -1,0 +1,228 @@
+/* =====================================================================
+   Panel Admin — Reportes
+   Reutiliza tokens y componentes base de ../css/styles.css y catalog.css
+   (--maroon-900, --orange-600, .card, .stat-card, .toolbar-sort select…)
+   ===================================================================== */
+
+/* ============ TOKENS DE GRÁFICAS ============ */
+:root{
+  --pink-600:#E14F82;
+  --pink-100:#FBE6EE;
+  --blue-600:#3E6FE0;
+  --blue-100:#E7EDFC;
+  --green-600:#1E8E3E;
+  --green-100:#E5F4EA;
+}
+
+/* ============ FILAS DEL REPORTE ============ */
+.report-row{
+  display:grid;
+  gap:20px;
+  margin-bottom:20px;
+  align-items:stretch;
+}
+.report-row--1{grid-template-columns:280px 1.3fr 1.3fr;}
+.report-row--2{grid-template-columns:1.1fr 1.3fr;}
+.report-row--3{grid-template-columns:1.7fr 1fr 1.1fr;}
+
+@media(max-width:1200px){
+  .report-row--1{grid-template-columns:1fr 1fr;}
+  .report-row--1 #cardVisits{grid-column:1/-1;}
+  .report-row--3{grid-template-columns:1fr 1fr;}
+  .report-row--3 .chart-card--wide{grid-column:1/-1;}
+}
+@media(max-width:760px){
+  .report-row--1,
+  .report-row--2,
+  .report-row--3{grid-template-columns:1fr;}
+  .report-row--1 #cardVisits,
+  .report-row--3 .chart-card--wide{grid-column:auto;}
+}
+
+.report-mini-stack{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+/* ============ TARJETA DE GRÁFICA (genérica) ============ */
+.chart-card{
+  display:flex;
+  flex-direction:column;
+}
+.chart-card__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.chart-card__head h3{font-size:1rem;}
+.chart-card__selects{display:flex;gap:10px;flex-wrap:wrap;}
+
+.chart-card__stat-block{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.chart-card__stat-block--stack{
+  flex-shrink:0;
+  flex-direction:row;
+}
+.chart-card__icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.chart-card__icon--purple{background:var(--purple-100);color:var(--purple-600);}
+.chart-card__icon--danger{background:#FBEAEA;color:#C0392B;}
+.chart-card__icon--green{background:var(--green-100);color:var(--green-600);}
+
+.chart-card__num{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:1.7rem;
+  color:var(--maroon-900);
+  line-height:1.15;
+}
+.chart-card__label{
+  font-size:.8rem;
+  color:var(--muted);
+  line-height:1.3;
+}
+.chart-card__updated{
+  font-size:.78rem;
+  color:var(--muted);
+  margin:16px 0 0;
+}
+
+.chart-card__split{
+  display:flex;
+  align-items:flex-start;
+  gap:20px;
+  flex:1;
+  flex-wrap:wrap;
+}
+
+/* ============ SELECT REUTILIZADO ============ */
+.chart-select{
+  appearance:none;-webkit-appearance:none;
+  font-family:inherit;
+  font-size:.82rem;
+  font-weight:600;
+  color:var(--ink);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5B68' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:9px 30px 9px 12px;
+  cursor:pointer;
+}
+.chart-select:hover{border-color:var(--orange-500);}
+
+/* ============ LEYENDA ============ */
+.chart-legend{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+  font-size:.82rem;
+  color:var(--ink);
+}
+.chart-legend__item{display:flex;align-items:center;gap:7px;}
+.chart-legend__dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+/* ============ SVG DE GRÁFICAS ============ */
+.chart-svg-wrap{
+  flex:1;
+  min-width:0;
+  width:100%;
+}
+.chart-svg-wrap--flex{min-width:180px;}
+.chart-svg-wrap svg{
+  width:100%;
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+.chart-axis-label{
+  font-family:var(--font-body);
+  font-size:9px;
+  fill:var(--muted);
+}
+.chart-empty{
+  padding:30px 10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+/* ============ TABLA DE LIBROS PERDIDOS ============ */
+.lost-books-table-wrap{flex:1;min-width:220px;}
+.lost-books-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.82rem;
+}
+.lost-books-table th{
+  text-align:left;
+  color:var(--muted);
+  font-weight:600;
+  font-size:.74rem;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  padding:0 8px 8px 0;
+  border-bottom:1px solid var(--border);
+}
+.lost-books-table td{
+  padding:9px 8px 9px 0;
+  border-bottom:1px solid var(--border);
+  color:var(--ink);
+}
+.lost-books-table tr:last-child td{border-bottom:none;}
+.lost-books-table td.lost-days{color:var(--orange-600);font-weight:600;white-space:nowrap;}
+.lost-books-toggle{
+  background:none;border:none;
+  color:var(--orange-600);
+  font-size:.82rem;font-weight:600;
+  padding:10px 0 0;
+}
+.lost-books-toggle:hover{text-decoration:underline;}
+
+/* ============ MINI STAT CARD (fila 3) ============ */
+.mini-stat-card{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+/* ============ DONUT ============ */
+.chart-card--donut{justify-content:center;}
+.donut-wrap{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.donut-wrap .chart-svg-wrap{flex:0 0 auto;max-width:150px;}
+.donut-legend{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.donut-legend__item{display:flex;align-items:center;gap:9px;}
+.donut-legend__dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.donut-legend__pct{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:1rem;
+  color:var(--maroon-900);
+  line-height:1.2;
+}
+.donut-legend__label{font-size:.78rem;color:var(--muted);}
+
+@media(prefers-reduced-motion: reduce){
+  .chart-svg-wrap *{transition:none;}
+}

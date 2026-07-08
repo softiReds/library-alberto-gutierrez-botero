@@ -1,6 +1,73 @@
 [
   {
-    "id": "9780141036144",
+    "id": 1,
+    "barcode": "978000000001",
+    "title": "Cien años de soledad",
+    "author": "Gabriel García Márquez",
+    "classification": "863 G216c",
+    "subject": "Literatura colombiana",
+    "material_type": "Libro",
+    "target_audience": "Adultos",
+    "publisher": "Sudamericana",
+    "publication_date": "1967",
+    "isbn": "9780307474728",
+    "status": "Disponible",
+    "location": "Estante A-01",
+    "featured": true,
+    "created_at": "2026-05-01T09:00:00Z"
+  },
+  {
+    "id": 3,
+    "barcode": "978000000003",
+    "title": "El Principito",
+    "author": "Antoine de Saint-Exupéry",
+    "classification": "843 S16",
+    "subject": "Literatura infantil",
+    "material_type": "Libro",
+    "target_audience": "Infantil",
+    "publisher": "Reynal & Hitchcock",
+    "publication_date": "1943",
+    "isbn": "9780156013987",
+    "status": "Disponible",
+    "location": "Estante C-02",
+    "featured": true,
+    "created_at": "2026-05-02T10:00:00Z"
+  },
+  {
+    "id": 4,
+    "barcode": "978000000004",
+    "title": "Don Quijote de la Mancha",
+    "author": "Miguel de Cervantes",
+    "classification": "863 C419",
+    "subject": "Novela clásica",
+    "material_type": "Libro",
+    "target_audience": "General",
+    "publisher": "Francisco de Robles",
+    "publication_date": "1605",
+    "isbn": "9788420412146",
+    "status": "Disponible",
+    "location": "Estante D-01",
+    "featured": false,
+    "created_at": "2026-05-03T11:00:00Z"
+  },
+  {
+    "id": 5,
+    "barcode": "978000000005",
+    "title": "Rayuela",
+    "author": "Julio Cortázar",
+    "classification": "863 C827",
+    "subject": "Literatura latinoamericana",
+    "material_type": "Libro",
+    "target_audience": "Adultos",
+    "publisher": "Sudamericana",
+    "publication_date": "1963",
+    "isbn": "9788437604947",
+    "status": "Prestado",
+    "location": "Estante A-03",
+    "featured": false,
+    "created_at": "2026-05-05T08:00:00Z"
+  },
+  {
     "title": "1984",
     "author": "George Orwell",
     "classification": "823.912 O79n",
@@ -17,7 +84,6 @@
     "featured": true
   },
   {
-    "id": "9780141439518",
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
     "classification": "823.7 A93p",
@@ -34,7 +100,6 @@
     "featured": true
   },
   {
-    "id": "35714002854624",
     "title": "El proceso de investigación",
     "author": "Sabino, Carlos A.",
     "classification": "001.42 S11p",
@@ -51,7 +116,6 @@
     "featured": true
   },
   {
-    "id": "35714005383237",
     "title": "Internet como herramienta para la investigación",
     "author": "Gutiérrez, Fernando",
     "classification": "004.678 G87i",
@@ -68,7 +132,6 @@
     "featured": true
   },
   {
-    "id": "35714002854338",
     "title": "Corel Draw 6",
     "author": "Noguera Muntadas, Montserrat",
     "classification": "005.369 N64C",
@@ -85,7 +148,6 @@
     "featured": false
   },
   {
-    "id": "35714003322994",
     "title": "El libro de lo inexplicable",
     "author": "Bergier, Jacques (1912-1978)",
     "classification": "001.94 B37L",
@@ -102,7 +164,6 @@
     "featured": false
   },
   {
-    "id": "35714005383181",
     "title": "Aplicaciones web",
     "author": "Roldán Martínez, David",
     "classification": "004.67 R65a",

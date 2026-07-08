@@ -1,0 +1,154 @@
+[
+  {
+    "id": 1,
+    "visit_date": "2026-07-01",
+    "age": 10,
+    "gender": "Femenino",
+    "visitor_name": "María González",
+    "visitor_phone": "3001234567"
+  },
+  {
+    "id": 2,
+    "visit_date": "2026-07-02",
+    "age": 8,
+    "gender": "Masculino",
+    "visitor_name": "Samuel Rojas",
+    "visitor_phone": "3019876543"
+  },
+  {
+    "id": 3,
+    "visit_date": "2026-07-03",
+    "age": 17,
+    "gender": "Masculino",
+    "visitor_name": "Juan Pérez",
+    "visitor_phone": "3114567890"
+  },
+  {
+    "id": 4,
+    "visit_date": "2026-07-04",
+    "age": 15,
+    "gender": "Femenino",
+    "visitor_name": "Daniela Gómez",
+    "visitor_phone": "3102345678"
+  },
+  {
+    "id": 5,
+    "visit_date": "2026-07-05",
+    "age": 19,
+    "gender": "Femenino",
+    "visitor_name": "Laura Rodríguez",
+    "visitor_phone": "3205678912"
+  },
+  {
+    "id": 6,
+    "visit_date": "2026-07-06",
+    "age": 22,
+    "gender": "Masculino",
+    "visitor_name": "Andrés Castro",
+    "visitor_phone": "3156789012"
+  },
+  {
+    "id": 7,
+    "visit_date": "2026-07-08",
+    "age": 25,
+    "gender": "Femenino",
+    "visitor_name": "Valentina Díaz",
+    "visitor_phone": "3209876543"
+  },
+  {
+    "id": 8,
+    "visit_date": "2026-07-09",
+    "age": 28,
+    "gender": "Masculino",
+    "visitor_name": "Miguel Herrera",
+    "visitor_phone": "3176543210"
+  },
+  {
+    "id": 9,
+    "visit_date": "2026-07-11",
+    "age": 34,
+    "gender": "Femenino",
+    "visitor_name": "Natalia Ruiz",
+    "visitor_phone": "3123456789"
+  },
+  {
+    "id": 10,
+    "visit_date": "2026-07-13",
+    "age": 38,
+    "gender": "Masculino",
+    "visitor_name": "Carlos Ramírez",
+    "visitor_phone": "3152349876"
+  },
+  {
+    "id": 11,
+    "visit_date": "2026-07-15",
+    "age": 42,
+    "gender": "Femenino",
+    "visitor_name": "Patricia López",
+    "visitor_phone": "3128765432"
+  },
+  {
+    "id": 12,
+    "visit_date": "2026-07-17",
+    "age": 49,
+    "gender": "Masculino",
+    "visitor_name": "Ricardo Molina",
+    "visitor_phone": "3187654321"
+  },
+  {
+    "id": 13,
+    "visit_date": "2026-07-20",
+    "age": 55,
+    "gender": "Femenino",
+    "visitor_name": "Gloria Sánchez",
+    "visitor_phone": "3134567890"
+  },
+  {
+    "id": 14,
+    "visit_date": "2026-07-22",
+    "age": 59,
+    "gender": "Masculino",
+    "visitor_name": "Luis Cárdenas",
+    "visitor_phone": "3198765432"
+  },
+  {
+    "id": 15,
+    "visit_date": "2026-07-25",
+    "age": 67,
+    "gender": "Femenino",
+    "visitor_name": "Elena Vargas",
+    "visitor_phone": "3008765432"
+  },
+  {
+    "id": 16,
+    "visit_date": "2026-07-27",
+    "age": 72,
+    "gender": "Masculino",
+    "visitor_name": "José Martínez",
+    "visitor_phone": "3016543210"
+  },
+  {
+    "id": 17,
+    "visit_date": "2026-06-18",
+    "age": 39,
+    "gender": "Masculino",
+    "visitor_name": "Carlos Ramírez",
+    "visitor_phone": "3152349876"
+  },
+  {
+    "id": 18,
+    "visit_date": "2026-06-24",
+    "age": 52,
+    "gender": "Femenino",
+    "visitor_name": "Patricia López",
+    "visitor_phone": "3128765432"
+  },
+  {
+    "id": 19,
+    "visit_date": "2026-05-12",
+    "age": 68,
+    "gender": "Masculino",
+    "visitor_name": "José Martínez",
+    "visitor_phone": "3016543210"
+  }
+]

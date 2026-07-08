@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "book_id": 1,
+    "book_title_fallback": "Cien años de soledad",
+    "reading_date": "2026-07-01"
+  },
+  {
+    "id": 2,
+    "book_id": 2,
+    "book_title_fallback": "1984",
+    "reading_date": "2026-07-05"
+  },
+  {
+    "id": 3,
+    "book_id": 3,
+    "book_title_fallback": "El Principito",
+    "reading_date": "2026-07-08"
+  },
+  {
+    "id": 4,
+    "book_id": 4,
+    "book_title_fallback": "Don Quijote de la Mancha",
+    "reading_date": "2026-06-18"
+  },
+  {
+    "id": 5,
+    "book_id": 5,
+    "book_title_fallback": "Rayuela",
+    "reading_date": "2026-06-25"
+  },
+  {
+    "id": 6,
+    "book_id": 1,
+    "book_title_fallback": "Cien años de soledad",
+    "reading_date": "2026-05-15"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "book_id": 1,
+    "member_id": 101,
+    "loan_date": "2026-07-02",
+    "due_date": "2026-07-16",
+    "return_date": "2026-07-12",
+    "status": "devuelto",
+    "condition_at_return": "Bueno"
+  },
+  {
+    "id": 2,
+    "book_id": 2,
+    "member_id": 102,
+    "loan_date": "2026-07-05",
+    "due_date": "2026-07-20",
+    "return_date": null,
+    "status": "prestado",
+    "condition_at_return": null
+  },
+  {
+    "id": 3,
+    "book_id": 3,
+    "member_id": 103,
+    "loan_date": "2026-06-14",
+    "due_date": "2026-06-28",
+    "return_date": null,
+    "status": "vencido",
+    "condition_at_return": null
+  },
+  {
+    "id": 4,
+    "book_id": 4,
+    "member_id": 104,
+    "loan_date": "2026-06-21",
+    "due_date": "2026-07-05",
+    "return_date": "2026-07-04",
+    "status": "devuelto",
+    "condition_at_return": "Excelente"
+  },
+  {
+    "id": 5,
+    "book_id": 5,
+    "member_id": 105,
+    "loan_date": "2026-05-10",
+    "due_date": "2026-05-24",
+    "return_date": "2026-05-20",
+    "status": "devuelto",
+    "condition_at_return": "Bueno"
+  },
+  {
+    "id": 6,
+    "book_id": 1,
+    "member_id": 106,
+    "loan_date": "2026-07-08",
+    "due_date": "2026-08-15",
+    "return_date": null,
+    "status": "prestado",
+    "condition_at_return": null
+  }
+]
