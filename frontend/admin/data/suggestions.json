@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "message": "Sería excelente ampliar el horario de atención los sábados hasta las 5:00 p. m.",
+    "submitted_at": "2026-07-02T10:15:00Z",
+    "visitor_name": "María González",
+    "visitor_email": "maria.gonzalez@email.com",
+    "status": "Nueva"
+  },
+  {
+    "id": 2,
+    "message": "Me gustaría que hubiera más libros de ciencia ficción para jóvenes.",
+    "submitted_at": "2026-07-04T14:30:00Z",
+    "visitor_name": "Juan Pérez",
+    "visitor_email": "juan.perez@email.com",
+    "status": "En revisión"
+  },
+  {
+    "id": 3,
+    "message": "Sería útil organizar un club de lectura para adultos mayores.",
+    "submitted_at": "2026-07-06T09:20:00Z",
+    "visitor_name": "Patricia López",
+    "visitor_email": "patricia.lopez@email.com",
+    "status": "Nueva"
+  },
+  {
+    "id": 4,
+    "message": "Sugiero habilitar más enchufes para quienes estudian con computador portátil.",
+    "submitted_at": "2026-07-08T16:45:00Z",
+    "visitor_name": "Carlos Ramírez",
+    "visitor_email": "carlos.ramirez@email.com",
+    "status": "Atendida"
+  },
+  {
+    "id": 5,
+    "message": "Sería interesante realizar talleres básicos de programación para niños.",
+    "submitted_at": "2026-07-10T11:10:00Z",
+    "visitor_name": "Laura Rodríguez",
+    "visitor_email": "laura.rodriguez@email.com",
+    "status": "Nueva"
+  },
+  {
+    "id": 6,
+    "message": "Podrían agregar más mesas de estudio individuales en la sala principal.",
+    "submitted_at": "2026-07-12T15:25:00Z",
+    "visitor_name": "Miguel Herrera",
+    "visitor_email": "miguel.herrera@email.com",
+    "status": "En revisión"
+  },
+  {
+    "id": 7,
+    "message": "Me gustaría encontrar una sección con novelas gráficas y manga.",
+    "submitted_at": "2026-07-14T13:05:00Z",
+    "visitor_name": "Valentina Díaz",
+    "visitor_email": "valentina.diaz@email.com",
+    "status": "Nueva"
+  },
+  {
+    "id": 8,
+    "message": "Los talleres de herramientas digitales han sido muy útiles. Sería bueno hacer una segunda parte.",
+    "submitted_at": "2026-07-16T17:40:00Z",
+    "visitor_name": "Andrés Castro",
+    "visitor_email": "andres.castro@email.com",
+    "status": "Atendida"
+  },
+  {
+    "id": 9,
+    "message": "Sería bueno disponer de una zona silenciosa exclusiva para lectura.",
+    "submitted_at": "2026-07-18T08:55:00Z",
+    "visitor_name": "Natalia Ruiz",
+    "visitor_email": "natalia.ruiz@email.com",
+    "status": "Nueva"
+  },
+  {
+    "id": 10,
+    "message": "Sugiero adquirir más ejemplares de literatura colombiana contemporánea.",
+    "submitted_at": "2026-07-20T12:20:00Z",
+    "visitor_name": "José Martínez",
+    "visitor_email": "jose.martinez@email.com",
+    "status": "En revisión"
+  }
+]

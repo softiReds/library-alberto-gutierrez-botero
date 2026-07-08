@@ -1,0 +1,93 @@
+/* =====================================================================
+   Panel Admin — Sugerencias
+   ===================================================================== */
+
+.suggestions-stat-card{max-width:280px;}
+
+/* ============ BARRA DE FILTROS ============ */
+.suggestions-toolbar{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.suggestions-toolbar__search{flex:1;min-width:220px;}
+.suggestions-toolbar__field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:150px;
+}
+.suggestions-toolbar__field label{
+  font-size:.76rem;
+  font-weight:600;
+  color:var(--muted);
+}
+.suggestions-toolbar__field .chart-select,
+.suggestions-toolbar__field input{width:100%;}
+.suggestions-toolbar__field input[type="date"]{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:9px 12px;
+  font-family:inherit;
+  font-size:.82rem;
+  color:var(--ink);
+}
+.suggestions-toolbar__clear{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:none;
+  border:none;
+  color:var(--orange-600);
+  font-size:.88rem;
+  font-weight:600;
+  padding:11px 4px;
+  flex-shrink:0;
+}
+.suggestions-toolbar__clear:hover{text-decoration:underline;}
+
+@media(max-width:1100px){
+  .suggestions-toolbar{flex-direction:column;align-items:stretch;}
+  .suggestions-toolbar__field{min-width:0;}
+}
+
+/* ============ TABLA ============ */
+.suggestions-table td:first-child{font-weight:600;color:var(--maroon-900);white-space:nowrap;}
+.suggestions-table td:nth-child(3){white-space:nowrap;}
+.suggestions-table__message{
+  display:block;
+  max-width:340px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* ============ BADGES DE ESTADO ============ */
+.suggestion-status{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 14px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:600;
+  white-space:nowrap;
+}
+.suggestion-status--nueva{background:var(--blue-100,#E7EDFC);color:var(--blue-600,#3E6FE0);}
+.suggestion-status--en-revision{background:var(--orange-100);color:var(--orange-600);}
+.suggestion-status--atendida{background:#E5F4EA;color:#1E8E3E;}
+
+.suggestion-status-select{
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  appearance:none;
+  -webkit-appearance:none;
+  padding-right:26px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 8px center;
+  background-size:12px;
+}
+.suggestion-status-select:focus{outline:2px solid var(--orange-500);outline-offset:2px;}

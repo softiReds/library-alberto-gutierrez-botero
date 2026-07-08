@@ -51,7 +51,6 @@
     return d;
   }
 
-  // Semana calendario (lunes a domingo) que contiene la fecha dada.
   function weekRange(date){
     const day = date.getDay();
     const diffToMonday = (day === 0) ? -6 : 1 - day;
