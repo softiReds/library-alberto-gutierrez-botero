@@ -1,0 +1,276 @@
+/* =====================================================================
+   Página Afiliación
+   ===================================================================== */
+
+/* ============ HERO ============ */
+.page-hero__title--underline{
+  position:relative;
+  padding-bottom:14px;
+}
+.page-hero__title--underline::after{
+  content:'';
+  position:absolute;left:2px;bottom:0;
+  width:46px;height:4px;border-radius:2px;
+  background:var(--orange-600);
+}
+
+.page-hero{
+  position:relative;
+  background:#fff;
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+.page-hero__inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
+  align-items:center;
+  gap:32px;
+  min-height:260px;
+}
+.page-hero__copy{padding:44px 0;}
+.page-hero__copy h1{
+  font-size:2.4rem;
+  font-weight:700;
+  line-height:1.15;
+}
+.page-hero__copy h1 span{color:var(--orange-600);}
+.page-hero__copy p{
+  color:var(--muted);
+  font-size:1.02rem;
+  line-height:1.6;
+  margin:14px 0 0;
+  max-width:400px;
+}
+.page-hero__media{
+  position:relative;
+  align-self:stretch;
+  min-height:260px;
+}
+.page-hero__media img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-bottom-left-radius:180px;
+}
+.page-hero__leaf{
+  color:var(--orange-500);
+  pointer-events:none;
+}
+.page-hero__leaf svg{width:100%;height:100%;display:block;}
+.page-hero__leaf--left{
+  position:absolute;
+  left:-14px;bottom:-18px;
+  width:110px;height:150px;
+  color:var(--orange-100);
+  filter:saturate(1.4);
+  z-index:0;
+}
+
+@media(max-width:860px){
+  .page-hero__inner{grid-template-columns:1fr;gap:0;}
+  .page-hero__copy{padding:36px 0 22px;}
+  .page-hero__copy h1{font-size:1.9rem;}
+  .page-hero__media{min-height:200px;margin:0 -24px;}
+  .page-hero__media img{border-bottom-left-radius:110px;}
+}
+
+/* ============ AVISO ============ */
+.affiliation-notice{
+  background:var(--cream);
+  padding:32px 0 0;
+}
+.notice-card{
+  display:flex;
+  gap:16px;
+  align-items:flex-start;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow);
+  padding:18px 22px;
+  max-width:760px;
+  margin:0 auto;
+}
+.notice-card__icon{
+  width:44px;height:44px;
+  flex-shrink:0;
+  border-radius:50%;
+  background:var(--orange-100);
+  color:var(--orange-600);
+  display:flex;align-items:center;justify-content:center;
+}
+.notice-card strong{
+  font-family:var(--font-display);
+  font-size:.95rem;
+  color:var(--maroon-900);
+}
+.notice-card p{
+  margin:4px 0 0;
+  font-size:.85rem;
+  color:var(--muted);
+  line-height:1.55;
+}
+
+/* ============ FORMULARIO ============ */
+.affiliation-section{
+  background:var(--cream);
+  padding:28px 0 60px;
+}
+.affiliation-card{
+  max-width:920px;
+  margin:0 auto;
+  padding:34px 38px;
+}
+.affiliation-card__title{
+  font-size:1.3rem;
+  margin-bottom:26px;
+  position:relative;
+  padding-bottom:10px;
+}
+.affiliation-card__title::after{
+  content:'';
+  position:absolute;left:0;bottom:0;
+  width:40px;height:3px;border-radius:2px;
+  background:var(--orange-600);
+}
+
+.form-section{margin-bottom:26px;}
+.form-section__title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.95rem;
+  font-weight:600;
+  margin-bottom:16px;
+}
+.form-section__title--orange svg{color:var(--orange-600);}
+
+.form-grid{
+  display:grid;
+  gap:16px 18px;
+  margin-bottom:16px;
+}
+.form-grid:last-child{margin-bottom:0;}
+.form-grid--2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.form-grid--3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.form-grid--4{grid-template-columns:repeat(4,minmax(0,1fr));}
+
+.field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.field > span{
+  font-size:.78rem;
+  font-weight:600;
+  color:var(--maroon-900);
+}
+.field input,
+.field select{
+  font-family:inherit;
+  font-size:.86rem;
+  color:var(--ink);
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:10px 12px;
+  width:100%;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field select{
+  appearance:none;
+  -webkit-appearance:none;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5B68' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  padding-right:32px;
+  cursor:pointer;
+}
+.field select:invalid{color:var(--muted);}
+.field input::placeholder{color:#B9AFB6;}
+.field input:focus,
+.field select:focus{
+  outline:none;
+  border-color:var(--orange-500);
+  box-shadow:0 0 0 3px rgba(244,121,30,.14);
+}
+.field input.is-invalid,
+.field select.is-invalid{
+  border-color:#C33;
+  box-shadow:0 0 0 3px rgba(204,51,51,.1);
+}
+.field .field-hint{
+  font-size:.72rem;
+  color:#C33;
+  display:none;
+}
+.field.has-error .field-hint{display:block;}
+
+.form-error{
+  background:#FDECEA;
+  color:#B3261E;
+  border:1px solid #F5C6C1;
+  border-radius:10px;
+  padding:12px 16px;
+  font-size:.85rem;
+  margin:0 0 16px;
+}
+
+.form-actions{
+  display:flex;
+  justify-content:center;
+  margin-top:8px;
+}
+.form-actions .btn{min-width:260px;}
+.form-actions .btn:disabled{opacity:.6;cursor:wait;transform:none;}
+
+/* ============ MENSAJE DE ÉXITO ============ */
+.affiliation-success[hidden]{display:none;}
+.affiliation-success{
+  text-align:center;
+  padding:30px 20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.affiliation-success__icon{
+  width:76px;height:76px;
+  border-radius:50%;
+  background:#E6F4EA;
+  color:#1E8E3E;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:6px;
+}
+.affiliation-success h2{
+  font-size:1.5rem;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+.affiliation-success p{
+  color:var(--muted);
+  font-size:1rem;
+  margin:0;
+  max-width:420px;
+}
+.affiliation-success__actions{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:14px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:860px){
+  .form-grid--4{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .form-grid--3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .affiliation-card{padding:24px 20px;}
+}
+@media(max-width:540px){
+  .form-grid--2,
+  .form-grid--3,
+  .form-grid--4{grid-template-columns:minmax(0,1fr);}
+  .form-actions .btn{width:100%;min-width:0;}
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  .field input, .field select, .check-option input{transition:none;}
+}
