@@ -1,5 +1,6 @@
 [
   {
+    "id": "9780141036144",
     "title": "1984",
     "author": "George Orwell",
     "classification": "823.912 O79n",
@@ -16,6 +17,7 @@
     "featured": true
   },
   {
+    "id": "9780141439518",
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
     "classification": "823.7 A93p",
@@ -32,6 +34,7 @@
     "featured": true
   },
   {
+    "id": "35714002854624",
     "title": "El proceso de investigación",
     "author": "Sabino, Carlos A.",
     "classification": "001.42 S11p",
@@ -48,6 +51,7 @@
     "featured": true
   },
   {
+    "id": "35714005383237",
     "title": "Internet como herramienta para la investigación",
     "author": "Gutiérrez, Fernando",
     "classification": "004.678 G87i",
@@ -64,6 +68,7 @@
     "featured": true
   },
   {
+    "id": "35714002854338",
     "title": "Corel Draw 6",
     "author": "Noguera Muntadas, Montserrat",
     "classification": "005.369 N64C",
@@ -80,6 +85,7 @@
     "featured": false
   },
   {
+    "id": "35714003322994",
     "title": "El libro de lo inexplicable",
     "author": "Bergier, Jacques (1912-1978)",
     "classification": "001.94 B37L",
@@ -96,6 +102,7 @@
     "featured": false
   },
   {
+    "id": "35714005383181",
     "title": "Aplicaciones web",
     "author": "Roldán Martínez, David",
     "classification": "004.67 R65a",

@@ -1,13 +1,72 @@
 // =====================================================================
 // Catálogo (Admin) — filtros, búsqueda, orden, paginación y CRUD en memoria
-//
-// Los libros se cargan una sola vez desde admin/data/catalog.json.
-// Agregar / editar / eliminar modifica únicamente el arreglo CATALOG en
-// memoria: los cambios se reflejan al instante en la UI pero se pierden
-// al recargar la página. Las funciones del objeto `api` (más abajo) son
-// el único lugar que debe tocarse para conectar los endpoints reales
 // (POST /books, PATCH /books/:id, DELETE /books/:id) más adelante.
 // =====================================================================
+
+// ---------------------------------------------------------------------
+// AUTENTICACIÓN (pendiente de activar)
+// ---------------------------------------------------------------------
+// Este panel admin debería estar protegido: solo accesible después de un
+// login exitoso. Por ahora se deja preparado pero SIN activar — cuando se
+// implemente, descomentar el bloque de abajo y agregar la verificación de
+// sesión al inicio de loadCatalog() (o en cada página admin).
+//
+// Endpoint:
+//   POST /auth/login — Pública
+//   Devuelve un JWT válido por 8 horas por defecto.
+//
+//   Request body:
+//   { "username": "coordinadora", "password": "••••••••" }
+//
+//   200 OK:
+//   { "token": "eyJhbGciOiJIUzI1NiIs...", "expires_at": "2026-07-08T20:00:00Z" }
+//
+// const AUTH_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl);
+// const TOKEN_KEY = 'agb_admin_token';
+// const TOKEN_EXPIRES_KEY = 'agb_admin_token_expires';
+//
+// async function login(username, password) {
+//   const res = await fetch(AUTH_URL, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ username, password })
+//   });
+//   if (!res.ok) throw new Error('Credenciales inválidas');
+//   const { token, expires_at } = await res.json();
+//   sessionStorage.setItem(TOKEN_KEY, token);
+//   sessionStorage.setItem(TOKEN_EXPIRES_KEY, expires_at);
+//   return token;
+// }
+//
+// function getToken() {
+//   const token = sessionStorage.getItem(TOKEN_KEY);
+//   const expiresAt = sessionStorage.getItem(TOKEN_EXPIRES_KEY);
+//   if (!token || !expiresAt) return null;
+//   if (new Date(expiresAt) <= new Date()) {
+//     sessionStorage.removeItem(TOKEN_KEY);
+//     sessionStorage.removeItem(TOKEN_EXPIRES_KEY);
+//     return null;
+//   }
+//   return token;
+// }
+//
+// function requireAuth() {
+//   const token = getToken();
+//   if (!token) {
+//     window.location.href = 'login.html';
+//     return null;
+//   }
+//   return token;
+// }
+//
+// function logout() {
+//   sessionStorage.removeItem(TOKEN_KEY);
+//   sessionStorage.removeItem(TOKEN_EXPIRES_KEY);
+//   window.location.href = 'login.html';
+// }
+//
+// Luego, en las llamadas a la API real, agregar el header:
+//   headers: { 'Authorization': `Bearer ${getToken()}` }
 
 const CATALOG_URL = 'data/catalog.json';
 const PAGE_SIZE = 10;
@@ -76,17 +135,20 @@ const api = {
     const res = await fetch(CATALOG_URL);
     if (!res.ok) throw new Error('No se pudo cargar catalog.json');
     const data = await res.json();
-    return data.map((book, i) => ({ ...book, __id: book.barcode || `tmp-${i}` }));
+    // Usa el id explícito del JSON; si algún registro no lo trae (dato
+    // legado), cae de respaldo a barcode y luego a un id temporal.
+    return data.map((book, i) => ({ ...book, __id: book.id || book.barcode || `tmp-${i}` }));
   },
   async create(book) {
     // TODO: reemplazar por POST /books — usar el registro que devuelva el servidor
-    const newBook = { ...book, __id: `tmp-${Date.now()}` };
+    const newId = `tmp-${Date.now()}`;
+    const newBook = { ...book, id: newId, __id: newId };
     CATALOG = [newBook, ...CATALOG];
     return newBook;
   },
   async update(id, patch) {
     // TODO: reemplazar por PATCH /books/:id
-    CATALOG = CATALOG.map(b => (b.__id === id ? { ...b, ...patch, __id: id } : b));
+    CATALOG = CATALOG.map(b => (b.__id === id ? { ...b, ...patch, id, __id: id } : b));
     return CATALOG.find(b => b.__id === id);
   },
   async remove(id) {
@@ -175,6 +237,8 @@ function todayISO() {
 // Carga del catálogo
 // ---------------------------------------------------------------------
 async function loadCatalog() {
+  // requireAuth(); // descomentar cuando el login esté activo
+
   try {
     CATALOG = await api.list();
   } catch (err) {
@@ -562,6 +626,14 @@ document.getElementById('deleteConfirm').addEventListener('click', async () => {
   closeDeleteModal();
   buildFilterGroups();
   update();
+});
+
+// ---------------------------------------------------------------------
+// Cerrar sesión (botón del sidebar)
+// ---------------------------------------------------------------------
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  // logout(); // descomentar cuando el login esté activo (redirige a login.html)
+  console.log('Logout pendiente de implementar: ver bloque de autenticación al inicio del archivo.');
 });
 
 // ---------------------------------------------------------------------
