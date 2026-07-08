@@ -1,0 +1,14 @@
+/* =====================================================================
+   Panel Admin — Consultas en sala
+   ===================================================================== */
+
+.loans-table--readings{min-width:640px;}
+.loans-table--readings td:nth-child(3){white-space:nowrap;}
+.loans-table--readings .loans-table__actions{justify-content:flex-start;}
+
+.reading-book strong{
+  display:block;font-weight:600;color:var(--maroon-900);font-size:.88rem;
+}
+.reading-book span{
+  display:block;font-size:.78rem;color:var(--muted);
+}

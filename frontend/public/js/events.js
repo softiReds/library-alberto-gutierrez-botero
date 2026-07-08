@@ -23,7 +23,7 @@ const filterSelect = document.getElementById('eventsFilter');
 // Utilidades
 // ---------------------------------------------------------------------
 function toDate(ev) {
-  return new Date(`${ev.date}T00:00:00`);
+  return new Date(`${ev.event_date}T00:00:00`);
 }
 
 function dateKey(year, month, day) {
@@ -109,7 +109,7 @@ function renderEventsList() {
     const d = toDate(ev);
     const li = document.createElement('li');
     li.className = `event-color-${ev.colorIndex}`;
-    li.dataset.date = ev.date;
+    li.dataset.date = ev.event_date;
     if (d < today) li.classList.add('is-past');
 
     li.innerHTML = `
@@ -131,9 +131,9 @@ function renderEventsList() {
     li.addEventListener('click', () => {
       calYear = d.getFullYear();
       calMonth = d.getMonth();
-      selectedDateKey = ev.date;
+      selectedDateKey = ev.event_date;
       renderCalendar();
-      highlightListItems(ev.date);
+      highlightListItems(ev.event_date);
     });
 
     listEl.appendChild(li);

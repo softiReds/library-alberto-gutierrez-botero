@@ -68,6 +68,7 @@
     "created_at": "2026-05-05T08:00:00Z"
   },
   {
+    "id": 6,
     "title": "1984",
     "author": "George Orwell",
     "classification": "823.912 O79n",
@@ -84,6 +85,7 @@
     "featured": true
   },
   {
+    "id": 7,
     "title": "Pride and Prejudice",
     "author": "Jane Austen",
     "classification": "823.7 A93p",
@@ -100,6 +102,7 @@
     "featured": true
   },
   {
+    "id": 8,
     "title": "El proceso de investigación",
     "author": "Sabino, Carlos A.",
     "classification": "001.42 S11p",
@@ -116,6 +119,7 @@
     "featured": true
   },
   {
+    "id": 9,
     "title": "Internet como herramienta para la investigación",
     "author": "Gutiérrez, Fernando",
     "classification": "004.678 G87i",
@@ -132,6 +136,7 @@
     "featured": true
   },
   {
+    "id": 10,
     "title": "Corel Draw 6",
     "author": "Noguera Muntadas, Montserrat",
     "classification": "005.369 N64C",
@@ -148,6 +153,7 @@
     "featured": false
   },
   {
+    "id": 11,
     "title": "El libro de lo inexplicable",
     "author": "Bergier, Jacques (1912-1978)",
     "classification": "001.94 B37L",
@@ -164,6 +170,7 @@
     "featured": false
   },
   {
+    "id": 12,
     "title": "Aplicaciones web",
     "author": "Roldán Martínez, David",
     "classification": "004.67 R65a",
