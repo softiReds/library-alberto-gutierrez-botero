@@ -1,0 +1,168 @@
+/* =====================================================================
+   Panel Admin — Préstamos
+   ===================================================================== */
+
+/* ============ TARJETAS DE ESTADÍSTICAS ============ */
+.loans-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:22px;
+}
+.stat-card--lg{
+  padding:18px 20px;
+  align-items:flex-start;
+}
+.stat-card__icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.stat-card__icon--purple{background:var(--purple-100);color:var(--purple-600);}
+.stat-card__icon--orange{background:var(--orange-100);color:var(--orange-600);}
+.stat-card__icon--green{background:#E5F4EA;color:#1E8E3E;}
+.stat-card__label-top{font-size:.84rem;color:var(--muted);font-weight:500;}
+.stat-card--lg .stat-card__num{font-size:1.6rem;margin:2px 0;}
+.stat-card--lg .stat-card__label{font-size:.78rem;}
+
+@media(max-width:1000px){
+  .loans-stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:560px){
+  .loans-stats-grid{grid-template-columns:1fr;}
+}
+
+/* ============ BARRA DE FILTROS ============ */
+.loans-toolbar{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.loans-toolbar__search{flex:1;min-width:220px;}
+.loans-toolbar__field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:150px;
+}
+.loans-toolbar__field label{
+  font-size:.76rem;
+  font-weight:600;
+  color:var(--muted);
+}
+.loans-toolbar__field .chart-select{width:100%;}
+.loans-toolbar__clear{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:none;
+  border:none;
+  color:var(--orange-600);
+  font-size:.88rem;
+  font-weight:600;
+  padding:11px 4px;
+  flex-shrink:0;
+}
+.loans-toolbar__clear:hover{text-decoration:underline;}
+
+/* ============ TABLA DE PRÉSTAMOS ============ */
+.loans-table-wrap{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow);
+  overflow-x:auto;
+}
+.loans-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:.86rem;
+  min-width:920px;
+}
+.loans-table thead th{
+  text-align:left;
+  padding:14px 16px;
+  font-size:.74rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  color:var(--muted);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.loans-table tbody td{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  color:var(--ink);
+  vertical-align:middle;
+}
+.loans-table tbody tr:last-child td{border-bottom:none;}
+.loans-table tbody tr:hover{background:var(--cream);}
+
+.loans-table__id{color:var(--purple-600);font-weight:600;}
+
+.loans-table__book strong{
+  display:block;font-weight:600;color:var(--maroon-900);font-size:.88rem;
+  white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;
+}
+.loans-table__book span{
+  display:block;font-size:.78rem;color:var(--muted);
+  white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;
+}
+.loans-table__member strong{display:block;font-weight:600;color:var(--ink);font-size:.86rem;}
+.loans-table__member span{display:block;font-size:.78rem;color:var(--muted);}
+
+.loans-table__muted{color:var(--muted);}
+
+.loans-table__actions{display:flex;gap:8px;}
+.loans-table__actions .icon-action{
+  flex:none;width:34px;height:34px;padding:0;
+}
+
+/* ============ BADGES DE ESTADO ============ */
+.loan-status{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 14px;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:600;
+  white-space:nowrap;
+}
+.loan-status--activo{background:#E5F4EA;color:#1E8E3E;}
+.loan-status--devuelto{background:var(--purple-100,#E7EDFC);color:#3E6FE0;}
+.loan-status--vencido{background:#FBEAEA;color:#C0392B;}
+
+/* ============ ESTADO VACÍO ============ */
+.loans-table__empty{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+/* ============ PIE / PAGINACIÓN ============ */
+.loans-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+.loans-footer__range{font-size:.85rem;color:var(--muted);}
+.loans-footer__pagesize{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.85rem;
+  color:var(--muted);
+  flex-shrink:0;
+}
+.loans-footer__pagesize .chart-select{padding:8px 26px 8px 12px;}
+
+@media(max-width:760px){
+  .loans-footer{flex-direction:column;align-items:stretch;}
+}
