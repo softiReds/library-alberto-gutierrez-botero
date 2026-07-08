@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Library.Api.Auth;
 using Library.Api.Common;
 using Library.Api.Data;
+using Library.Api.Email;
 using Library.Api.Domain.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,13 @@ var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<Jw
     ?? throw new InvalidOperationException("Missing 'Jwt' configuration section.");
 
 builder.Services.AddSingleton<TokenService>();
+
+builder.Services.AddOptions<EmailOptions>()
+    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // --- Database (Postgres, snake_case columns, native Spanish-labeled enums) ---
 var connectionString = builder.Configuration.GetConnectionString("LibraryDb")
