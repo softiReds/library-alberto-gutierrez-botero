@@ -1,0 +1,197 @@
+/* =====================================================================
+   Panel Admin — Eventos y talleres
+   ===================================================================== */
+
+/* ============ FILA SUPERIOR ============ */
+.events-top-row{
+  display:flex;
+  gap:20px;
+  align-items:stretch;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+.events-total-card{flex:0 0 300px;}
+.events-top-toolbar{
+  flex:1;
+  min-width:320px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.events-top-toolbar__search{flex:1;min-width:220px;}
+.events-top-toolbar .chart-select{padding:12px 30px 12px 14px;}
+
+/* ============ GRID PRINCIPAL ============ */
+.events-main-grid{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:22px;
+  align-items:start;
+}
+@media(max-width:1000px){
+  .events-main-grid{grid-template-columns:1fr;}
+}
+
+.events-side-col{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+/* ============ TARJETA DE CALENDARIO ============ */
+.calendar-card{padding:20px;}
+.calendar-card__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+.calendar-card__title{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:1rem;
+  color:var(--maroon-900);
+}
+.calendar-nav-btn{
+  width:32px;height:32px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease, color .15s ease, border-color .15s ease;
+}
+.calendar-nav-btn:hover{background:var(--orange-100);color:var(--orange-600);border-color:var(--orange-500);}
+
+.calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.cal-weekday{
+  text-align:center;
+  font-size:.68rem;
+  font-weight:700;
+  color:var(--muted);
+  padding-bottom:6px;
+  text-transform:uppercase;
+}
+.cal-day{
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  border-radius:8px;
+  font-size:.82rem;
+  color:var(--ink);
+  border:none;
+  background:none;
+}
+.cal-day--muted{color:var(--border);}
+.cal-day--event{
+  cursor:pointer;
+  font-weight:600;
+  color:var(--maroon-900);
+}
+.cal-day--event:hover{background:var(--orange-100);}
+.cal-day--event .cal-day__dot{
+  position:absolute;
+  bottom:4px;
+  left:50%;
+  transform:translateX(-50%);
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--orange-600);
+}
+.cal-day--today{
+  background:var(--orange-100);
+  color:var(--orange-600);
+  font-weight:700;
+}
+.cal-day--selected{
+  background:var(--maroon-900) !important;
+  color:#fff !important;
+}
+.cal-day--selected .cal-day__dot{background:#fff;}
+
+/* ============ TARJETA DE FILTROS ============ */
+.filters-card{
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.filters-card__head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:var(--maroon-900);
+  margin-bottom:2px;
+}
+.filters-card__head h2{font-size:.95rem;}
+.filters-card__search{width:100%;}
+.filters-card__select{width:100%;}
+.filters-card__daterow{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.filters-card__daterow .form-field label{
+  font-size:.76rem;font-weight:600;color:var(--muted);margin-bottom:4px;
+}
+.filters-card__daterow input{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 12px;
+  font-family:inherit;
+  font-size:.85rem;
+  color:var(--ink);
+  width:100%;
+}
+.filters-card__clear{
+  justify-content:center;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 14px;
+  margin-top:4px;
+}
+.filters-card__clear:hover{background:var(--orange-100);}
+
+/* ============ TARJETA / TABLA DE EVENTOS ============ */
+.events-list-card{padding:0;overflow:hidden;}
+.events-list-card__table-wrap{
+  border:none;box-shadow:none;border-radius:0;
+}
+.events-table thead th{padding:16px 20px;}
+.events-table tbody td{padding:16px 20px;}
+.events-table__title strong{
+  display:block;font-weight:700;color:var(--maroon-900);font-size:.92rem;margin-bottom:3px;
+}
+.events-table__title span{
+  display:block;font-size:.82rem;color:var(--muted);line-height:1.4;
+}
+.events-table__datetime{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:.85rem;color:var(--ink);white-space:nowrap;
+}
+.events-table__datetime svg{color:var(--muted);flex-shrink:0;margin-top:2px;}
+.events-table__datetime div{display:flex;flex-direction:column;gap:2px;}
+.events-table__datetime .time-range{color:var(--muted);font-size:.8rem;}
+
+.events-list-card .loans-footer{padding:16px 20px 20px;margin-top:0;}
+
+.featured-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--orange-100);color:var(--orange-600);
+  font-size:.68rem;font-weight:700;
+  padding:2px 9px;border-radius:999px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+
+@media(max-width:760px){
+  .events-top-toolbar{flex-direction:column;align-items:stretch;}
+  .filters-card__daterow{grid-template-columns:1fr;}
+}
