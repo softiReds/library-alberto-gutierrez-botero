@@ -108,7 +108,8 @@ function buildPayload() {
     contact_phone: data.get('contact_phone').trim(),
     contact_name: emergencyName,
     emergency_contact_name: emergencyName,
-    emergency_contact_phone: data.get('emergency_contact_phone').trim()
+    emergency_contact_phone: data.get('emergency_contact_phone').trim(),
+    agreement_accepted: true
   };
 }
 
@@ -155,7 +156,7 @@ form.addEventListener('submit', async e => {
       let detail = '';
       try {
         const body = await res.json();
-        detail = body.message || body.error || '';
+        detail = (body.error && body.error.message) || body.message || '';
       } catch (_) { /* respuesta sin JSON */ }
       throw new Error(detail || `El servidor respondió con el código ${res.status}.`);
     }

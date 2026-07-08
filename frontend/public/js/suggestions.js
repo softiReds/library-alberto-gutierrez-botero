@@ -167,7 +167,7 @@
         let detail = '';
         try {
           const resBody = await res.json();
-          detail = resBody.message || resBody.error || '';
+          detail = (resBody.error && resBody.error.message) || resBody.message || '';
         } catch (_) { /* respuesta sin JSON */ }
         throw new Error(detail || `El servidor respondió con el código ${res.status}.`);
       }
