@@ -1,9 +1,8 @@
 // =====================================================================
-// Afiliación — validación y envío al API
+// Afiliación — validación, envío al API y mensaje de éxito
 // =====================================================================
 
-// endpoint: POST {API_BASE_URL}/members
-const API_BASE_URL = 'https://TU-API-AQUI.example.com';
+const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
 const MEMBERS_ENDPOINT = `${API_BASE_URL}/members`;
 
 const PAISES = [
@@ -137,8 +136,8 @@ form.addEventListener('submit', async e => {
     return;
   }
 
-  if (API_BASE_URL.includes('TU-API-AQUI')) {
-    showError('El formulario aún no está conectado al servidor. Configura API_BASE_URL en js/affiliation.js con la URL de tu API.');
+  if (!API_BASE_URL || API_BASE_URL.includes('TU-API-AQUI')) {
+    showError('El formulario aún no está conectado al servidor. Configura baseUrl en js/config.js con la URL de tu API.');
     return;
   }
 
