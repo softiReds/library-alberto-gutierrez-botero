@@ -41,10 +41,9 @@ var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<Jw
 
 builder.Services.AddSingleton<TokenService>();
 
+// No ValidateOnStart here: SMTP config is entirely optional (see EmailOptions/EmailService).
 builder.Services.AddOptions<EmailOptions>()
-    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName));
 
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
