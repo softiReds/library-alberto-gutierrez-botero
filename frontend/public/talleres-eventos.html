@@ -165,25 +165,6 @@
   </div>
 </section>
 
-<!-- Botón flotante de sugerencias -->
-<button class="fab" id="suggestionFab">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  <span>Deja tu<br>sugerencia</span>
-</button>
-
-<!-- Modal de sugerencia -->
-<div class="modal" id="suggestionModal" hidden>
-  <div class="modal__panel">
-    <button class="modal__close" id="suggestionClose" aria-label="Cerrar">✕</button>
-    <h3>Cuéntanos tu sugerencia</h3>
-    <p>Tu opinión nos ayuda a mejorar la biblioteca.</p>
-    <form id="suggestionForm">
-      <textarea rows="4" placeholder="Escribe aquí tu idea o comentario..." required></textarea>
-      <button type="submit" class="btn btn--primary">Enviar sugerencia</button>
-    </form>
-  </div>
-</div>
-
 <!-- ============ FOOTER ============ -->
 <footer class="site-footer">
   <div class="container site-footer__inner">
@@ -203,6 +184,8 @@
   </div>
 </footer>
 
+<script src="js/config.js"></script>
+<script src="js/suggestions.js"></script>
 <script src="js/animations.js"></script>
 <script src="js/events.js"></script>
 </body>
