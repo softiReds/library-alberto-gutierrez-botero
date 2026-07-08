@@ -1,0 +1,1228 @@
+{
+  "info": {
+    "_postman_id": "e08956e1-3759-4e91-8801-e3538fec3a70",
+    "name": "Library API - Biblioteca Alberto Gutiérrez Botero",
+    "description": "Colección completa de los 10 módulos del backend (Catálogo, Afiliaciones, Préstamos, Consulta en sala, Asistencia, Eventos, Sugerencias, Contador de visitas, Reportes, Auth).\n\nCómo usarla:\n1. Seleccioná el entorno 'Library API - Local' (o importá library-api.postman_environment.json).\n2. Completá auth_username / auth_password con las credenciales de tu appsettings.Development.json.\n3. Corré 'Auth > Login' una vez — guarda el token en {{jwt_token}} automáticamente para el resto de la colección.\n4. Para las rutas con {{book_id}}, {{member_id}}, {{loan_id}}, {{event_id}} o {{suggestion_id}}: creá el recurso primero y pegá el id devuelto en la variable correspondiente del entorno.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (guarda el token automáticamente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{auth_username}}\",\n  \"password\": \"{{auth_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Credenciales del login único de la coordinadora (Auth:Username / Auth:Password en appsettings.Development.json)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loginResponse = pm.response.json();",
+                  "if (pm.response.code === 200 && loginResponse.token) {",
+                  "    pm.environment.set(\"jwt_token\", loginResponse.token);",
+                  "    console.log(\"jwt_token guardado en el entorno\");",
+                  "} else {",
+                  "    console.warn(\"Login falló, jwt_token no actualizado\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Catálogo",
+      "item": [
+        {
+          "name": "Listar catálogo (público, con búsqueda)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books?search=garcia&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "garcia"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver libro por id (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books",
+                "{{book_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Libros destacados (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/books/featured",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books",
+                "featured"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear libro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcode\": \"B-000123\",\n  \"title\": \"Cien años de soledad\",\n  \"author\": \"Gabriel García Márquez\",\n  \"classification\": \"863\",\n  \"subject\": \"Novela\",\n  \"material_type\": \"Libro\",\n  \"target_audience\": \"Adultos\",\n  \"publisher\": \"Sudamericana\",\n  \"publication_date\": \"1967-05-30\",\n  \"isbn\": \"978-0307474728\",\n  \"status\": \"disponible\",\n  \"location\": \"Estante 3B\",\n  \"featured\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar libro",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books",
+                "{{book_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"barcode\": \"B-000124\",\n  \"title\": \"Cien años de soledad\",\n  \"author\": \"Gabriel García Márquez\",\n  \"classification\": \"863\",\n  \"subject\": \"Novela\",\n  \"material_type\": \"Libro\",\n  \"target_audience\": \"Adultos\",\n  \"publisher\": \"Sudamericana\",\n  \"publication_date\": \"1967-05-30\",\n  \"isbn\": \"978-0307474728\",\n  \"status\": \"disponible\",\n  \"location\": \"Estante 4A\",\n  \"featured\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Dar de baja libro (retiro, no borra el registro)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}/retire",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books",
+                "{{book_id}}",
+                "retire"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Afiliaciones",
+      "item": [
+        {
+          "name": "Buscar afiliado por documento (chequeo de duplicados)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/members?document=1032456789",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "document",
+                  "value": "1032456789"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver afiliado por id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/members/{{member_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "members",
+                "{{member_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar / buscar afiliados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/members?search=torres&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "torres"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Afiliar nuevo miembro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "members"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document_type\": \"CC\",\n  \"document_number\": \"1032456789\",\n  \"birth_date\": \"1995-03-14\",\n  \"nationality_country\": \"Colombia\",\n  \"email\": \"ana.torres@example.com\",\n  \"gender\": \"Femenino\",\n  \"first_name\": \"Ana\",\n  \"last_name\": \"Torres\",\n  \"occupation\": \"Estudiante\",\n  \"education_level\": \"Universitaria\",\n  \"locality\": \"Ricaurte\",\n  \"neighborhood\": \"Ricaurte\",\n  \"address\": \"Cra 20 # 12-34\",\n  \"contact_phone\": \"3001234567\",\n  \"contact_name\": \"María Torres\",\n  \"emergency_contact_name\": \"María Torres\",\n  \"emergency_contact_phone\": \"3009876543\",\n  \"wants_cultural_agenda\": true,\n  \"agreement_accepted\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar afiliado",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/members/{{member_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "members",
+                "{{member_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document_type\": \"CC\",\n  \"document_number\": \"1032456790\",\n  \"birth_date\": \"1995-03-14\",\n  \"nationality_country\": \"Colombia\",\n  \"email\": \"ana.torres.updated@example.com\",\n  \"gender\": \"Femenino\",\n  \"first_name\": \"Ana\",\n  \"last_name\": \"Torres\",\n  \"occupation\": \"Estudiante\",\n  \"education_level\": \"Universitaria\",\n  \"locality\": \"Ricaurte\",\n  \"neighborhood\": \"Ricaurte\",\n  \"address\": \"Cra 22 # 15-40\",\n  \"contact_phone\": \"3001234567\",\n  \"contact_name\": \"María Torres\",\n  \"emergency_contact_name\": \"María Torres\",\n  \"emergency_contact_phone\": \"3009876543\",\n  \"wants_cultural_agenda\": true,\n  \"agreement_accepted\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Préstamos",
+      "item": [
+        {
+          "name": "Crear préstamo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loans",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loans"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{book_id}}\",\n  \"member_id\": \"{{member_id}}\",\n  \"due_date\": \"2026-08-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Falla con validation_error si el libro no existe o no está Disponible; 404 si el afiliado no existe."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar devolución",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loans/{{loan_id}}/return",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}",
+                "return"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition_at_return\": \"Bueno\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "condition_at_return libre, ej. 'Bueno' o 'Dañado'. Falla con validation_error si el préstamo ya fue devuelto."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar préstamos (filtros opcionales)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loans?status=prestado&member_id={{member_id}}&book_id={{book_id}}&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loans"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "prestado"
+                },
+                {
+                  "key": "member_id",
+                  "value": "{{member_id}}"
+                },
+                {
+                  "key": "book_id",
+                  "value": "{{book_id}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "status acepta: prestado, devuelto, vencido. Cualquier préstamo vencido se marca automáticamente antes de listar."
+          },
+          "response": []
+        },
+        {
+          "name": "Ver préstamo por id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/loans/{{loan_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "loans",
+                "{{loan_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Consulta en sala",
+      "item": [
+        {
+          "name": "Registrar consulta en sala (libro con código de barras)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/in-house-readings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "in-house-readings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{book_id}}\",\n  \"reading_date\": \"2026-07-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar consulta en sala (libro sin código de barras)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/in-house-readings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "in-house-readings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_title_fallback\": \"Revista National Geographic - julio 2026\",\n  \"reading_date\": \"2026-07-08\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Para libros sin barcode: usar book_title_fallback en vez de book_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar consultas en sala (rango de fechas)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/in-house-readings?from=2026-07-01&to=2026-07-31&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "in-house-readings"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-07-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-31"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Asistencia",
+      "item": [
+        {
+          "name": "Registrar visita",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visit_date\": \"2026-07-08\",\n  \"age\": 27,\n  \"gender\": \"Femenino\",\n  \"visitor_name\": \"Laura Gómez\",\n  \"visitor_phone\": \"3011234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Solo age y gender son obligatorios; visitor_name/visitor_phone son opcionales."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar asistencia (filtros opcionales)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance?from=2026-07-01&to=2026-07-31&gender=Femenino&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-07-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-31"
+                },
+                {
+                  "key": "gender",
+                  "value": "Femenino"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Eventos",
+      "item": [
+        {
+          "name": "Próximos eventos (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eventos destacados (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/featured",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "featured"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar todos los eventos (historial completo, paginado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/all?page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "all"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver evento por id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear evento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Taller de lectura infantil\",\n  \"description\": \"Actividad de lectura en voz alta para niños de 6 a 10 años.\",\n  \"event_date\": \"2026-09-15\",\n  \"start_time\": \"16:00:00\",\n  \"end_time\": \"17:30:00\",\n  \"featured\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Si se envían start_time y end_time, end_time debe ser posterior a start_time."
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar evento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Taller de lectura infantil (actualizado)\",\n  \"description\": \"Actividad de lectura en voz alta para niños de 6 a 10 años.\",\n  \"event_date\": \"2026-09-15\",\n  \"start_time\": \"15:00:00\",\n  \"end_time\": \"16:30:00\",\n  \"featured\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar evento (borrado físico)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/events/{{event_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "events",
+                "{{event_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sugerencias",
+      "item": [
+        {
+          "name": "Enviar sugerencia (público)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/suggestions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "suggestions"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Sería genial tener más libros de ciencia ficción y fantasía para jóvenes.\",\n  \"visitor_name\": \"Camila Ruiz\",\n  \"visitor_email\": \"camila.ruiz@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Dispara un correo a la coordinadora; si el envío falla, la sugerencia igual queda guardada y la request responde 201."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar sugerencias (filtro opcional por status)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/suggestions?status=nueva&page=1&page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "suggestions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "nueva"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar sugerencia como leída",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/suggestions/{{suggestion_id}}/mark-read",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "suggestions",
+                "{{suggestion_id}}",
+                "mark-read"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contador de visitas",
+      "item": [
+        {
+          "name": "Ver conteo actual (público)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/site-visits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "site-visits"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Incrementar conteo (público)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/site-visits/increment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "site-visits",
+                "increment"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Reporte de catálogo y préstamos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reports/catalog?month=7&year=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reports",
+                "catalog"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "7"
+                },
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reporte de sala y asistencia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reports/attendance?month=7&year=2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "reports",
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "7"
+                },
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://localhost:7272/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_username",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "book_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "member_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "suggestion_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
