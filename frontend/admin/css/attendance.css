@@ -1,0 +1,98 @@
+/* =====================================================================
+   Panel Admin — Asistencia
+   ===================================================================== */
+
+/* ============ TARJETAS DE ESTADÍSTICAS ============ */
+.attendance-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:20px;
+}
+.stat-card__icon--pink{background:var(--pink-100,#FBE6EE);color:var(--pink-600,#E14F82);}
+.stat-card__icon--blue{background:var(--blue-100,#E7EDFC);color:var(--blue-600,#3E6FE0);}
+
+@media(max-width:1000px){
+  .attendance-stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:560px){
+  .attendance-stats-grid{grid-template-columns:1fr;}
+}
+
+/* ============ TARJETA DE FILTROS ============ */
+.attendance-filters-card{
+  padding:20px 22px;
+  margin-bottom:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.attendance-filters-row{
+  display:flex;
+  align-items:flex-end;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.attendance-filters__search{flex:1;min-width:220px;}
+.attendance-filters__field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:150px;
+  flex:1;
+}
+.attendance-filters__field label{
+  font-size:.76rem;
+  font-weight:600;
+  color:var(--muted);
+}
+.attendance-filters__field .chart-select,
+.attendance-filters__field input{
+  width:100%;
+}
+.attendance-filters__field input[type="date"]{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:9px 12px;
+  font-family:inherit;
+  font-size:.82rem;
+  color:var(--ink);
+}
+.attendance-filters__clear{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:none;
+  border:none;
+  color:var(--orange-600);
+  font-size:.88rem;
+  font-weight:600;
+  padding:11px 4px;
+  flex-shrink:0;
+}
+.attendance-filters__clear:hover{text-decoration:underline;}
+
+#filterRowExtra[hidden]{display:none;}
+
+@media(max-width:1100px){
+  .attendance-filters-row{flex-direction:column;align-items:stretch;}
+  .attendance-filters__field{min-width:0;}
+}
+
+/* ============ TABLA ============ */
+.attendance-table td:first-child{font-weight:600;color:var(--maroon-900);}
+.attendance-table td:nth-child(5){white-space:nowrap;}
+
+.gender-dot{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+}
+.gender-dot::before{
+  content:'';
+  width:8px;height:8px;border-radius:50%;
+  background:var(--muted);
+  flex-shrink:0;
+}
+.gender-dot--femenino::before{background:var(--pink-600,#E14F82);}
+.gender-dot--masculino::before{background:var(--blue-600,#3E6FE0);}

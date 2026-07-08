@@ -203,7 +203,7 @@ function renderRecommendedEvent() {
     <div class="event-highlight__stats">
       <div class="event-highlight__stat">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-        <div><span>Fecha</span><strong>${formatEventDateLong(event.date)}</strong></div>
+        <div><span>Fecha</span><strong>${formatEventDateLong(event.event_date)}</strong></div>
       </div>
       <div class="event-highlight__stat">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
@@ -245,13 +245,13 @@ function renderEvents() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const sorted = [...EVENTS].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const upcoming = sorted.filter(ev => new Date(`${ev.date}T00:00:00`) >= today);
+  const sorted = [...EVENTS].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+  const upcoming = sorted.filter(ev => new Date(`${ev.event_date}T00:00:00`) >= today);
   const toShow = (upcoming.length ? upcoming : sorted).slice(0, 3);
 
   toShow.forEach((ev, i) => {
     const li = document.createElement('li');
-    const { day, month } = formatEventDate(ev.date);
+    const { day, month } = formatEventDate(ev.event_date);
 
     const dateEl = document.createElement('span');
     dateEl.className = 'event-date';
@@ -270,7 +270,7 @@ function renderEvents() {
 
 function renderWorkshopsStat() {
   const currentYear = new Date().getFullYear();
-  const count = EVENTS.filter(ev => new Date(`${ev.date}T00:00:00`).getFullYear() === currentYear).length;
+  const count = EVENTS.filter(ev => new Date(`${ev.event_date}T00:00:00`).getFullYear() === currentYear).length;
   const value = count || STATIC_STATS.workshops;
   setCounterTarget('statWorkshops', value);
 }
