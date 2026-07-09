@@ -167,7 +167,22 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const bookCreateResponse = pm.response.json();",
+                  "if (pm.response.code < 300 && bookCreateResponse.id) {",
+                  "    pm.environment.set('book_id', bookCreateResponse.id);",
+                  "    console.log('book_id guardado: ' + bookCreateResponse.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Actualizar libro",
@@ -203,31 +218,6 @@
                   "language": "json"
                 }
               }
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Dar de baja libro (retiro, no borra el registro)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{jwt_token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/books/{{book_id}}/retire",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "books",
-                "{{book_id}}",
-                "retire"
-              ]
             }
           },
           "response": []
@@ -362,7 +352,22 @@
               }
             }
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const memberCreateResponse = pm.response.json();",
+                  "if (pm.response.code < 300 && memberCreateResponse.id) {",
+                  "    pm.environment.set('member_id', memberCreateResponse.id);",
+                  "    console.log('member_id guardado: ' + memberCreateResponse.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Actualizar afiliado",
@@ -443,7 +448,22 @@
             },
             "description": "Falla con validation_error si el libro no existe o no está Disponible; 404 si el afiliado no existe."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const loanCreateResponse = pm.response.json();",
+                  "if (pm.response.code < 300 && loanCreateResponse.id) {",
+                  "    pm.environment.set('loan_id', loanCreateResponse.id);",
+                  "    console.log('loan_id guardado: ' + loanCreateResponse.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Registrar devolución",
@@ -898,7 +918,22 @@
             },
             "description": "Si se envían start_time y end_time, end_time debe ser posterior a start_time."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const eventCreateResponse = pm.response.json();",
+                  "if (pm.response.code < 300 && eventCreateResponse.id) {",
+                  "    pm.environment.set('event_id', eventCreateResponse.id);",
+                  "    console.log('event_id guardado: ' + eventCreateResponse.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Actualizar evento",
@@ -998,7 +1033,22 @@
             },
             "description": "Dispara un correo a la coordinadora; si el envío falla, la sugerencia igual queda guardada y la request responde 201."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const suggestionCreateResponse = pm.response.json();",
+                  "if (pm.response.code < 300 && suggestionCreateResponse.id) {",
+                  "    pm.environment.set('suggestion_id', suggestionCreateResponse.id);",
+                  "    console.log('suggestion_id guardado: ' + suggestionCreateResponse.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Listar sugerencias (filtro opcional por status)",
@@ -1172,6 +1222,37 @@
                 }
               ]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catálogo (cleanup)",
+      "item": [
+        {
+          "name": "Dar de baja libro (retiro, no borra el registro)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/books/{{book_id}}/retire",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "books",
+                "{{book_id}}",
+                "retire"
+              ]
+            },
+            "description": "Nota: se dejó al final de toda la colección a propósito, para que correr todo de punta a punta no retire el libro de ejemplo antes de que Préstamos lo use."
           },
           "response": []
         }

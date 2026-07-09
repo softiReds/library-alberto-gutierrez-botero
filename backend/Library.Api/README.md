@@ -110,10 +110,13 @@ cubre los 35 endpoints de los 10 módulos, organizados en carpetas.
    `Auth` local.
 3. Corré **Auth → Login** una vez: guarda el token en `{{jwt_token}}` automáticamente para el
    resto de la colección (no hay que copiarlo a mano).
-4. Para las rutas que llevan `{{book_id}}`, `{{member_id}}`, `{{loan_id}}`, `{{event_id}}` o
-   `{{suggestion_id}}`: creá el recurso con el request correspondiente y pegá el `id` que
-   devuelve en la variable del entorno — no se autocompletan solos, a propósito, para no
-   esconder qué id está usando cada request.
+4. Los requests que crean un recurso (**Crear libro**, **Afiliar nuevo miembro**, **Crear
+   préstamo**, **Crear evento**, **Enviar sugerencia**) guardan automáticamente el `id` que
+   devuelven en `{{book_id}}`, `{{member_id}}`, `{{loan_id}}`, `{{event_id}}` y
+   `{{suggestion_id}}` respectivamente — el resto de la colección ya los usa solo, sin copiar
+   nada a mano. Corriendo las carpetas en orden (de arriba hacia abajo) alcanza; **"Dar de
+   baja libro"** queda al final a propósito, para no retirar el libro de ejemplo antes de
+   que Préstamos lo use.
 
 ## 5. Apagar todo
 
