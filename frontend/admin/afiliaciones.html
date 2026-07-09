@@ -92,6 +92,12 @@
           <h1>Afiliaciones</h1>
           <p>Consulta y administra la información de los usuarios afiliados a la biblioteca.</p>
         </div>
+        <div class="admin-page-head__actions">
+          <button type="button" class="btn btn--primary" id="addMemberBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            Agregar afiliado
+          </button>
+        </div>
       </div>
 
       <!-- ============ TARJETA DE ESTADÍSTICA ============ -->
@@ -214,10 +220,12 @@
 <div class="modal modal--form" id="memberModal" hidden>
   <div class="modal__panel modal__panel--form">
     <button type="button" class="modal__close" id="memberModalClose" aria-label="Cerrar">✕</button>
-    <h3>Editar afiliado</h3>
+    <h3 id="memberFormTitle">Editar afiliado</h3>
     <p>Actualiza la información del usuario afiliado.</p>
 
     <form class="book-form" id="memberForm">
+      <p class="form-error" id="memberFormError" hidden></p>
+
       <div class="form-row">
         <div class="form-field">
           <label for="memberFirstName">Nombres *</label>

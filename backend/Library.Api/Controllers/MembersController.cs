@@ -22,6 +22,14 @@ public class MembersController(LibraryDbContext db) : ControllerBase
     public async Task<ActionResult> GetMembers(
         [FromQuery] string? document,
         [FromQuery] string? search,
+        [FromQuery(Name = "document_type")] string? documentType,
+        [FromQuery(Name = "education_level")] string? educationLevel,
+        [FromQuery] string? occupation,
+        [FromQuery] string? gender,
+        [FromQuery] string? locality,
+        [FromQuery] string? neighborhood,
+        [FromQuery(Name = "date_from")] DateOnly? dateFrom,
+        [FromQuery(Name = "date_to")] DateOnly? dateTo,
         [FromQuery] int page = 1,
         [FromQuery(Name = "page_size")] int pageSize = 20)
     {
@@ -49,6 +57,48 @@ public class MembersController(LibraryDbContext db) : ControllerBase
                 EF.Functions.ILike(m.DocumentNumber, $"%{search}%"));
         }
 
+        if (!string.IsNullOrWhiteSpace(documentType))
+        {
+            query = query.Where(m => m.DocumentType == documentType);
+        }
+
+        if (!string.IsNullOrWhiteSpace(educationLevel))
+        {
+            query = query.Where(m => m.EducationLevel == educationLevel);
+        }
+
+        if (!string.IsNullOrWhiteSpace(occupation))
+        {
+            query = query.Where(m => m.Occupation == occupation);
+        }
+
+        if (!string.IsNullOrWhiteSpace(gender))
+        {
+            query = query.Where(m => m.Gender == gender);
+        }
+
+        if (!string.IsNullOrWhiteSpace(locality))
+        {
+            query = query.Where(m => m.Locality == locality);
+        }
+
+        if (!string.IsNullOrWhiteSpace(neighborhood))
+        {
+            query = query.Where(m => m.Neighborhood == neighborhood);
+        }
+
+        if (dateFrom.HasValue)
+        {
+            var from = new DateTimeOffset(dateFrom.Value.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+            query = query.Where(m => m.CreatedAt >= from);
+        }
+
+        if (dateTo.HasValue)
+        {
+            var to = new DateTimeOffset(dateTo.Value.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
+            query = query.Where(m => m.CreatedAt <= to);
+        }
+
         var total = await query.CountAsync();
 
         var members = await query
@@ -63,6 +113,32 @@ public class MembersController(LibraryDbContext db) : ControllerBase
             Page = page,
             PageSize = pageSize,
             Total = total
+        });
+    }
+
+    /// <summary>Distinct values already in use, to populate the admin panel's filter dropdowns
+    /// without requiring the whole (paginated) member list on the client.</summary>
+    [HttpGet("filters")]
+    public async Task<ActionResult> GetMemberFilters()
+    {
+        async Task<List<string>> Distinct(IQueryable<string?> source) =>
+            (await source.Where(v => v != null).Distinct().OrderBy(v => v).ToListAsync())!;
+
+        var documentTypes = await Distinct(db.Members.Select(m => (string?)m.DocumentType));
+        var educationLevels = await Distinct(db.Members.Select(m => m.EducationLevel));
+        var occupations = await Distinct(db.Members.Select(m => m.Occupation));
+        var genders = await Distinct(db.Members.Select(m => m.Gender));
+        var localities = await Distinct(db.Members.Select(m => m.Locality));
+        var neighborhoods = await Distinct(db.Members.Select(m => m.Neighborhood));
+
+        return Ok(new
+        {
+            DocumentTypes = documentTypes,
+            EducationLevels = educationLevels,
+            Occupations = occupations,
+            Genders = genders,
+            Localities = localities,
+            Neighborhoods = neighborhoods
         });
     }
 
