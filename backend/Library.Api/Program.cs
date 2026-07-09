@@ -104,14 +104,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// --- CORS: the public site is hosted on GitHub Pages (a *.github.io subdomain) ---
-const string GitHubPagesCorsPolicy = "GitHubPages";
+// --- CORS ---
+// The public site is hosted on GitHub Pages (any *.github.io subdomain — always allowed).
+// Beyond that, exact origins (local dev tools, a future custom production domain, etc.)
+// come from configuration instead of being hardcoded here — see Cors:AllowedOrigins in
+// appsettings.json / appsettings.Development.json. Adding a new one later is a config
+// change, not a C# change.
+const string FrontendCorsPolicy = "Frontend";
+var configuredCorsOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(GitHubPagesCorsPolicy, policy =>
+    options.AddPolicy(FrontendCorsPolicy, policy =>
         policy.SetIsOriginAllowed(origin =>
-                Uri.TryCreate(origin, UriKind.Absolute, out var originUri) &&
-                originUri.Host.EndsWith(".github.io", StringComparison.OrdinalIgnoreCase))
+                configuredCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase) ||
+                (Uri.TryCreate(origin, UriKind.Absolute, out var originUri) &&
+                 originUri.Host.EndsWith(".github.io", StringComparison.OrdinalIgnoreCase)))
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -201,7 +211,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(GitHubPagesCorsPolicy);
+app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
