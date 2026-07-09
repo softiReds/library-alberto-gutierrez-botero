@@ -2,8 +2,11 @@
 // Biblioteca Alberto Gutiérrez Botero — Homepage
 // =====================================================================
 
-const CATALOG_URL = 'data/catalog.json';
-const EVENTS_URL = 'data/events.json';
+const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
+const BOOKS_URL = `${API_BASE_URL}/books`;
+const FEATURED_BOOKS_URL = `${API_BASE_URL}/books/featured`;
+const FEATURED_EVENTS_URL = `${API_BASE_URL}/events/featured`;
+const SEARCH_DEBOUNCE_MS = 350;
 
 const FALLBACK_COVERS = [
   'assets/home/book-cover-1.png',
@@ -137,34 +140,47 @@ lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightb
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 // ---------------------------------------------------------------------
-// Carga del catálogo
+// Carga del catálogo (destacados para el home)
 // ---------------------------------------------------------------------
 async function loadCatalog() {
   try {
-    const res = await fetch(CATALOG_URL);
-    if (!res.ok) throw new Error('No se pudo cargar catalog.json');
+    const res = await fetch(FEATURED_BOOKS_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
     CATALOG = await res.json();
   } catch (err) {
-    console.error(err);
+    console.error('No se pudieron cargar los libros destacados.', err);
     CATALOG = [];
   }
 
-  renderStats();
-  renderGallery();
   renderFeaturedBookCarousel();
   renderRecommended();
 }
 
 // ---------------------------------------------------------------------
-// Carga de eventos y talleres
+// Total de libros del catálogo (para la estadística, independiente de
+// los destacados de arriba)
+// ---------------------------------------------------------------------
+async function loadBooksTotal() {
+  try {
+    const res = await fetch(`${BOOKS_URL}?page=1&page_size=1`);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const data = await res.json();
+    setCounterTarget('statBooks', data.total || 0);
+  } catch (err) {
+    console.error('No se pudo obtener el total del catálogo.', err);
+  }
+}
+
+// ---------------------------------------------------------------------
+// Carga de eventos y talleres (destacados para el home)
 // ---------------------------------------------------------------------
 async function loadEvents() {
   try {
-    const res = await fetch(EVENTS_URL);
-    if (!res.ok) throw new Error('No se pudo cargar events.json');
+    const res = await fetch(FEATURED_EVENTS_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
     EVENTS = await res.json();
   } catch (err) {
-    console.error(err);
+    console.error('No se pudieron cargar los eventos destacados.', err);
     EVENTS = [];
   }
 
@@ -178,10 +194,10 @@ async function loadEvents() {
 // ---------------------------------------------------------------------
 function renderRecommendedEvent() {
   const container = document.getElementById('recommendedEvent');
-  const event = EVENTS.find(ev => ev.featured === true);
+  const event = EVENTS[0];
 
   if (!event) {
-    container.innerHTML = '<p class="event-highlight__empty">Marca un evento con "featured": true en events.json para destacarlo aquí.</p>';
+    container.innerHTML = '<p class="event-highlight__empty">No hay eventos destacados por ahora.</p>';
     return;
   }
 
@@ -223,6 +239,7 @@ function formatEventDateLong(dateStr) {
 }
 
 function formatTime12h(hhmm) {
+  if (!hhmm) return 'Hora por confirmar';
   const [h, m] = hhmm.split(':').map(Number);
   const mm = String(m).padStart(2, '0');
   if (h === 12 && m === 0) return '12:00 m.';
@@ -237,16 +254,13 @@ function renderEvents() {
   list.innerHTML = '';
 
   if (!EVENTS.length) {
-    list.innerHTML = '<li class="search-results__empty">Aún no hay eventos programados.</li>';
+    list.innerHTML = '<li class="search-results__empty">Aún no hay eventos destacados por ahora.</li>';
     return;
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const sorted = [...EVENTS].sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
-  const upcoming = sorted.filter(ev => new Date(`${ev.event_date}T00:00:00`) >= today);
-  const toShow = (upcoming.length ? upcoming : sorted).slice(0, 3);
+  // /events/featured ya viene filtrado a próximos + destacados y ordenado
+  // por fecha ascendente — no hace falta volver a ordenar ni filtrar acá.
+  const toShow = EVENTS.slice(0, 3);
 
   toShow.forEach((ev, i) => {
     const li = document.createElement('li');
@@ -278,8 +292,8 @@ function renderWorkshopsStat() {
 // Estadísticas
 // ---------------------------------------------------------------------
 function renderStats() {
-  setCounterTarget('statBooks', CATALOG.length);
-  setCounterTarget('statWorkshops', STATIC_STATS.workshops);
+  // statBooks lo pone loadBooksTotal() (GET /books, campo "total").
+  // statWorkshops lo pone renderWorkshopsStat() (a partir de EVENTS).
   setCounterTarget('statUsers', STATIC_STATS.users);
   // statVisits no se setea acá: js/visit-counter.js dispara
   // "bagb:visits-updated" con el total real apenas responde la API
@@ -367,10 +381,11 @@ function renderRecommended() {
   const track = document.getElementById('recommendedTrack');
   track.innerHTML = '';
 
-  const featured = CATALOG.filter(b => b.featured === true).slice(0, 3);
+  // CATALOG ya viene de GET /books/featured — nada que filtrar de nuevo.
+  const featured = CATALOG.slice(0, 3);
 
   if (!featured.length) {
-    track.innerHTML = '<p class="search-results__empty">Marca libros con "featured": true en catalog.json para que aparezcan aquí.</p>';
+    track.innerHTML = '<p class="search-results__empty">No hay libros destacados por ahora.</p>';
     return;
   }
 
@@ -434,21 +449,28 @@ document.querySelectorAll('[data-carousel]').forEach(wrapper => {
 const searchInput = document.getElementById('catalogSearchInput');
 const searchResults = document.getElementById('searchResults');
 const filterTags = document.getElementById('filterTags');
-let activeFilter = 'title';
 
+// Nota: GET /books?search= busca por título O autor combinados — el
+// backend no soporta filtrar por un campo específico (autor/editorial/
+// materia por separado), así que estos tags ya no cambian el resultado
+// de la búsqueda, solo quedan como acento visual.
 filterTags.addEventListener('click', e => {
   const btn = e.target.closest('.tag');
   if (!btn) return;
   filterTags.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  activeFilter = btn.dataset.filter;
-  runSearch();
 });
 
-searchInput.addEventListener('input', runSearch);
+let searchDebounceTimer = null;
+let searchRequestId = 0;
 
-function runSearch() {
-  const q = searchInput.value.trim().toLowerCase();
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(runSearch, SEARCH_DEBOUNCE_MS);
+});
+
+async function runSearch() {
+  const q = searchInput.value.trim();
 
   if (!q) {
     searchResults.hidden = true;
@@ -456,28 +478,39 @@ function runSearch() {
     return;
   }
 
-  const results = CATALOG.filter(book => {
-    const field = book[activeFilter];
-    if (!field) return false;
-    return String(field).toLowerCase().includes(q);
-  });
-
+  const requestId = ++searchRequestId;
   searchResults.hidden = false;
+  searchResults.innerHTML = '<div class="search-results__empty">Buscando…</div>';
 
-  if (!results.length) {
-    searchResults.innerHTML = '<div class="search-results__empty">No encontramos resultados para tu búsqueda.</div>';
-    return;
-  }
+  try {
+    const res = await fetch(`${BOOKS_URL}?search=${encodeURIComponent(q)}&page=1&page_size=8`);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const data = await res.json();
 
-  searchResults.innerHTML = results.map(book => `
-    <div class="search-results__item">
-      <div>
-        <strong>${escapeHtml(book.title)}</strong>
-        <span>${escapeHtml(book.author || '')}</span>
+    // Si el usuario siguió escribiendo, esta respuesta ya quedó vieja.
+    if (requestId !== searchRequestId) return;
+
+    const results = data.data || [];
+
+    if (!results.length) {
+      searchResults.innerHTML = '<div class="search-results__empty">No encontramos resultados para tu búsqueda.</div>';
+      return;
+    }
+
+    searchResults.innerHTML = results.map(book => `
+      <div class="search-results__item">
+        <div>
+          <strong>${escapeHtml(book.title)}</strong>
+          <span>${escapeHtml(book.author || '')}</span>
+        </div>
+        <span>${escapeHtml(book.publication_date || '')}</span>
       </div>
-      <span>${escapeHtml(book.publication_date || '')}</span>
-    </div>
-  `).join('');
+    `).join('');
+  } catch (err) {
+    if (requestId !== searchRequestId) return;
+    console.error('Error buscando en el catálogo.', err);
+    searchResults.innerHTML = '<div class="search-results__empty">No pudimos completar la búsqueda. Intenta de nuevo en un momento.</div>';
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -493,5 +526,8 @@ document.getElementById('navSearchToggle').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 initStaticReveals();
 initStatsCounter();
+renderStats();
+renderGallery();
+loadBooksTotal();
 loadCatalog();
 loadEvents();

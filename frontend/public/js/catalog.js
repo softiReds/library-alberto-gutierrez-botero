@@ -1,8 +1,10 @@
 // =====================================================================
-// Catálogo — filtros dinámicos, búsqueda, orden, vistas y paginación
+// Catálogo — búsqueda, orden, vistas y paginación (contra la API real)
 // =====================================================================
 
-const CATALOG_URL = 'data/catalog.json';
+const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
+const BOOKS_URL = `${API_BASE_URL}/books`;
+const SEARCH_DEBOUNCE_MS = 350;
 const PAGE_SIZE = 10;
 
 const FALLBACK_COVERS = [
@@ -11,18 +13,11 @@ const FALLBACK_COVERS = [
   'assets/home/book-cover-3.png'
 ];
 
-const FILTER_GROUPS = [
-  { key: 'material_type', label: 'Tipo de material' },
-  { key: 'target_audience', label: 'Público objetivo' },
-  { key: 'location', label: 'Ubicación' },
-  { key: 'status', label: 'Disponibilidad' }
-];
-
-let CATALOG = [];
 let currentPage = 1;
+let currentTotal = 0;
 let currentView = 'grid';
-const activeFilters = {};
-FILTER_GROUPS.forEach(g => { activeFilters[g.key] = new Set(); });
+let currentSort = 'relevance';
+let loadRequestId = 0;
 
 const gridEl = document.getElementById('catalogGrid');
 const countEl = document.getElementById('resultsCount');
@@ -32,6 +27,16 @@ const searchInput = document.getElementById('filterSearch');
 const sortSelect = document.getElementById('sortSelect');
 const bookModal = document.getElementById('bookModal');
 const bookDetailEl = document.getElementById('bookDetail');
+
+// El backend (GET /books) busca por título O autor combinados y no
+// soporta facetas (tipo de material, público, ubicación, disponibilidad)
+// ni orden por parámetro — filtrar por esas facetas requeriría traer
+// todo el catálogo a memoria, que es justo lo que la paginación del
+// servidor busca evitar. Por ahora dejamos el panel de filtros vacío;
+// el orden se aplica solo sobre la página ya cargada.
+if (filterGroupsEl) {
+  filterGroupsEl.innerHTML = '<p class="filters-empty">Los filtros por categoría no están disponibles todavía.</p>';
+}
 
 // ---------------------------------------------------------------------
 // Portada de libro (misma lógica del home)
@@ -106,127 +111,69 @@ function statusClass(status) {
 }
 
 // ---------------------------------------------------------------------
-// Carga del catálogo
+// Orden (aplicado solo sobre la página actual — el backend siempre
+// devuelve ordenado por título)
 // ---------------------------------------------------------------------
-async function loadCatalog() {
-  try {
-    const res = await fetch(CATALOG_URL);
-    if (!res.ok) throw new Error('No se pudo cargar catalog.json');
-    CATALOG = await res.json();
-  } catch (err) {
-    console.error(err);
-    CATALOG = [];
-  }
-
-  buildFilterGroups();
-  update();
-}
-
-// ---------------------------------------------------------------------
-// Filtros dinámicos
-// ---------------------------------------------------------------------
-function buildFilterGroups() {
-  filterGroupsEl.innerHTML = '';
-
-  FILTER_GROUPS.forEach(group => {
-    const counts = new Map();
-    CATALOG.forEach(book => {
-      const value = book[group.key];
-      if (!value) return;
-      counts.set(value, (counts.get(value) || 0) + 1);
-    });
-
-    if (!counts.size) return;
-
-    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-
-    const groupEl = document.createElement('div');
-    groupEl.className = 'filter-group';
-
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'filter-group__toggle';
-    toggle.innerHTML = `
-      ${escapeHtml(group.label)}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
-    `;
-    toggle.addEventListener('click', () => groupEl.classList.toggle('is-collapsed'));
-
-    const options = document.createElement('div');
-    options.className = 'filter-options';
-
-    sorted.forEach(([value, count]) => {
-      const label = document.createElement('label');
-      label.className = 'filter-option';
-
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.value = value;
-      input.checked = activeFilters[group.key].has(value);
-      input.addEventListener('change', () => {
-        if (input.checked) activeFilters[group.key].add(value);
-        else activeFilters[group.key].delete(value);
-        currentPage = 1;
-        update();
-      });
-
-      const displayValue = group.key === 'status' ? displayStatus(value) : value;
-
-      const text = document.createElement('span');
-      text.innerHTML = `${escapeHtml(displayValue)} <span class="count">(${count.toLocaleString('es-CO')})</span>`;
-
-      label.appendChild(input);
-      label.appendChild(text);
-      options.appendChild(label);
-    });
-
-    groupEl.appendChild(toggle);
-    groupEl.appendChild(options);
-    filterGroupsEl.appendChild(groupEl);
-  });
-}
-
-// ---------------------------------------------------------------------
-// Filtrado, búsqueda y orden
-// ---------------------------------------------------------------------
-function getFilteredBooks() {
-  const q = normalize(searchInput.value.trim());
-
-  let books = CATALOG.filter(book => {
-    for (const group of FILTER_GROUPS) {
-      const selected = activeFilters[group.key];
-      if (selected.size && !selected.has(book[group.key])) return false;
-    }
-
-    if (q) {
-      const isbns = Array.isArray(book.isbn) ? book.isbn.join(' ') : (book.isbn || '');
-      const haystack = normalize(`${book.title} ${book.author} ${book.subject} ${book.publisher} ${isbns} ${book.barcode || ''}`);
-      if (!haystack.includes(q)) return false;
-    }
-
-    return true;
-  });
-
-  switch (sortSelect.value) {
+function applySort(books) {
+  const sorted = [...books];
+  switch (currentSort) {
     case 'title':
-      books.sort((a, b) => normalize(a.title).localeCompare(normalize(b.title)));
+      sorted.sort((a, b) => normalize(a.title).localeCompare(normalize(b.title)));
       break;
     case 'author':
-      books.sort((a, b) => normalize(a.author).localeCompare(normalize(b.author)));
+      sorted.sort((a, b) => normalize(a.author).localeCompare(normalize(b.author)));
       break;
     case 'newest':
-      books.sort((a, b) => Number(b.publication_date || 0) - Number(a.publication_date || 0));
+      sorted.sort((a, b) => String(b.publication_date || '').localeCompare(String(a.publication_date || '')));
       break;
     case 'oldest':
-      books.sort((a, b) => Number(a.publication_date || 9999) - Number(b.publication_date || 9999));
+      sorted.sort((a, b) => String(a.publication_date || '9999').localeCompare(String(b.publication_date || '9999')));
       break;
     case 'relevance':
     default:
-      books.sort((a, b) => (b.featured === true) - (a.featured === true));
+      sorted.sort((a, b) => (b.featured === true) - (a.featured === true));
       break;
   }
+  return sorted;
+}
 
-  return books;
+// ---------------------------------------------------------------------
+// Carga de una página del catálogo
+// ---------------------------------------------------------------------
+async function loadCatalog() {
+  const requestId = ++loadRequestId;
+  const q = searchInput.value.trim();
+
+  gridEl.innerHTML = '<div class="catalog-empty">Cargando catálogo…</div>';
+  paginationEl.innerHTML = '';
+
+  const params = new URLSearchParams({
+    page: String(currentPage),
+    page_size: String(PAGE_SIZE)
+  });
+  if (q) params.set('search', q);
+
+  try {
+    const res = await fetch(`${BOOKS_URL}?${params.toString()}`);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const data = await res.json();
+
+    // Si el usuario ya disparó otra carga (nueva búsqueda/página), esta
+    // respuesta llegó tarde — no la pintamos para no pisar la vigente.
+    if (requestId !== loadRequestId) return;
+
+    const books = applySort(data.data || []);
+    currentTotal = data.total || 0;
+    countEl.textContent = currentTotal.toLocaleString('es-CO');
+
+    renderBooks(books);
+    renderPagination();
+  } catch (err) {
+    if (requestId !== loadRequestId) return;
+    console.error('Error cargando el catálogo.', err);
+    countEl.textContent = '0';
+    gridEl.innerHTML = '<div class="catalog-empty">No pudimos cargar el catálogo. Intenta de nuevo en un momento.</div>';
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -237,21 +184,18 @@ function renderBooks(books) {
   gridEl.classList.toggle('is-list', currentView === 'list');
 
   if (!books.length) {
-    gridEl.innerHTML = '<div class="catalog-empty">No encontramos resultados con los filtros actuales.<br>Prueba con otros términos o limpia los filtros.</div>';
+    gridEl.innerHTML = '<div class="catalog-empty">No encontramos resultados con los filtros actuales.<br>Prueba con otros términos o limpia la búsqueda.</div>';
     return;
   }
 
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const pageBooks = books.slice(start, start + PAGE_SIZE);
-
-  pageBooks.forEach((book, i) => {
+  books.forEach((book, i) => {
     const card = document.createElement('article');
     card.className = 'book-card';
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-label', `Ver detalle de ${book.title}`);
 
-    const coverWrap = buildCoverWrap(book, start + i, 'book-card__cover', 'book-card__cover-wrap');
+    const coverWrap = buildCoverWrap(book, i, 'book-card__cover', 'book-card__cover-wrap');
 
     const body = document.createElement('div');
     body.className = 'book-card__body';
@@ -272,11 +216,11 @@ function renderBooks(books) {
     card.appendChild(body);
     card.appendChild(meta);
 
-    card.addEventListener('click', () => openBookModal(book));
+    card.addEventListener('click', () => openBookModal(book.id));
     card.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openBookModal(book);
+        openBookModal(book.id);
       }
     });
 
@@ -286,9 +230,25 @@ function renderBooks(books) {
 }
 
 // ---------------------------------------------------------------------
-// Modal de detalle de libro
+// Modal de detalle de libro — GET /books/{id}, no el JSON ya cargado
 // ---------------------------------------------------------------------
-function openBookModal(book) {
+async function openBookModal(id) {
+  bookModal.hidden = false;
+  bookDetailEl.innerHTML = '<p class="book-detail__loading">Cargando…</p>';
+
+  try {
+    const res = await fetch(`${BOOKS_URL}/${encodeURIComponent(id)}`);
+    if (res.status === 404) throw new Error('Este libro ya no está disponible en el catálogo.');
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const book = await res.json();
+    renderBookDetail(book);
+  } catch (err) {
+    console.error('Error cargando el detalle del libro.', err);
+    bookDetailEl.innerHTML = `<p class="book-detail__error">No pudimos cargar el detalle de este libro. ${escapeHtml(err.message || '')}</p>`;
+  }
+}
+
+function renderBookDetail(book) {
   bookDetailEl.innerHTML = '';
 
   const coverWrap = buildCoverWrap(book, 0, 'book-detail__cover', 'book-detail__cover-wrap');
@@ -296,8 +256,8 @@ function openBookModal(book) {
   const info = document.createElement('div');
   info.className = 'book-detail__info';
 
-  const isbns = Array.isArray(book.isbn) ? book.isbn.join(', ') : (book.isbn || '');
-
+  // barcode/created_at son datos de gestión interna — GET /books/{id}
+  // público (BookPublicDto) nunca los expone, así que no se muestran acá.
   const fields = [
     ['Autor', book.author],
     ['Clasificación', book.classification],
@@ -306,10 +266,8 @@ function openBookModal(book) {
     ['Público objetivo', book.target_audience],
     ['Editorial', book.publisher],
     ['Año de publicación', book.publication_date],
-    ['ISBN', isbns],
-    ['Ubicación', book.location],
-    ['Código de barras', book.barcode],
-    ['Fecha de ingreso', book.created_at]
+    ['ISBN', book.isbn],
+    ['Ubicación', book.location]
   ];
 
   const fieldsHtml = fields.map(([label, value]) => `
@@ -329,8 +287,6 @@ function openBookModal(book) {
 
   bookDetailEl.appendChild(coverWrap);
   bookDetailEl.appendChild(info);
-
-  bookModal.hidden = false;
 }
 
 function closeBookModal() {
@@ -344,11 +300,11 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------------------------------------------------------------------
-// Paginación
+// Paginación (server-side: cada página es un fetch nuevo)
 // ---------------------------------------------------------------------
-function renderPagination(total) {
+function renderPagination() {
   paginationEl.innerHTML = '';
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(currentTotal / PAGE_SIZE);
   if (totalPages <= 1) return;
 
   function addBtn(label, page, { active = false, disabled = false, ariaLabel = null } = {}) {
@@ -361,7 +317,7 @@ function renderPagination(total) {
     if (!disabled && !active) {
       btn.addEventListener('click', () => {
         currentPage = page;
-        update();
+        loadCatalog();
         gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
@@ -391,39 +347,28 @@ function renderPagination(total) {
 }
 
 // ---------------------------------------------------------------------
-// Actualización general
-// ---------------------------------------------------------------------
-function update() {
-  const books = getFilteredBooks();
-  countEl.textContent = books.length.toLocaleString('es-CO');
-
-  const totalPages = Math.max(1, Math.ceil(books.length / PAGE_SIZE));
-  if (currentPage > totalPages) currentPage = totalPages;
-
-  renderBooks(books);
-  renderPagination(books.length);
-}
-
-// ---------------------------------------------------------------------
 // Controles
 // ---------------------------------------------------------------------
+let searchDebounceTimer = null;
 searchInput.addEventListener('input', () => {
-  currentPage = 1;
-  update();
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    currentPage = 1;
+    loadCatalog();
+  }, SEARCH_DEBOUNCE_MS);
 });
 
 sortSelect.addEventListener('change', () => {
-  currentPage = 1;
-  update();
+  currentSort = sortSelect.value;
+  loadCatalog();
 });
 
 document.getElementById('clearFilters').addEventListener('click', () => {
-  FILTER_GROUPS.forEach(g => activeFilters[g.key].clear());
   searchInput.value = '';
   sortSelect.value = 'relevance';
+  currentSort = 'relevance';
   currentPage = 1;
-  filterGroupsEl.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
-  update();
+  loadCatalog();
 });
 
 document.getElementById('viewGrid').addEventListener('click', () => setView('grid'));
@@ -433,14 +378,13 @@ function setView(view) {
   currentView = view;
   document.getElementById('viewGrid').classList.toggle('active', view === 'grid');
   document.getElementById('viewList').classList.toggle('active', view === 'list');
-  update();
+  gridEl.classList.toggle('is-list', currentView === 'list');
 }
 
 document.getElementById('navSearchToggle').addEventListener('click', () => {
   searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
   searchInput.focus({ preventScroll: true });
 });
-
 
 // ---------------------------------------------------------------------
 // Init

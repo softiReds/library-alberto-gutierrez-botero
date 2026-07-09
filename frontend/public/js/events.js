@@ -2,7 +2,8 @@
 // Talleres y eventos — lista + calendario interactivo
 // =====================================================================
 
-const EVENTS_URL = 'data/events.json';
+const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
+const EVENTS_URL = `${API_BASE_URL}/events`;
 
 const MESES_LARGO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS_SEMANA = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
@@ -31,6 +32,7 @@ function dateKey(year, month, day) {
 }
 
 function formatTime12h(hhmm) {
+  if (!hhmm) return 'Hora por confirmar';
   const [h, m] = hhmm.split(':').map(Number);
   const mm = String(m).padStart(2, '0');
   if (h === 12 && m === 0) return '12:00 m.';
@@ -50,16 +52,26 @@ function escapeHtml(str) {
 // Carga de eventos
 // ---------------------------------------------------------------------
 async function loadEvents() {
+  listEl.innerHTML = '<li class="events-empty">Cargando eventos…</li>';
+
+  let loadError = false;
   try {
     const res = await fetch(EVENTS_URL);
-    if (!res.ok) throw new Error('No se pudo cargar events.json');
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
     const data = await res.json();
     EVENTS = [...data]
       .sort((a, b) => toDate(a) - toDate(b))
       .map((ev, i) => ({ ...ev, colorIndex: i % NUM_COLORS }));
   } catch (err) {
-    console.error(err);
+    console.error('No se pudieron cargar los eventos.', err);
     EVENTS = [];
+    loadError = true;
+  }
+
+  if (loadError) {
+    listEl.innerHTML = '<li class="events-empty">No se pudieron cargar los eventos. Intenta de nuevo más tarde.</li>';
+    renderCalendar();
+    return;
   }
 
   renderEventsList();
@@ -118,7 +130,7 @@ function renderEventsList() {
       </span>
       <span class="event-body">
         <strong>${escapeHtml(ev.title)}</strong>
-        <span class="event-time">${formatTime12h(ev.start_time)} - ${formatTime12h(ev.end_time)}</span>
+        <span class="event-time">${ev.start_time || ev.end_time ? `${formatTime12h(ev.start_time)} - ${formatTime12h(ev.end_time)}` : 'Hora por confirmar'}</span>
         ${ev.location ? `
         <span class="event-place">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
