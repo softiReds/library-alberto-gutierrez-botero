@@ -13,8 +13,7 @@ const FALLBACK_COVERS = [
 
 const STATIC_STATS = {
   workshops: 85,
-  users: 3214,
-  visits: 101
+  users: 3214
 };
 
 const MESES_ABREV = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
@@ -282,8 +281,17 @@ function renderStats() {
   setCounterTarget('statBooks', CATALOG.length);
   setCounterTarget('statWorkshops', STATIC_STATS.workshops);
   setCounterTarget('statUsers', STATIC_STATS.users);
-  setCounterTarget('statVisits', STATIC_STATS.visits);
+  // statVisits no se setea acá: js/visit-counter.js dispara
+  // "bagb:visits-updated" con el total real apenas responde la API
+  // (ver el listener más abajo).
 }
+
+// ---------------------------------------------------------------------
+// Contador de visitas real (ver js/visit-counter.js)
+// ---------------------------------------------------------------------
+window.addEventListener('bagb:visits-updated', e => {
+  setCounterTarget('statVisits', e.detail);
+});
 
 // ---------------------------------------------------------------------
 // Galería
