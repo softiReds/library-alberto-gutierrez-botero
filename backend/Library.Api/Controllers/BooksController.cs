@@ -15,15 +15,26 @@ public class BooksController(LibraryDbContext db) : ControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<PagedResult<BookPublicDto>>> GetBooks(
+    public async Task<IActionResult> GetBooks(
         [FromQuery] string? search,
         [FromQuery] int page = 1,
-        [FromQuery(Name = "page_size")] int pageSize = 20)
+        [FromQuery(Name = "page_size")] int pageSize = 20,
+        [FromQuery(Name = "include_retired")] bool includeRetired = false)
     {
         page = page < 1 ? 1 : page;
         pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
 
-        var query = db.Books.Where(b => b.Status != BookStatus.Baja);
+        // El DTO de salida y la visibilidad de libros "Baja" dependen de si la
+        // petición trae un JWT válido: el catálogo público nunca ve retirados
+        // ni campos de gestión (barcode/created_at), el panel admin sí puede
+        // pedir ambos vía include_retired.
+        var isAuthenticated = User.Identity?.IsAuthenticated == true;
+
+        var query = db.Books.AsQueryable();
+        if (!(isAuthenticated && includeRetired))
+        {
+            query = query.Where(b => b.Status != BookStatus.Baja);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -39,6 +50,17 @@ public class BooksController(LibraryDbContext db) : ControllerBase
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        if (isAuthenticated)
+        {
+            return Ok(new PagedResult<BookDto>
+            {
+                Data = books.Select(BookDto.FromEntity).ToList(),
+                Page = page,
+                PageSize = pageSize,
+                Total = total
+            });
+        }
 
         return Ok(new PagedResult<BookPublicDto>
         {

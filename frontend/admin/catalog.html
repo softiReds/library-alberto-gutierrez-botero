@@ -171,6 +171,8 @@
     <p>Completa la información del material. Los campos marcados son obligatorios.</p>
 
     <form class="book-form" id="bookForm">
+      <p class="form-error" id="formError" hidden></p>
+
       <div class="form-row form-row--single">
         <div class="form-field">
           <label for="bookTitle">Título *</label>
@@ -243,8 +245,10 @@
         <div class="form-field">
           <label for="bookStatus">Disponibilidad</label>
           <select id="bookStatus">
-            <option value="Disponible">Disponible</option>
-            <option value="Baja">Prestado</option>
+            <option value="disponible">Disponible</option>
+            <option value="prestado">Prestado</option>
+            <option value="consulta_en_sala">Consulta en sala</option>
+            <option value="perdido">Perdido</option>
           </select>
         </div>
         <div class="form-field">
@@ -266,18 +270,19 @@
   </div>
 </div>
 
-<!-- ============ MODAL: CONFIRMAR ELIMINACIÓN ============ -->
+<!-- ============ MODAL: CONFIRMAR BAJA ============ -->
 <div class="modal modal--confirm" id="deleteModal" hidden>
   <div class="modal__panel modal__panel--confirm">
     <button type="button" class="modal__close" id="deleteModalClose" aria-label="Cerrar">✕</button>
     <span class="confirm-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
     </span>
-    <h3>Eliminar libro</h3>
-    <p>¿Seguro que quieres eliminar <strong id="deleteBookName"></strong> del catálogo? Esta acción no se puede deshacer.</p>
+    <h3>Dar de baja</h3>
+    <p>¿Seguro que quieres dar de baja <strong id="deleteBookName"></strong>? El libro dejará de aparecer en el catálogo público y en las búsquedas, pero su registro se conserva.</p>
+    <p class="retire-error" id="retireError" hidden></p>
     <div class="form-actions">
       <button type="button" class="btn btn--outline" id="deleteCancel">Cancelar</button>
-      <button type="button" class="btn btn--danger" id="deleteConfirm">Eliminar</button>
+      <button type="button" class="btn btn--danger" id="deleteConfirm">Dar de baja</button>
     </div>
   </div>
 </div>
