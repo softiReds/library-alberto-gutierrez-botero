@@ -109,7 +109,7 @@ function buildPayload() {
     contact_name: emergencyName,
     emergency_contact_name: emergencyName,
     emergency_contact_phone: data.get('emergency_contact_phone').trim(),
-    agreement_accepted: true
+    agreement_accepted: document.getElementById('agreementAccepted').checked
   };
 }
 
@@ -131,6 +131,14 @@ function showSuccess() {
 form.addEventListener('submit', async e => {
   e.preventDefault();
   errorEl.hidden = true;
+
+  const agreementCheckbox = document.getElementById('agreementAccepted');
+  if (!agreementCheckbox.checked) {
+    agreementCheckbox.classList.add('is-invalid');
+    showError('Debes aceptar el compromiso de responsabilidad para continuar con la afiliación.');
+    agreementCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
 
   if (!validateForm()) {
     showError('Por favor revisa los campos marcados en rojo. Todos los datos son requeridos.');

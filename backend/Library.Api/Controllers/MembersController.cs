@@ -154,7 +154,10 @@ public class MembersController(LibraryDbContext db) : ControllerBase
         return Ok(MemberDto.FromEntity(member));
     }
 
+    // Pública: es el endpoint que usa el formulario de autoafiliación en
+    // frontend/public/afiliacion.html, sin sesión de la coordinadora.
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult<MemberDto>> CreateMember(MemberCreateRequest request)
     {
         if (!request.AgreementAccepted)

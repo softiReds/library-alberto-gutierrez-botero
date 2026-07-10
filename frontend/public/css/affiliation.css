@@ -202,6 +202,24 @@
 }
 .field.has-error .field-hint{display:block;}
 
+.agreement-check{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  cursor:pointer;
+  font-size:.86rem;
+  line-height:1.5;
+  color:var(--text, #2A2A2A);
+}
+.agreement-check input[type="checkbox"]{
+  flex:none;
+  width:18px;
+  height:18px;
+  margin-top:2px;
+  accent-color:var(--orange-600, #F4791E);
+}
+.agreement-check input.is-invalid{outline:2px solid #C33;outline-offset:2px;}
+
 .form-error{
   background:#FDECEA;
   color:#B3261E;
