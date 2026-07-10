@@ -51,6 +51,14 @@ html,body{
   justify-content:center;
 }
 
+/* [hidden] y .kiosk-screen empatan en especificidad; sin este override
+   explícito, el display:flex de arriba gana por orden de cascada y la
+   pantalla oculta sigue renderizando al lado de la visible dentro del
+   contenedor flex de .kiosk. */
+.kiosk-screen[hidden]{
+  display:none;
+}
+
 .kiosk-card{
   background:#fff;
   border-radius:28px;
