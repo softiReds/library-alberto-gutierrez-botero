@@ -14,7 +14,14 @@ const ICONS = {
   shield: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 4.4 3.4 7.6 8 9 4.6-1.4 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>',
   service: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="m5.3 5.3 3 3M18.7 5.3l-3 3M5.3 18.7l3-3M18.7 18.7l-3-3"/></svg>',
   group: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="7" r="2.4"/><circle cx="12" cy="9.5" r="2.6"/><path d="M2 20c0-2.9 2.2-4.8 5-4.8M22 20c0-2.9-2.2-4.8-5-4.8M7 20c0-3.3 2.2-5.5 5-5.5s5 2.2 5 5.5"/></svg>',
-  book: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.5c-1.6-1.3-3.6-2-6.5-2v13c2.9 0 4.9.7 6.5 2 1.6-1.3 3.6-2 6.5-2V4.5c-2.9 0-4.9.7-6.5 2Z"/><path d="M12 6.5v13"/></svg>'
+  book: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.5c-1.6-1.3-3.6-2-6.5-2v13c2.9 0 4.9.7 6.5 2 1.6-1.3 3.6-2 6.5-2V4.5c-2.9 0-4.9.7-6.5 2Z"/><path d="M12 6.5v13"/></svg>',
+  consulta: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg>',
+  prestamo: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l4 4v16H6z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>',
+  wifi: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12a10 10 0 0 1 13 0"/><path d="M9 15.5a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r="1" fill="currentColor" stroke="none"/></svg>',
+  computer: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  play: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5-6-3.5Z" fill="currentColor" stroke="none"/></svg>',
+  pacifier: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="9.5" r="5"/><path d="M9 9.5a3 3 0 0 0 6 0"/><path d="M12 14.5V18"/><circle cx="12" cy="19.3" r="1.4"/></svg>',
+  child: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg>'
 };
 
 function icon(name) {
@@ -34,6 +41,8 @@ async function loadAbout() {
 
   renderHero(data.hero);
   renderQuienesSomos(data.quienesSomos);
+  renderServicios(data.servicios);
+  renderEspacios(data.espacios);
   renderMisionVision(data.mision, data.vision);
   renderValores(data.valores);
   renderTeam(data.equipo);
@@ -59,6 +68,43 @@ function renderQuienesSomos(quienes) {
   textContainer.querySelector('h2').textContent = quienes.title;
   const paragraphsHost = textContainer.querySelector('.about-quienes__paragraphs');
   paragraphsHost.innerHTML = quienes.paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
+}
+
+function renderServicios(servicios) {
+  const card = document.getElementById('serviciosCard');
+  if (!card || !servicios) return;
+
+  card.querySelector('.section-heading-center').textContent = servicios.title;
+
+  const list = card.querySelector('.services-list');
+  list.innerHTML = servicios.items.map(s => `
+    <div class="service-item">
+      <span class="service-item__icon">${icon(s.icon)}</span>
+      <div>
+        <h4>${escapeHtml(s.title)}</h4>
+        <p>${escapeHtml(s.text)}</p>
+      </div>
+    </div>
+  `).join('');
+
+  [...list.children].forEach((el, i) => makeReveal(el, i));
+}
+
+function renderEspacios(espacios) {
+  const box = document.getElementById('espaciosBox');
+  if (!box || !espacios) return;
+
+  box.querySelector('.section-heading-center').textContent = espacios.title;
+
+  const grid = box.querySelector('.espacios-grid');
+  grid.innerHTML = espacios.items.map(e => `
+    <div class="espacio-item">
+      <span class="espacio-icon">${icon(e.icon)}</span>
+      <span class="espacio-label">${escapeHtml(e.label)}</span>
+    </div>
+  `).join('');
+
+  [...grid.children].forEach((el, i) => makeReveal(el, i));
 }
 
 function renderMisionVision(mision, vision) {

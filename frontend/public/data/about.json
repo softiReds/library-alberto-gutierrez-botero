@@ -14,6 +14,25 @@
       "Nuestro compromiso es ofrecer servicios innovadores, pertinentes y de calidad que respondan a las necesidades del territorio, contribuyendo al cierre de brechas educativas, culturales y digitales, al fortalecimiento del tejido social y a la construcción de una comunidad más participativa, resiliente y solidaria."
     ]
   },
+  "servicios": {
+    "title": "Nuestros servicios",
+    "items": [
+      { "icon": "book", "title": "Referencia", "text": "Te orientamos y ayudamos a encontrar la información que necesitas." },
+      { "icon": "consulta", "title": "Consulta en sala", "text": "Accede a nuestros libros, revistas y recursos en un ambiente cómodo." },
+      { "icon": "prestamo", "title": "Préstamo externo", "text": "Lleva libros y materiales prestados para disfrutar en casa." },
+      { "icon": "wifi", "title": "Acceso a internet", "text": "Conéctate, investiga y aprende con acceso gratuito a internet." }
+    ]
+  },
+  "espacios": {
+    "title": "Espacios de la biblioteca",
+    "items": [
+      { "icon": "computer", "label": "Sala de sistemas" },
+      { "icon": "play", "label": "Sala de audiovisuales" },
+      { "icon": "pacifier", "label": "Bebeteca" },
+      { "icon": "child", "label": "Sala infantil" },
+      { "icon": "book", "label": "Sala general" }
+    ]
+  },
   "features": [
     { "icon": "wifi", "label": "Internet 100% gratuita" },
     { "icon": "meeting", "label": "Sala de reuniones con equipo audiovisual" },
