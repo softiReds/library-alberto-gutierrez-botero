@@ -1,156 +1,131 @@
 /* =====================================================================
    Panel Admin — Reportes (js)
-   Fuentes de datos: data/attendance.json, data/loans.json,
-   data/inhousereading.json, data/catalog.json
-   "Visitas a la página pública" usa un número fijo (no requiere JSON).
+   GET /site-visits, GET /reports/catalog y GET /reports/attendance,
+   vía apiFetch. Módulo de solo lectura: no crea ni edita nada, solo
+   visualiza lo que ya existe en los demás módulos.
    ===================================================================== */
-(function(){
+(function () {
+  'use strict';
 
-  const DATA_PATH = (window.CONFIG && window.CONFIG.DATA_PATH) || 'data/';
-  const MOCK_TOTAL_VISITS = 12458;
+  const token = window.BAGBAuth && window.BAGBAuth.getToken();
+  if (!token) {
+    window.location.replace('index.html');
+    return;
+  }
 
-  const MONTHS_LONG = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const MONTHS_LONG = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  // Mismos 5 rangos que ya usa el backend (coinciden con el Excel de
+  // la coordinadora) — no se reagrupan ni se inventan otros acá.
+  const AGE_RANGE_ORDER = ['0-5', '6-15', '16-30', '31-50', '51-99'];
 
   const COLORS = {
-    purple:'#4A1942',
-    orange:'#F4791E',
-    green:'#1E8E3E',
-    pink:'#E14F82',
-    blue:'#3E6FE0',
+    purple: '#4A1942',
+    orange: '#F4791E',
+    green: '#1E8E3E',
+    pink: '#E14F82',
+    blue: '#3E6FE0',
+  };
+  const GENDER_COLORS = { Femenino: COLORS.pink, Masculino: COLORS.blue };
+  const FALLBACK_COLORS = [COLORS.orange, COLORS.purple, COLORS.green];
+
+  /* ============ API — apiFetch agrega el token y parsea errores ============ */
+
+  const api = {
+    async siteVisits() {
+      return window.BAGBApi.apiFetch('/site-visits');
+    },
+    async catalogReport(month, year) {
+      return window.BAGBApi.apiFetch(`/reports/catalog?month=${month}&year=${year}`);
+    },
+    async attendanceReport(month, year) {
+      return window.BAGBApi.apiFetch(`/reports/attendance?month=${month}&year=${year}`);
+    }
   };
 
-  /* ============ UTILIDADES ============ */
+  /* ============ Utilidades ============ */
 
-  function toArray(json, ...keys){
-    if(Array.isArray(json)) return json;
-    if(json && typeof json === 'object'){
-      for(const k of keys){
-        if(Array.isArray(json[k])) return json[k];
-      }
-      const firstArray = Object.values(json).find(v => Array.isArray(v));
-      if(firstArray) return firstArray;
-    }
-    return [];
-  }
-
-  async function fetchJSON(filename, ...keys){
-    try{
-      const res = await fetch(DATA_PATH + filename);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      return toArray(json, ...keys);
-    }catch(err){
-      console.warn('No se pudo cargar', filename, err);
-      return [];
-    }
-  }
-
-  // Parsea "YYYY-MM-DD" (o con hora) evitando desfases de zona horaria.
-  function parseDate(str){
-    if(!str) return null;
-    const datePart = String(str).slice(0,10);
-    const [y,m,d] = datePart.split('-').map(Number);
-    if(!y || !m || !d) return null;
-    return new Date(y, m-1, d);
-  }
-
-  function ymKey(date){
-    return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
-  }
-
-  function ageBucket(age){
-    const n = Number(age);
-    if(!isFinite(n)) return null;
-    if(n <= 12) return '0-12';
-    if(n <= 17) return '13-17';
-    if(n <= 25) return '18-25';
-    if(n <= 35) return '26-35';
-    if(n <= 45) return '36-45';
-    if(n <= 60) return '46-60';
-    return '60+';
-  }
-  const AGE_BUCKETS = ['0-12','13-17','18-25','26-35','36-45','46-60','60+'];
-
-  function niceCeiling(value){
-    if(value <= 0) return 5;
+  function niceCeiling(value) {
+    if (value <= 0) return 5;
     const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-    const steps = [1,2,2.5,5,10];
-    for(const step of steps){
+    const steps = [1, 2, 2.5, 5, 10];
+    for (const step of steps) {
       const candidate = step * magnitude;
-      if(candidate >= value) return candidate;
+      if (candidate >= value) return candidate;
     }
-    return Math.ceil(value/magnitude)*magnitude;
+    return Math.ceil(value / magnitude) * magnitude;
   }
 
-  function formatUpdatedNow(){
+  function formatNow() {
     const now = new Date();
     const day = now.getDate();
     const month = MONTHS_LONG[now.getMonth()].toLowerCase();
     const year = now.getFullYear();
     let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2,'0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
     const ampm = hours >= 12 ? 'p. m.' : 'a. m.';
-    hours = hours % 12; if(hours === 0) hours = 12;
-    return `Última actualización: ${day} de ${month} de ${year} ${String(hours).padStart(2,'0')}:${minutes} ${ampm}`;
+    hours = hours % 12; if (hours === 0) hours = 12;
+    return `${day} de ${month} de ${year} ${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
   }
 
-  function el(html){
-    const t = document.createElement('template');
-    t.innerHTML = html.trim();
-    return t.content.firstChild;
-  }
+  /* ============ Selects de mes / año ============ */
 
-  /* ============ SELECTS DE MES / AÑO ============ */
-
-  // dates: array de objetos Date. Devuelve claves "YYYY-MM" únicas, orden descendente.
-  function buildMonthKeys(dates){
-    const set = new Set(dates.filter(Boolean).map(ymKey));
-    return Array.from(set).sort().reverse();
-  }
-  function buildYearKeys(dates){
-    const set = new Set(dates.filter(Boolean).map(d => d.getFullYear()));
-    return Array.from(set).sort((a,b)=>b-a);
-  }
-
-  function fillMonthSelect(selectEl, monthKeys){
-    selectEl.innerHTML = '';
-    if(monthKeys.length === 0){
-      const now = new Date();
-      monthKeys = [ymKey(now)];
+  // Últimos `count` meses contando desde el mes actual hacia atrás,
+  // como "YYYY-MM" (más reciente primero) — no hay un endpoint que
+  // diga "qué meses tienen datos", así que se ofrece una ventana
+  // razonable y GET /reports/attendance simplemente da 0 en los que
+  // no tengan actividad.
+  function buildRecentMonthOptions(count) {
+    const now = new Date();
+    const options = [];
+    for (let i = 0; i < count; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const y = d.getFullYear(), m = d.getMonth() + 1;
+      options.push({ value: `${y}-${String(m).padStart(2, '0')}`, label: `${MONTHS_LONG[m - 1]} ${y}` });
     }
-    monthKeys.forEach(key => {
-      const [y,m] = key.split('-').map(Number);
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = `${MONTHS_LONG[m-1]} ${y}`;
-      selectEl.appendChild(opt);
-    });
-    selectEl.selectedIndex = 0;
+    return options;
   }
 
-  function fillYearSelect(selectEl, years){
+  function buildRecentYears(count) {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = 0; i < count; i++) years.push(currentYear - i);
+    return years;
+  }
+
+  function fillMonthSelect(selectEl) {
     selectEl.innerHTML = '';
-    if(years.length === 0) years = [new Date().getFullYear()];
-    years.forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y;
-      opt.textContent = y;
-      selectEl.appendChild(opt);
+    buildRecentMonthOptions(12).forEach(opt => {
+      const el = document.createElement('option');
+      el.value = opt.value;
+      el.textContent = opt.label;
+      selectEl.appendChild(el);
     });
     selectEl.selectedIndex = 0;
   }
 
-  /* ============ GRÁFICAS SVG ============ */
+  function fillYearSelect(selectEl) {
+    selectEl.innerHTML = '';
+    buildRecentYears(5).forEach(y => {
+      const el = document.createElement('option');
+      el.value = y;
+      el.textContent = y;
+      selectEl.appendChild(el);
+    });
+    selectEl.selectedIndex = 0;
+  }
 
-  function emptyMessage(container, text){
+  /* ============ Gráficas SVG ============ */
+
+  function emptyMessage(container, text) {
     container.innerHTML = `<div class="chart-empty">${text}</div>`;
   }
 
   // Barras agrupadas. series: [{name, color, data:[...]}] alineado con categories.
-  function renderGroupedBarChart(container, categories, series, opts={}){
-    if(categories.length === 0){ emptyMessage(container,'No hay datos para este período.'); return; }
-    const width = opts.width || 640, height = opts.height || 260;
+  function renderGroupedBarChart(container, categories, series, opts = {}) {
+    if (categories.length === 0) { emptyMessage(container, 'No hay datos para este período.'); return; }
+    const width = opts.width || 640, height = opts.height || 220;
     const padL = 34, padB = 26, padT = 10, padR = 8;
     const chartW = width - padL - padR;
     const chartH = height - padT - padB;
@@ -162,23 +137,23 @@
 
     let svg = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">`;
 
-    for(let i=0;i<=ticks;i++){
-      const val = niceMax - (niceMax/ticks)*i;
-      const y = padT + (chartH/ticks)*i;
-      svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
-      svg += `<text x="${padL-6}" y="${(y+3).toFixed(1)}" text-anchor="end" class="chart-axis-label">${Math.round(val)}</text>`;
+    for (let i = 0; i <= ticks; i++) {
+      const val = niceMax - (niceMax / ticks) * i;
+      const y = padT + (chartH / ticks) * i;
+      svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width - padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+      svg += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" text-anchor="end" class="chart-axis-label">${Math.round(val)}</text>`;
     }
 
     categories.forEach((cat, ci) => {
       series.forEach((s, si) => {
         const val = s.data[ci] || 0;
-        const barH = (val/niceMax) * chartH;
-        const x = padL + ci*groupW + si*barW + barW*0.12;
+        const barH = (val / niceMax) * chartH;
+        const x = padL + ci * groupW + si * barW + barW * 0.12;
         const y = padT + chartH - barH;
-        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW*0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${s.color}"/>`;
+        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${s.color}"/>`;
       });
-      const xLabel = padL + ci*groupW + groupW/2;
-      svg += `<text x="${xLabel.toFixed(1)}" y="${height-8}" text-anchor="middle" class="chart-axis-label">${cat}</text>`;
+      const xLabel = padL + ci * groupW + groupW / 2;
+      svg += `<text x="${xLabel.toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis-label">${cat}</text>`;
     });
 
     svg += '</svg>';
@@ -186,8 +161,8 @@
   }
 
   // Línea/área para una sola serie con puntos. labels: eje X (día o mes).
-  function renderAreaLineChart(container, labels, data, opts={}){
-    if(labels.length === 0){ emptyMessage(container,'No hay datos para este período.'); return; }
+  function renderAreaLineChart(container, labels, data, opts = {}) {
+    if (labels.length === 0) { emptyMessage(container, 'No hay datos para este período.'); return; }
     const width = opts.width || 640, height = opts.height || 240;
     const padL = 34, padB = 24, padT = 12, padR = 10;
     const chartW = width - padL - padR;
@@ -196,94 +171,43 @@
     const maxVal = Math.max(1, ...data);
     const niceMax = niceCeiling(maxVal);
     const ticks = 5;
-    const stepX = labels.length > 1 ? chartW/(labels.length-1) : 0;
-    const labelEvery = opts.labelEvery || 1;
+    const stepX = labels.length > 1 ? chartW / (labels.length - 1) : 0;
 
-    function xy(i){
-      const x = padL + i*stepX;
-      const y = padT + chartH - (data[i]/niceMax)*chartH;
-      return [x,y];
+    function xy(i) {
+      const x = padL + i * stepX;
+      const y = padT + chartH - (data[i] / niceMax) * chartH;
+      return [x, y];
     }
 
     let svg = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">`;
 
-    for(let i=0;i<=ticks;i++){
-      const val = niceMax - (niceMax/ticks)*i;
-      const y = padT + (chartH/ticks)*i;
-      svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
-      svg += `<text x="${padL-6}" y="${(y+3).toFixed(1)}" text-anchor="end" class="chart-axis-label">${Math.round(val)}</text>`;
+    for (let i = 0; i <= ticks; i++) {
+      const val = niceMax - (niceMax / ticks) * i;
+      const y = padT + (chartH / ticks) * i;
+      svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width - padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
+      svg += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" text-anchor="end" class="chart-axis-label">${Math.round(val)}</text>`;
     }
 
-    const points = data.map((_,i) => xy(i));
-    const linePath = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-    const areaPath = linePath + ` L${points[points.length-1][0].toFixed(1)},${(padT+chartH).toFixed(1)} L${points[0][0].toFixed(1)},${(padT+chartH).toFixed(1)} Z`;
+    const points = data.map((_, i) => xy(i));
+    const linePath = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const areaPath = linePath + ` L${points[points.length - 1][0].toFixed(1)},${(padT + chartH).toFixed(1)} L${points[0][0].toFixed(1)},${(padT + chartH).toFixed(1)} Z`;
 
     svg += `<path d="${areaPath}" fill="${color}" opacity="0.12" stroke="none"/>`;
     svg += `<path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.2"/>`;
-    points.forEach(([x,y],i) => {
+    points.forEach(([x, y]) => {
       svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${color}"/>`;
     });
 
-    labels.forEach((label,i) => {
-      if(i % labelEvery === 0 || i === labels.length-1){
-        const [x] = xy(i);
-        svg += `<text x="${x.toFixed(1)}" y="${height-6}" text-anchor="middle" class="chart-axis-label">${label}</text>`;
-      }
+    labels.forEach((label, i) => {
+      const [x] = xy(i);
+      svg += `<text x="${x.toFixed(1)}" y="${height - 6}" text-anchor="middle" class="chart-axis-label">${label}</text>`;
     });
 
     svg += '</svg>';
     container.innerHTML = svg;
   }
 
-  // Multi-línea sin área, con leyenda externa. series: [{name,color,data}]
-  function renderMultiLineChart(container, labels, series, opts={}){
-    if(labels.length === 0){ emptyMessage(container,'No hay datos para este período.'); return; }
-    const width = opts.width || 640, height = opts.height || 240;
-    const padL = 34, padB = 24, padT = 12, padR = 10;
-    const chartW = width - padL - padR;
-    const chartH = height - padT - padB;
-    const maxVal = Math.max(1, ...series.flatMap(s=>s.data));
-    const niceMax = niceCeiling(maxVal);
-    const ticks = 5;
-    const stepX = labels.length > 1 ? chartW/(labels.length-1) : 0;
-    const labelEvery = opts.labelEvery || 1;
-
-    function xy(data,i){
-      const x = padL + i*stepX;
-      const y = padT + chartH - (data[i]/niceMax)*chartH;
-      return [x,y];
-    }
-
-    let svg = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">`;
-
-    for(let i=0;i<=ticks;i++){
-      const val = niceMax - (niceMax/ticks)*i;
-      const y = padT + (chartH/ticks)*i;
-      svg += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width-padR}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`;
-      svg += `<text x="${padL-6}" y="${(y+3).toFixed(1)}" text-anchor="end" class="chart-axis-label">${Math.round(val)}</text>`;
-    }
-
-    series.forEach(s => {
-      const points = s.data.map((_,i) => xy(s.data,i));
-      const linePath = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
-      svg += `<path d="${linePath}" fill="none" stroke="${s.color}" stroke-width="2.2"/>`;
-      points.forEach(([x,y]) => {
-        svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${s.color}"/>`;
-      });
-    });
-
-    labels.forEach((label,i) => {
-      if(i % labelEvery === 0 || i === labels.length-1){
-        const x = padL + i*stepX;
-        svg += `<text x="${x.toFixed(1)}" y="${height-6}" text-anchor="middle" class="chart-axis-label">${label}</text>`;
-      }
-    });
-
-    svg += '</svg>';
-    container.innerHTML = svg;
-  }
-
-  function renderLegend(container, items){
+  function renderLegend(container, items) {
     container.innerHTML = items.map(it => `
       <span class="chart-legend__item">
         <span class="chart-legend__dot" style="background:${it.color}"></span>${it.name}
@@ -291,259 +215,257 @@
     `).join('');
   }
 
-  function renderDonutChart(container, segments, opts={}){
+  function renderDonutChart(container, segments, opts = {}) {
     const size = opts.size || 150;
     const stroke = opts.stroke || 22;
     const r = (size - stroke) / 2;
-    const cx = size/2, cy = size/2;
+    const cx = size / 2, cy = size / 2;
     const circumference = 2 * Math.PI * r;
-    const realTotal = segments.reduce((a,s)=>a+s.value,0);
-    const divTotal = realTotal || 1; // solo para evitar dividir entre 0 al calcular proporciones
+    const realTotal = segments.reduce((a, s) => a + s.value, 0);
+    const divTotal = realTotal || 1;
 
     let offset = 0;
     let svg = `<svg viewBox="0 0 ${size} ${size}">`;
     svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${stroke}"/>`;
-    if(realTotal > 0){
+    if (realTotal > 0) {
       segments.forEach(seg => {
-        const frac = seg.value/divTotal;
+        const frac = seg.value / divTotal;
         const dash = frac * circumference;
         svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${stroke}"
-          stroke-dasharray="${dash.toFixed(2)} ${(circumference-dash).toFixed(2)}"
+          stroke-dasharray="${dash.toFixed(2)} ${(circumference - dash).toFixed(2)}"
           stroke-dashoffset="${(-offset).toFixed(2)}" stroke-linecap="butt"
           transform="rotate(-90 ${cx} ${cy})"/>`;
         offset += dash;
       });
     }
-    svg += `<text x="${cx}" y="${cy-3}" text-anchor="middle" font-family="var(--font-display)" font-weight="700" font-size="18" fill="var(--maroon-900)">${realTotal}</text>`;
-    svg += `<text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="9" fill="var(--muted)">Acciones</text>`;
+    svg += `<text x="${cx}" y="${cy - 3}" text-anchor="middle" font-family="var(--font-display)" font-weight="700" font-size="18" fill="var(--maroon-900)">${realTotal}</text>`;
+    svg += `<text x="${cx}" y="${cy + 14}" text-anchor="middle" font-size="9" fill="var(--muted)">Acciones</text>`;
     svg += '</svg>';
     container.innerHTML = svg;
   }
 
-  /* ============ CARGA DE DATOS ============ */
+  /* ============ Card: visitas a la página pública (GET /site-visits) ============ */
 
-  let ATTENDANCE = [];
-  let LOANS = [];
-  let READINGS = [];
-  let CATALOG_MAP = new Map();
-
-  async function loadAllData(){
-    const [attendanceRaw, loansRaw, readingsRaw, catalogRaw] = await Promise.all([
-      fetchJSON('attendance.json', 'attendance', 'records'),
-      fetchJSON('loans.json', 'loans', 'records'),
-      fetchJSON('inhousereading.json', 'inhousereading', 'readings', 'records'),
-      fetchJSON('catalog.json', 'books', 'catalog'),
-    ]);
-
-    ATTENDANCE = attendanceRaw.map(r => ({...r, _date: parseDate(r.visit_date)})).filter(r => r._date);
-    LOANS = loansRaw.map(r => ({...r, _loanDate: parseDate(r.loan_date), _dueDate: parseDate(r.due_date), _returnDate: parseDate(r.return_date)})).filter(r => r._loanDate);
-    READINGS = readingsRaw.map(r => ({...r, _date: parseDate(r.reading_date)})).filter(r => r._date);
-
-    CATALOG_MAP = new Map(catalogRaw.map(b => [String(b.id), b]));
+  async function initVisitsCard() {
+    try {
+      const data = await api.siteVisits();
+      document.getElementById('statVisitsTotal').textContent = data.total_visits.toLocaleString('es-CO');
+    } catch (err) {
+      console.error('No se pudo cargar el contador de visitas.', err);
+      document.getElementById('statVisitsTotal').textContent = '–';
+    }
+    // GET /site-visits no devuelve una marca de tiempo de última
+    // actualización — esto refleja cuándo se consultó el dato, no
+    // cuándo cambió el contador por última vez.
+    document.getElementById('statVisitsUpdated').textContent = `Datos consultados el ${formatNow()}`;
   }
 
-  function bookTitle(bookId){
-    const book = CATALOG_MAP.get(String(bookId));
-    return book ? (book.title || 'Sin título') : 'Libro no encontrado';
+  /* ============ Card: asistencia por edad y género (GET /reports/attendance) ============
+     El backend da dos desgloses independientes (by_gender, by_age_range),
+     no un cruce edad×género — se muestran como dos gráficas de barras
+     separadas dentro de la misma tarjeta, tal como se pidió. ============ */
+
+  async function renderAgeGenderChart(monthKey) {
+    const [year, month] = monthKey.split('-').map(Number);
+    const container = document.getElementById('chartAgeGender');
+    const legendEl = document.getElementById('legendAgeGender');
+
+    let data;
+    try {
+      data = await api.attendanceReport(month, year);
+    } catch (err) {
+      console.error('No se pudo cargar el reporte de asistencia.', err);
+      emptyMessage(container, 'No se pudo cargar el reporte.');
+      legendEl.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <p class="chart-subtitle">Por género</p>
+      <div class="chart-svg-wrap" id="miniChartGender"></div>
+      <p class="chart-subtitle">Por rango de edad</p>
+      <div class="chart-svg-wrap" id="miniChartAge"></div>
+    `;
+
+    const genderNames = Object.keys(data.by_gender);
+    const genderSeries = [{
+      name: 'Visitantes',
+      color: COLORS.purple,
+      data: genderNames.map(g => data.by_gender[g])
+    }];
+    renderGroupedBarChart(document.getElementById('miniChartGender'), genderNames, genderSeries, { height: 180 });
+    renderLegend(legendEl, genderNames.map((g, i) => ({ name: g, color: GENDER_COLORS[g] || FALLBACK_COLORS[i % FALLBACK_COLORS.length] })));
+
+    const ageSeries = [{
+      name: 'Visitantes',
+      color: COLORS.blue,
+      data: AGE_RANGE_ORDER.map(range => data.by_age_range[range] || 0)
+    }];
+    renderGroupedBarChart(document.getElementById('miniChartAge'), AGE_RANGE_ORDER, ageSeries, { height: 180 });
   }
 
-  /* ============ CARD: VISITAS (mock) ============ */
-
-  function initVisitsCard(){
-    document.getElementById('statVisitsTotal').textContent = MOCK_TOTAL_VISITS.toLocaleString('es-CO');
-    document.getElementById('statVisitsUpdated').textContent = formatUpdatedNow();
-  }
-
-  /* ============ CARD: ASISTENCIA POR EDAD Y GÉNERO ============ */
-
-  function renderAgeGenderChart(monthKey){
-    const filtered = ATTENDANCE.filter(r => ymKey(r._date) === monthKey);
-    const genders = Array.from(new Set(filtered.map(r => r.gender).filter(Boolean)));
-    const palette = {Femenino: COLORS.pink, Masculino: COLORS.blue};
-    const fallbackColors = [COLORS.orange, COLORS.purple, COLORS.green];
-
-    const series = genders.map((g,i) => ({
-      name: g,
-      color: palette[g] || fallbackColors[i % fallbackColors.length],
-      data: AGE_BUCKETS.map(bucket => filtered.filter(r => r.gender === g && ageBucket(r.age) === bucket).length),
-    }));
-
-    renderLegend(document.getElementById('legendAgeGender'), series);
-    renderGroupedBarChart(document.getElementById('chartAgeGender'), AGE_BUCKETS, series);
-  }
-
-  function initAgeGenderCard(){
+  function initAgeGenderCard() {
     const select = document.getElementById('selectAgeGenderMonth');
-    const monthKeys = buildMonthKeys(ATTENDANCE.map(r => r._date));
-    fillMonthSelect(select, monthKeys);
+    fillMonthSelect(select);
     select.addEventListener('change', () => renderAgeGenderChart(select.value));
     renderAgeGenderChart(select.value);
   }
 
-  /* ============ CARD: ASISTENCIA TOTAL POR MES ============ */
+  /* ============ Card: asistencia total por mes (12 llamadas, una por mes) ============ */
 
-  function renderAttendanceYearChart(year){
-    const counts = new Array(12).fill(0);
-    ATTENDANCE.forEach(r => {
-      if(r._date.getFullYear() === Number(year)) counts[r._date.getMonth()]++;
-    });
-    renderAreaLineChart(document.getElementById('chartAttendanceYear'), MONTHS_SHORT, counts, {color: COLORS.purple});
+  async function renderAttendanceYearChart(year) {
+    const container = document.getElementById('chartAttendanceYear');
+
+    const monthPromises = [];
+    for (let m = 1; m <= 12; m++) {
+      monthPromises.push(
+        api.attendanceReport(m, Number(year))
+          .then(d => d.total_visits)
+          .catch(err => {
+            console.error(`No se pudo cargar la asistencia de ${MONTHS_LONG[m - 1]} ${year}.`, err);
+            return null; // un mes que falla no debe tumbar el gráfico completo
+          })
+      );
+    }
+    const results = await Promise.all(monthPromises);
+    const counts = results.map(v => v ?? 0);
+
+    renderAreaLineChart(container, MONTHS_SHORT, counts, { color: COLORS.purple });
   }
 
-  function initAttendanceYearCard(){
+  function initAttendanceYearCard() {
     const select = document.getElementById('selectAttendanceYear');
-    const years = buildYearKeys(ATTENDANCE.map(r => r._date));
-    fillYearSelect(select, years);
+    fillYearSelect(select);
     select.addEventListener('change', () => renderAttendanceYearChart(select.value));
     renderAttendanceYearChart(select.value);
   }
 
-  /* ============ CARD: LIBROS PRESTADOS EN EL MES ============ */
+  /* ============ Card: libros prestados en el mes (GET /reports/catalog) ============
+     El backend solo da un total mensual (loans_count), no un
+     desglose por día, así que no hay una vista diaria que dibujar —
+     se muestra únicamente el total. ============ */
 
-  function daysInMonth(year, month){ return new Date(year, month+1, 0).getDate(); }
+  async function renderLoansMonthCard(monthKey) {
+    const [year, month] = monthKey.split('-').map(Number);
+    const chartEl = document.getElementById('chartLoansMonth');
 
-  function renderLoansMonthChart(monthKey){
-    const [y,m] = monthKey.split('-').map(Number);
-    const nDays = daysInMonth(y, m-1);
-    const counts = new Array(nDays).fill(0);
-    let total = 0;
-    LOANS.forEach(r => {
-      if(ymKey(r._loanDate) === monthKey){
-        counts[r._loanDate.getDate()-1]++;
-        total++;
-      }
-    });
-    const labels = counts.map((_,i) => i+1);
-    document.getElementById('statLoansMonth').textContent = total.toLocaleString('es-CO');
-    document.getElementById('loansMonthTitle').textContent = `Libros prestados en ${MONTHS_LONG[m-1]} ${y}`;
-    renderAreaLineChart(document.getElementById('chartLoansMonth'), labels, counts, {color: COLORS.purple, labelEvery: 3, height: 200});
+    let data;
+    try {
+      data = await api.catalogReport(month, year);
+    } catch (err) {
+      console.error('No se pudo cargar el reporte de catálogo.', err);
+      document.getElementById('statLoansMonth').textContent = '–';
+      emptyMessage(chartEl, 'No se pudo cargar el reporte.');
+      return;
+    }
+
+    document.getElementById('statLoansMonth').textContent = data.loans_count.toLocaleString('es-CO');
+    document.getElementById('loansMonthTitle').textContent = `Libros prestados en ${MONTHS_LONG[month - 1]} ${year}`;
+    emptyMessage(chartEl, 'El backend solo expone el total del mes, no un desglose diario.');
+
+    return data;
   }
 
-  function initLoansMonthCard(){
+  function initLoansMonthCard() {
     const select = document.getElementById('selectLoansMonth');
-    const monthKeys = buildMonthKeys(LOANS.map(r => r._loanDate));
-    fillMonthSelect(select, monthKeys);
-    select.addEventListener('change', () => renderLoansMonthChart(select.value));
-    renderLoansMonthChart(select.value);
+    fillMonthSelect(select);
+    select.addEventListener('change', () => renderLoansMonthCard(select.value));
+    renderLoansMonthCard(select.value);
   }
 
-  /* ============ CARD: LIBROS PERDIDOS (NO DEVUELTOS) ============ */
+  /* ============ Card: libros perdidos (snapshot actual, no por mes) ============
+     lost_books_count es el estado ACTUAL de la base de datos, no
+     depende del mes/año que se le pasa a GET /reports/catalog — por
+     eso esta tarjeta no tiene selector de período. El backend tampoco
+     expone el detalle libro por libro, solo el total. ============ */
 
-  function getOverdueLoans(){
-    const today = new Date(); today.setHours(0,0,0,0);
-    return LOANS
-      .filter(r => !r._returnDate && r._dueDate && r._dueDate < today)
-      .map(r => ({
-        ...r,
-        _daysLate: Math.floor((today - r._dueDate) / 86400000),
-      }))
-      .sort((a,b) => b._daysLate - a._daysLate);
-  }
-
-  function formatDateEs(date){
-    return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear();
-  }
-
-  function initLostBooksCard(){
-    const overdue = getOverdueLoans();
-    document.getElementById('statLostTotal').textContent = overdue.length.toLocaleString('es-CO');
-
+  async function initLostBooksCard() {
     const tbody = document.getElementById('lostBooksBody');
     const toggleBtn = document.getElementById('lostBooksToggle');
-    let expanded = false;
+    toggleBtn.hidden = true; // no hay listado detallado que expandir
 
-    function draw(){
-      const rows = expanded ? overdue : overdue.slice(0,5);
-      tbody.innerHTML = rows.map(r => `
-        <tr>
-          <td>${bookTitle(r.book_id)}</td>
-          <td>${formatDateEs(r._loanDate)}</td>
-          <td class="lost-days">${r._daysLate} días</td>
-        </tr>
-      `).join('') || `<tr><td colspan="3" class="chart-empty">No hay libros perdidos.</td></tr>`;
+    const now = new Date();
+    let data;
+    try {
+      data = await api.catalogReport(now.getMonth() + 1, now.getFullYear());
+    } catch (err) {
+      console.error('No se pudo cargar el reporte de catálogo.', err);
+      document.getElementById('statLostTotal').textContent = '–';
+      tbody.innerHTML = `<tr><td colspan="3" class="chart-empty">No se pudo cargar el reporte.</td></tr>`;
+      return;
     }
 
-    draw();
-
-    if(overdue.length > 5){
-      toggleBtn.hidden = false;
-      toggleBtn.textContent = 'Ver todos los libros perdidos';
-      toggleBtn.addEventListener('click', () => {
-        expanded = !expanded;
-        toggleBtn.textContent = expanded ? 'Ver menos' : 'Ver todos los libros perdidos';
-        draw();
-      });
-    }
+    document.getElementById('statLostTotal').textContent = data.lost_books_count.toLocaleString('es-CO');
+    tbody.innerHTML = `<tr><td colspan="3" class="chart-empty">El backend solo expone el total de libros perdidos, no el detalle por libro.</td></tr>`;
   }
 
-  /* ============ CARD: CONSULTAS EN SALA VS. LIBROS PRESTADOS ============ */
+  /* ============ Card: consultas en sala vs. libros prestados ============
+     Ambos números vienen del mismo GET /reports/attendance?month&year
+     (in_house_reading_count y loans_count). El backend no da un
+     desglose diario, así que en vez de una tendencia por día se
+     muestra la comparación de los dos totales del mes (barras +
+     dona), que es lo que sí se puede respaldar con datos reales. ============ */
 
-  function renderCompareChart(monthNum, year){
-    const nDays = daysInMonth(year, monthNum-1);
-    const readingCounts = new Array(nDays).fill(0);
-    const loanCounts = new Array(nDays).fill(0);
+  async function renderCompareChart(monthNum, year) {
+    const chartEl = document.getElementById('chartCompare');
+    const legendEl = document.getElementById('legendCompare');
 
-    READINGS.forEach(r => {
-      if(r._date.getFullYear() === year && r._date.getMonth() === monthNum-1) readingCounts[r._date.getDate()-1]++;
-    });
-    LOANS.forEach(r => {
-      if(r._loanDate.getFullYear() === year && r._loanDate.getMonth() === monthNum-1) loanCounts[r._loanDate.getDate()-1]++;
-    });
+    let data;
+    try {
+      data = await api.attendanceReport(monthNum, year);
+    } catch (err) {
+      console.error('No se pudo cargar el reporte de asistencia.', err);
+      emptyMessage(chartEl, 'No se pudo cargar el reporte.');
+      legendEl.innerHTML = '';
+      return;
+    }
 
-    const totalReading = readingCounts.reduce((a,b)=>a+b,0);
-    const totalLoans = loanCounts.reduce((a,b)=>a+b,0);
+    const totalReading = data.in_house_reading_count;
+    const totalLoans = data.loans_count;
 
     document.getElementById('statCompareReading').textContent = totalReading.toLocaleString('es-CO');
     document.getElementById('statCompareLoans').textContent = totalLoans.toLocaleString('es-CO');
 
-    const series = [
-      {name:'Consultas en sala', color: COLORS.green, data: readingCounts},
-      {name:'Libros prestados', color: COLORS.purple, data: loanCounts},
-    ];
-    renderLegend(document.getElementById('legendCompare'), series);
-    const labels = readingCounts.map((_,i)=>i+1);
-    renderMultiLineChart(document.getElementById('chartCompare'), labels, series, {labelEvery:3});
+    const categories = ['Consultas en sala', 'Libros prestados'];
+    const series = [{ name: 'Total del mes', color: COLORS.purple, data: [totalReading, totalLoans] }];
+    renderGroupedBarChart(chartEl, categories, series, { height: 200 });
+    renderLegend(legendEl, [
+      { name: 'Consultas en sala', color: COLORS.green },
+      { name: 'Libros prestados', color: COLORS.purple }
+    ]);
 
     renderDonutChart(document.getElementById('chartDonut'), [
-      {name:'Libros prestados', value: totalLoans, color: COLORS.purple},
-      {name:'Consultas en sala', value: totalReading, color: COLORS.green},
+      { name: 'Libros prestados', value: totalLoans, color: COLORS.purple },
+      { name: 'Consultas en sala', value: totalReading, color: COLORS.green }
     ]);
 
     const total = totalLoans + totalReading || 1;
     const legendItems = [
-      {name:'Libros prestados', value: totalLoans, color: COLORS.purple},
-      {name:'Consultas en sala', value: totalReading, color: COLORS.green},
+      { name: 'Libros prestados', value: totalLoans, color: COLORS.purple },
+      { name: 'Consultas en sala', value: totalReading, color: COLORS.green }
     ];
     document.getElementById('donutLegend').innerHTML = legendItems.map(it => `
       <div class="donut-legend__item">
         <span class="donut-legend__dot" style="background:${it.color}"></span>
         <span>
-          <span class="donut-legend__pct">${((it.value/total)*100).toFixed(1)}%</span><br>
+          <span class="donut-legend__pct">${((it.value / total) * 100).toFixed(1)}%</span><br>
           <span class="donut-legend__label">${it.name} (${it.value})</span>
         </span>
       </div>
     `).join('');
   }
 
-  function initCompareCard(){
+  function initCompareCard() {
     const monthSelect = document.getElementById('selectCompareMonth');
     const yearSelect = document.getElementById('selectCompareYear');
 
-    const allDates = [...READINGS.map(r=>r._date), ...LOANS.map(r=>r._loanDate)];
-    const years = buildYearKeys(allDates);
-    fillYearSelect(yearSelect, years);
+    monthSelect.innerHTML = MONTHS_LONG.map((name, i) => `<option value="${i + 1}">${name}</option>`).join('');
+    fillYearSelect(yearSelect);
 
-    monthSelect.innerHTML = MONTHS_LONG.map((name,i) => `<option value="${i+1}">${name}</option>`).join('');
+    const now = new Date();
+    monthSelect.value = now.getMonth() + 1;
 
-    // Por defecto, seleccionar el mes/año más reciente con datos.
-    const monthKeys = buildMonthKeys(allDates);
-    if(monthKeys.length){
-      const [defY, defM] = monthKeys[0].split('-').map(Number);
-      monthSelect.value = defM;
-      yearSelect.value = defY;
-    }
-
-    function update(){
+    function update() {
       renderCompareChart(Number(monthSelect.value), Number(yearSelect.value));
     }
     monthSelect.addEventListener('change', update);
@@ -551,18 +473,24 @@
     update();
   }
 
-  /* ============ INIT ============ */
+  /* ============ Cerrar sesión ============ */
 
-  async function init(){
-    initVisitsCard();
-    await loadAllData();
-    initAgeGenderCard();
-    initAttendanceYearCard();
-    initLoansMonthCard();
-    initLostBooksCard();
-    initCompareCard();
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    window.BAGBAuth.logout();
+  });
+
+  /* ============ Init ============ */
+
+  async function init() {
+    await Promise.all([
+      initVisitsCard(),
+      Promise.resolve(initAgeGenderCard()),
+      Promise.resolve(initAttendanceYearCard()),
+      Promise.resolve(initLoansMonthCard()),
+      initLostBooksCard(),
+      Promise.resolve(initCompareCard())
+    ]);
   }
 
-  document.addEventListener('DOMContentLoaded', init);
-
+  init();
 })();
