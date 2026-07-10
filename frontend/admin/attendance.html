@@ -209,7 +209,6 @@
               <th>Género</th>
               <th>Edad</th>
               <th>Fecha de visita</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="attendanceTableBody"></tbody>
@@ -242,10 +241,12 @@
     <p>Completa la información de la visita.</p>
 
     <form class="book-form" id="attendanceForm">
+      <p class="form-error" id="attendanceFormError" hidden></p>
+
       <div class="form-row">
         <div class="form-field">
-          <label for="attendanceName">Nombre completo *</label>
-          <input type="text" id="attendanceName" required>
+          <label for="attendanceName">Nombre completo</label>
+          <input type="text" id="attendanceName">
         </div>
         <div class="form-field">
           <label for="attendancePhone">Teléfono</label>
@@ -255,8 +256,8 @@
 
       <div class="form-row">
         <div class="form-field">
-          <label for="attendanceGender">Género</label>
-          <select id="attendanceGender">
+          <label for="attendanceGender">Género *</label>
+          <select id="attendanceGender" required>
             <option value="Femenino">Femenino</option>
             <option value="Masculino">Masculino</option>
             <option value="Otro">Otro</option>
@@ -270,8 +271,8 @@
 
       <div class="form-row form-row--single">
         <div class="form-field">
-          <label for="attendanceDate">Fecha de visita *</label>
-          <input type="date" id="attendanceDate" required>
+          <label for="attendanceDate">Fecha de visita <span class="hint">— si se deja vacío, se usa la fecha de hoy</span></label>
+          <input type="date" id="attendanceDate">
         </div>
       </div>
 

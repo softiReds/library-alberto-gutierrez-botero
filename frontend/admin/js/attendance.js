@@ -1,261 +1,247 @@
 /* =====================================================================
    Panel Admin — Asistencia
-   Fuente de datos: data/attendance.json
+   GET/POST /attendance, vía apiFetch.
    ===================================================================== */
-(function(){
+(function () {
+  'use strict';
 
-  const DATA_PATH = (window.CONFIG && window.CONFIG.DATA_PATH) || 'data/';
+  const token = window.BAGBAuth && window.BAGBAuth.getToken();
+  if (!token) {
+    window.location.replace('index.html');
+    return;
+  }
 
-  /* ============ UTILIDADES ============ */
+  const GENDER_OPTIONS = ['Femenino', 'Masculino', 'Otro'];
 
-  function toArray(json, ...keys){
-    if(Array.isArray(json)) return json;
-    if(json && typeof json === 'object'){
-      for(const k of keys){
-        if(Array.isArray(json[k])) return json[k];
-      }
-      const firstArray = Object.values(json).find(v => Array.isArray(v));
-      if(firstArray) return firstArray;
+  let ATTENDANCE = [];     // solo las asistencias de la página actual
+  let currentPage = 1;
+  let currentPageSize = 10;
+  let currentTotal = 0;
+  let currentSort = 'recent';
+  let dateFrom = '';
+  let dateTo = '';
+  let filterGender = '';
+  let loadRequestId = 0;
+
+  /* ============ API — apiFetch agrega el token y parsea errores ============ */
+
+  const api = {
+    async list() {
+      const params = new URLSearchParams({
+        page: String(currentPage),
+        page_size: String(currentPageSize)
+      });
+      if (dateFrom) params.set('from', dateFrom);
+      if (dateTo) params.set('to', dateTo);
+      if (filterGender) params.set('gender', filterGender);
+      return window.BAGBApi.apiFetch(`/attendance?${params.toString()}`);
+    },
+    async statTotal(extra) {
+      const params = new URLSearchParams({ page: '1', page_size: '1', ...extra });
+      const data = await window.BAGBApi.apiFetch(`/attendance?${params.toString()}`);
+      return data.total;
+    },
+    async create(payload) {
+      return window.BAGBApi.apiFetch('/attendance', { method: 'POST', body: payload });
     }
-    return [];
-  }
-
-  async function fetchJSON(filename, ...keys){
-    try{
-      const res = await fetch(DATA_PATH + filename);
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      return toArray(json, ...keys);
-    }catch(err){
-      console.warn('No se pudo cargar', filename, err);
-      return [];
-    }
-  }
-
-  function parseDate(str){
-    if(!str) return null;
-    const datePart = String(str).slice(0,10);
-    const [y,m,d] = datePart.split('-').map(Number);
-    if(!y || !m || !d) return null;
-    return new Date(y, m-1, d);
-  }
-
-  function formatDateEs(date){
-    if(!date) return '–';
-    return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear();
-  }
-
-  function todayAtMidnight(){
-    const d = new Date();
-    d.setHours(0,0,0,0);
-    return d;
-  }
-
-  function weekRange(date){
-    const day = date.getDay();
-    const diffToMonday = (day === 0) ? -6 : 1 - day;
-    const start = new Date(date);
-    start.setDate(date.getDate() + diffToMonday);
-    start.setHours(0,0,0,0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23,59,59,999);
-    return {start, end};
-  }
-
-  function normalize(str){
-    return String(str||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  }
-
-  function uniqueSorted(values){
-    return Array.from(new Set(values.filter(v => v !== undefined && v !== null && v !== ''))).sort((a,b) => String(a).localeCompare(String(b)));
-  }
-
-  function fillSelect(selectEl, values, allLabel){
-    const current = selectEl.value;
-    selectEl.innerHTML = `<option value="">${allLabel}</option>` + values.map(v => `<option value="${v}">${v}</option>`).join('');
-    if(values.includes(current)) selectEl.value = current;
-  }
-
-  /* ============ ESTADO ============ */
-
-  let ATTENDANCE = [];
-  let editingAttendanceId = null;
-  let deletingAttendanceId = null;
-
-  const state = {
-    search:'',
-    gender:'',
-    ageRange:'',
-    dateFrom:null,
-    dateTo:null,
-    sort:'recent',
-    page:1,
-    pageSize:10,
   };
 
-  /* ============ CARGA INICIAL ============ */
+  /* ============ Utilidades ============ */
 
-  async function loadAttendance(){
-    ATTENDANCE = await fetchJSON('attendance.json', 'attendance', 'records');
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
   }
 
-  /* ============ ESTADÍSTICAS ============ */
-
-  function renderStats(){
-    const today = todayAtMidnight();
-    const {start: weekStart, end: weekEnd} = weekRange(today);
-
-    let todayCount = 0, weekCount = 0, monthCount = 0;
-    ATTENDANCE.forEach(a => {
-      const visit = parseDate(a.visit_date);
-      if(!visit) return;
-      if(visit.getTime() === today.getTime()) todayCount++;
-      if(visit >= weekStart && visit <= weekEnd) weekCount++;
-      if(visit.getFullYear() === today.getFullYear() && visit.getMonth() === today.getMonth()) monthCount++;
-    });
-
-    document.getElementById('statTotal').textContent = ATTENDANCE.length.toLocaleString('es-CO');
-    document.getElementById('statToday').textContent = todayCount.toLocaleString('es-CO');
-    document.getElementById('statWeek').textContent = weekCount.toLocaleString('es-CO');
-    document.getElementById('statMonth').textContent = monthCount.toLocaleString('es-CO');
+  function formatDateEs(isoDate) {
+    if (!isoDate) return '–';
+    const [y, m, d] = isoDate.slice(0, 10).split('-');
+    return `${d}/${m}/${y}`;
   }
 
-  /* ============ SELECTS DE FILTRO (DINÁMICOS) ============ */
-
-  function populateFilterSelects(){
-    fillSelect(document.getElementById('filterGender'), uniqueSorted(ATTENDANCE.map(a => a.gender)), 'Todos');
+  function todayISO() {
+    return new Date().toISOString().slice(0, 10);
   }
 
-  /* ============ FILTRADO / ORDEN / PAGINACIÓN ============ */
-
-  function ageInRange(age, range){
-    if(!range) return true;
-    const [min, max] = range.split('-').map(Number);
-    return age >= min && age <= max;
+  function startOfWeekISO(date) {
+    const d = new Date(date);
+    const day = d.getDay(); // 0=domingo..6=sábado
+    const diff = (day === 0 ? -6 : 1) - day;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0, 10);
   }
 
-  function getFilteredSorted(){
-    let rows = ATTENDANCE.filter(a => {
-      if(state.gender && a.gender !== state.gender) return false;
-      if(state.ageRange && !ageInRange(Number(a.age), state.ageRange)) return false;
-
-      const visit = parseDate(a.visit_date);
-      if(state.dateFrom && (!visit || visit < state.dateFrom)) return false;
-      if(state.dateTo && (!visit || visit > state.dateTo)) return false;
-
-      if(state.search){
-        const term = normalize(state.search);
-        const haystack = normalize([a.visitor_name, a.visitor_phone].filter(Boolean).join(' '));
-        if(!haystack.includes(term)) return false;
-      }
-
-      return true;
-    });
-
-    rows.sort((a,b) => {
-      const da = parseDate(a.visit_date), db = parseDate(b.visit_date);
-      return state.sort === 'oldest' ? da - db : db - da;
-    });
-
-    return rows;
+  function startOfMonthISO(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().slice(0, 10);
   }
 
-  /* ============ RENDER TABLA ============ */
-
-  function genderTag(gender){
-    const cls = normalize(gender) === 'femenino' ? 'gender-dot--femenino' : normalize(gender) === 'masculino' ? 'gender-dot--masculino' : '';
-    return `<span class="gender-dot ${cls}">${gender || '–'}</span>`;
+  function genderTag(gender) {
+    const norm = String(gender || '').toLowerCase();
+    const cls = norm === 'femenino' ? 'gender-dot--femenino' : norm === 'masculino' ? 'gender-dot--masculino' : '';
+    return `<span class="gender-dot ${cls}">${escapeHtml(gender || '–')}</span>`;
   }
 
-  function renderTable(){
-    const filtered = getFilteredSorted();
-    const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
-    if(state.page > totalPages) state.page = totalPages;
-    const start = (state.page - 1) * state.pageSize;
-    const pageRows = filtered.slice(start, start + state.pageSize);
+  /* ============ Búsqueda de texto y rango de edad: el backend de
+     gestión no los soporta todavía (GET /attendance solo filtra por
+     from/to y gender), así que se deshabilitan en vez de simular un
+     filtro que solo miraría la página ya cargada. ============ */
+  function disableUnsupportedFilters() {
+    const searchInput = document.getElementById('filterSearch');
+    const ageRangeSelect = document.getElementById('filterAgeRange');
+    searchInput.disabled = true;
+    searchInput.placeholder = 'Búsqueda no disponible todavía';
+    ageRangeSelect.disabled = true;
+  }
 
+  function populateGenderFilter() {
+    const genderSelect = document.getElementById('filterGender');
+    genderSelect.innerHTML = '<option value="">Todos</option>' +
+      GENDER_OPTIONS.map(g => `<option value="${g}">${g}</option>`).join('');
+  }
+
+  /* ============ Estadísticas (reutilizan el total del envelope
+     paginado). Nota: "esta semana"/"este mes" van desde el inicio del
+     período hasta HOY (no hasta el fin del período), tal como se
+     pidió. ============ */
+
+  async function loadStats() {
+    const now = new Date();
+    const today = todayISO();
+
+    const [total, todayCount, weekCount, monthCount] = await Promise.all([
+      api.statTotal({}).catch(() => null),
+      api.statTotal({ from: today, to: today }).catch(() => null),
+      api.statTotal({ from: startOfWeekISO(now), to: today }).catch(() => null),
+      api.statTotal({ from: startOfMonthISO(now), to: today }).catch(() => null)
+    ]);
+
+    if (total !== null) document.getElementById('statTotal').textContent = total.toLocaleString('es-CO');
+    if (todayCount !== null) document.getElementById('statToday').textContent = todayCount.toLocaleString('es-CO');
+    if (weekCount !== null) document.getElementById('statWeek').textContent = weekCount.toLocaleString('es-CO');
+    if (monthCount !== null) document.getElementById('statMonth').textContent = monthCount.toLocaleString('es-CO');
+  }
+
+  /* ============ Orden (solo sobre la página ya cargada — GET
+     /attendance no tiene un query param de orden, siempre viene por
+     visit_date descendente) ============ */
+
+  function applySort(rows) {
+    const sorted = [...rows];
+    if (currentSort === 'oldest') {
+      sorted.sort((a, b) => a.visit_date.localeCompare(b.visit_date));
+    }
+    return sorted;
+  }
+
+  /* ============ Carga y render de la tabla ============ */
+
+  async function loadAttendance() {
+    const requestId = ++loadRequestId;
     const tbody = document.getElementById('attendanceTableBody');
+    tbody.innerHTML = `<tr><td colspan="5" class="loans-table__empty">Cargando asistencias…</td></tr>`;
+    document.getElementById('pagination').innerHTML = '';
 
-    if(pageRows.length === 0){
-      tbody.innerHTML = `<tr><td colspan="6" class="loans-table__empty">No se encontraron asistencias con estos filtros.</td></tr>`;
-    }else{
-      tbody.innerHTML = pageRows.map(a => `
-        <tr data-id="${a.id}">
-          <td>${a.visitor_name || 'Sin nombre'}</td>
-          <td>${a.visitor_phone || '–'}</td>
-          <td>${genderTag(a.gender)}</td>
-          <td>${a.age ?? '–'}</td>
-          <td>${formatDateEs(parseDate(a.visit_date))}</td>
-          <td>
-            <div class="loans-table__actions">
-              <button type="button" class="icon-action attendance-edit-btn" data-id="${a.id}" aria-label="Editar asistencia">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-              </button>
-              <button type="button" class="icon-action icon-action--danger attendance-delete-btn" data-id="${a.id}" aria-label="Eliminar asistencia">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+    let data;
+    try {
+      data = await api.list();
+    } catch (err) {
+      if (requestId !== loadRequestId) return;
+      console.error('No se pudo cargar la lista de asistencias.', err);
+      tbody.innerHTML = `<tr><td colspan="5" class="loans-table__empty">No se pudo cargar la lista: ${escapeHtml(err.message)}</td></tr>`;
+      document.getElementById('resultsRange').textContent = 'Sin resultados';
+      return;
     }
 
-    renderPagination(totalPages);
-    renderRange(filtered.length, start, pageRows.length);
-    attachRowActionListeners();
+    if (requestId !== loadRequestId) return; // respuesta obsoleta, se descarta
+
+    ATTENDANCE = data.data;
+    currentTotal = data.total;
+
+    renderTable();
+    renderPagination();
+    renderRange();
   }
 
-  function renderRange(totalFiltered, start, shown){
+  function renderRange() {
     const rangeEl = document.getElementById('resultsRange');
-    if(totalFiltered === 0){
+    if (currentTotal === 0) {
       rangeEl.textContent = 'Mostrando 0 de 0 asistencias';
-    }else{
-      rangeEl.textContent = `Mostrando ${start+1} – ${start+shown} de ${totalFiltered} asistencias`;
+      return;
     }
+    const start = (currentPage - 1) * currentPageSize + 1;
+    const end = Math.min(currentPage * currentPageSize, currentTotal);
+    rangeEl.textContent = `Mostrando ${start} – ${end} de ${currentTotal.toLocaleString('es-CO')} asistencias`;
   }
 
-  function renderPagination(totalPages){
+  function renderTable() {
+    const tbody = document.getElementById('attendanceTableBody');
+    const rows = applySort(ATTENDANCE);
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="loans-table__empty">No se encontraron asistencias con estos filtros.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(a => `
+      <tr data-id="${a.id}">
+        <td>${escapeHtml(a.visitor_name || 'Sin nombre')}</td>
+        <td>${escapeHtml(a.visitor_phone || '–')}</td>
+        <td>${genderTag(a.gender)}</td>
+        <td>${a.age ?? '–'}</td>
+        <td>${formatDateEs(a.visit_date)}</td>
+      </tr>
+    `).join('');
+  }
+
+  function renderPagination() {
     const nav = document.getElementById('pagination');
-    if(totalPages <= 1){ nav.innerHTML = ''; return; }
+    nav.innerHTML = '';
+    const totalPages = Math.ceil(currentTotal / currentPageSize);
+    if (totalPages <= 1) return;
 
-    const page = state.page;
-    const pagesToShow = new Set([1, totalPages, page, page-1, page+1].filter(p => p>=1 && p<=totalPages));
-    const sorted = Array.from(pagesToShow).sort((a,b)=>a-b);
+    function addBtn(label, page, { active = false, disabled = false, ariaLabel = null } = {}) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerHTML = label;
+      if (active) btn.classList.add('active');
+      btn.disabled = disabled;
+      if (ariaLabel) btn.setAttribute('aria-label', ariaLabel);
+      if (!disabled && !active) {
+        btn.addEventListener('click', () => {
+          currentPage = page;
+          loadAttendance();
+        });
+      }
+      nav.appendChild(btn);
+    }
 
-    let html = `<button type="button" data-page="${page-1}" ${page===1?'disabled':''} aria-label="Anterior">‹</button>`;
+    function addEllipsis() {
+      const span = document.createElement('span');
+      span.className = 'ellipsis';
+      span.textContent = '…';
+      nav.appendChild(span);
+    }
+
+    addBtn('‹', currentPage - 1, { disabled: currentPage === 1, ariaLabel: 'Anterior' });
+
+    const pages = new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
+    const sorted = [...pages].filter(p => p >= 1 && p <= totalPages).sort((a, b) => a - b);
+
     let prev = 0;
     sorted.forEach(p => {
-      if(prev && p - prev > 1) html += `<span class="ellipsis">…</span>`;
-      html += `<button type="button" data-page="${p}" class="${p===page?'active':''}">${p}</button>`;
+      if (p - prev > 1) addEllipsis();
+      addBtn(String(p), p, { active: p === currentPage });
       prev = p;
     });
-    html += `<button type="button" data-page="${page+1}" ${page===totalPages?'disabled':''} aria-label="Siguiente">›</button>`;
 
-    nav.innerHTML = html;
-    nav.querySelectorAll('button[data-page]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const p = Number(btn.dataset.page);
-        if(p >= 1 && p <= totalPages){ state.page = p; renderTable(); }
-      });
-    });
+    addBtn('›', currentPage + 1, { disabled: currentPage === totalPages, ariaLabel: 'Siguiente' });
   }
 
-  function attachRowActionListeners(){
-    document.querySelectorAll('.attendance-edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => openAttendanceModal(Number(btn.dataset.id)));
-    });
-    document.querySelectorAll('.attendance-delete-btn').forEach(btn => {
-      btn.addEventListener('click', () => openDeleteModal(Number(btn.dataset.id)));
-    });
-  }
+  /* ============ Filtros: eventos ============ */
 
-  /* ============ FILTROS: EVENTOS ============ */
-
-  function initFilters(){
-    const searchInput = document.getElementById('filterSearch');
+  function initFilters() {
     const genderSelect = document.getElementById('filterGender');
-    const ageRangeSelect = document.getElementById('filterAgeRange');
     const dateFromInput = document.getElementById('filterDateFrom');
     const dateToInput = document.getElementById('filterDateTo');
     const sortSelect = document.getElementById('sortSelect');
@@ -264,13 +250,20 @@
     const filterRowExtra = document.getElementById('filterRowExtra');
     const clearBtn = document.getElementById('clearFiltersBtn');
 
-    searchInput.addEventListener('input', () => { state.search = searchInput.value.trim(); state.page = 1; renderTable(); });
-    genderSelect.addEventListener('change', () => { state.gender = genderSelect.value; state.page = 1; renderTable(); });
-    ageRangeSelect.addEventListener('change', () => { state.ageRange = ageRangeSelect.value; state.page = 1; renderTable(); });
-    dateFromInput.addEventListener('change', () => { state.dateFrom = dateFromInput.value ? parseDate(dateFromInput.value) : null; state.page = 1; renderTable(); });
-    dateToInput.addEventListener('change', () => { state.dateTo = dateToInput.value ? parseDate(dateToInput.value) : null; state.page = 1; renderTable(); });
-    sortSelect.addEventListener('change', () => { state.sort = sortSelect.value; renderTable(); });
-    pageSizeSelect.addEventListener('change', () => { state.pageSize = Number(pageSizeSelect.value); state.page = 1; renderTable(); });
+    genderSelect.addEventListener('change', () => { filterGender = genderSelect.value; currentPage = 1; loadAttendance(); });
+    dateFromInput.addEventListener('change', () => { dateFrom = dateFromInput.value; currentPage = 1; loadAttendance(); });
+    dateToInput.addEventListener('change', () => { dateTo = dateToInput.value; currentPage = 1; loadAttendance(); });
+
+    sortSelect.addEventListener('change', () => {
+      currentSort = sortSelect.value;
+      renderTable();
+    });
+
+    pageSizeSelect.addEventListener('change', () => {
+      currentPageSize = Number(pageSizeSelect.value);
+      currentPage = 1;
+      loadAttendance();
+    });
 
     filterToggle.addEventListener('click', () => {
       const isHidden = filterRowExtra.hidden;
@@ -279,119 +272,111 @@
     });
 
     clearBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      genderSelect.value = ''; ageRangeSelect.value = '';
-      dateFromInput.value = ''; dateToInput.value = '';
+      genderSelect.value = '';
+      dateFromInput.value = '';
+      dateToInput.value = '';
       sortSelect.value = 'recent';
-      Object.assign(state, {
-        search:'', gender:'', ageRange:'', dateFrom:null, dateTo:null, sort:'recent', page:1,
-      });
-      renderTable();
+      filterGender = '';
+      dateFrom = '';
+      dateTo = '';
+      currentSort = 'recent';
+      currentPage = 1;
+      loadAttendance();
     });
   }
 
-  /* ============ MODAL: REGISTRAR / EDITAR ASISTENCIA ============ */
+  /* ============ Modal: nueva asistencia (POST /attendance) ============ */
 
-  function openAttendanceModal(attendanceId){
-    editingAttendanceId = attendanceId || null;
-    const modal = document.getElementById('attendanceModal');
-    const title = document.getElementById('attendanceFormTitle');
-    const form = document.getElementById('attendanceForm');
-    form.reset();
+  const attendanceFormError = document.getElementById('attendanceFormError');
 
-    if(editingAttendanceId){
-      const a = ATTENDANCE.find(x => x.id === editingAttendanceId);
-      title.textContent = 'Editar asistencia';
-      document.getElementById('attendanceName').value = a.visitor_name || '';
-      document.getElementById('attendancePhone').value = a.visitor_phone || '';
-      document.getElementById('attendanceGender').value = a.gender || 'Femenino';
-      document.getElementById('attendanceAge').value = a.age ?? '';
-      document.getElementById('attendanceDate').value = a.visit_date ? String(a.visit_date).slice(0,10) : '';
-    }else{
-      title.textContent = 'Nueva asistencia';
-      document.getElementById('attendanceDate').value = new Date().toISOString().slice(0,10);
-    }
-
-    modal.hidden = false;
+  function hideFormError() {
+    attendanceFormError.hidden = true;
+    attendanceFormError.textContent = '';
   }
 
-  function closeAttendanceModal(){
+  function showFormError(message) {
+    attendanceFormError.textContent = message;
+    attendanceFormError.hidden = false;
+  }
+
+  function openAttendanceModal() {
+    document.getElementById('attendanceForm').reset();
+    hideFormError();
+    document.getElementById('attendanceModal').hidden = false;
+  }
+
+  function closeAttendanceModal() {
     document.getElementById('attendanceModal').hidden = true;
-    editingAttendanceId = null;
   }
 
-  function saveAttendanceForm(e){
+  async function saveAttendanceForm(e) {
     e.preventDefault();
+    hideFormError();
+
     const name = document.getElementById('attendanceName').value.trim();
-    const phone = document.getElementById('attendancePhone').value.trim() || null;
+    const phone = document.getElementById('attendancePhone').value.trim();
     const gender = document.getElementById('attendanceGender').value;
-    const age = Number(document.getElementById('attendanceAge').value);
+    const ageRaw = document.getElementById('attendanceAge').value;
     const visitDate = document.getElementById('attendanceDate').value;
 
-    if(editingAttendanceId){
-      const a = ATTENDANCE.find(x => x.id === editingAttendanceId);
-      Object.assign(a, {visitor_name: name, visitor_phone: phone, gender, age, visit_date: visitDate});
-    }else{
-      const newId = ATTENDANCE.length ? Math.max(...ATTENDANCE.map(a => a.id)) + 1 : 1;
-      ATTENDANCE.push({id: newId, visitor_name: name, visitor_phone: phone, gender, age, visit_date: visitDate});
+    if (!gender || ageRaw === '') {
+      showFormError('Género y edad son obligatorios.');
+      return;
     }
 
-    closeAttendanceModal();
-    renderStats();
-    populateFilterSelects();
-    renderTable();
+    const payload = { age: Number(ageRaw), gender };
+    // visitor_name, visitor_phone y visit_date son opcionales — solo
+    // se incluyen en el body si la coordinadora los llenó.
+    if (name) payload.visitor_name = name;
+    if (phone) payload.visitor_phone = phone;
+    if (visitDate) payload.visit_date = visitDate;
+
+    const submitBtn = document.getElementById('attendanceFormSubmit');
+    submitBtn.disabled = true;
+    try {
+      await api.create(payload);
+      closeAttendanceModal();
+      await Promise.all([loadAttendance(), loadStats()]);
+    } catch (err) {
+      showFormError(err.message);
+    } finally {
+      submitBtn.disabled = false;
+    }
   }
 
-  /* ============ MODAL: CONFIRMAR ELIMINACIÓN ============ */
+  /* ============ Modales: cierre genérico ============ */
 
-  function openDeleteModal(attendanceId){
-    deletingAttendanceId = attendanceId;
-    const a = ATTENDANCE.find(x => x.id === attendanceId);
-    document.getElementById('deleteAttendanceName').textContent = a.visitor_name || 'este visitante';
-    document.getElementById('deleteAttendanceModal').hidden = false;
-  }
-  function closeDeleteModal(){
-    document.getElementById('deleteAttendanceModal').hidden = true;
-    deletingAttendanceId = null;
-  }
-  function confirmDelete(){
-    ATTENDANCE = ATTENDANCE.filter(a => a.id !== deletingAttendanceId);
-    closeDeleteModal();
-    renderStats();
-    populateFilterSelects();
-    renderTable();
+  function initModalDismiss(modalEl, closeFn) {
+    modalEl.addEventListener('click', (e) => { if (e.target === modalEl) closeFn(); });
   }
 
-  /* ============ MODALES: CIERRE GENÉRICO ============ */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const attendanceModal = document.getElementById('attendanceModal');
+    if (!attendanceModal.hidden) closeAttendanceModal();
+  });
 
-  function initModalDismiss(modalEl, closeFn){
-    modalEl.addEventListener('click', (e) => { if(e.target === modalEl) closeFn(); });
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape' && !modalEl.hidden) closeFn();
-    });
-  }
+  /* ============ Cerrar sesión ============ */
 
-  /* ============ INIT ============ */
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    window.BAGBAuth.logout();
+  });
 
-  async function init(){
-    await loadAttendance();
-    renderStats();
-    populateFilterSelects();
+  /* ============ Init ============ */
+
+  async function init() {
+    disableUnsupportedFilters();
+    populateGenderFilter();
     initFilters();
-    renderTable();
 
-    document.getElementById('addAttendanceBtn').addEventListener('click', () => openAttendanceModal(null));
+    document.getElementById('addAttendanceBtn').addEventListener('click', openAttendanceModal);
     document.getElementById('attendanceModalClose').addEventListener('click', closeAttendanceModal);
     document.getElementById('attendanceFormCancel').addEventListener('click', closeAttendanceModal);
     document.getElementById('attendanceForm').addEventListener('submit', saveAttendanceForm);
     initModalDismiss(document.getElementById('attendanceModal'), closeAttendanceModal);
 
-    document.getElementById('deleteAttendanceModalClose').addEventListener('click', closeDeleteModal);
-    document.getElementById('deleteAttendanceCancel').addEventListener('click', closeDeleteModal);
-    document.getElementById('deleteAttendanceConfirm').addEventListener('click', confirmDelete);
-    initModalDismiss(document.getElementById('deleteAttendanceModal'), closeDeleteModal);
+    await Promise.all([loadAttendance(), loadStats()]);
   }
 
-  document.addEventListener('DOMContentLoaded', init);
-
+  init();
 })();
