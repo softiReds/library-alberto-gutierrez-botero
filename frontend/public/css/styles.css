@@ -508,6 +508,44 @@ h1,h2,h3{font-family:var(--font-display);margin:0;color:var(--maroon-900);}
 }
 .lightbox__close:hover{background:rgba(255,255,255,.3);transform:scale(1.06);}
 
+/* ============ LIGHTBOX: NAVEGACIÓN ============ */
+.lightbox__nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:46px;height:46px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,.15);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease, transform .15s ease;
+  z-index:2;
+}
+.lightbox__nav:hover{background:rgba(255,255,255,.3);}
+.lightbox__nav:active{transform:translateY(-50%) scale(.92);}
+.lightbox__nav--prev{left:26px;}
+.lightbox__nav--next{right:26px;}
+.lightbox__counter{
+  position:absolute;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+  font-size:.85rem;
+  font-weight:600;
+  background:rgba(255,255,255,.15);
+  padding:6px 16px;
+  border-radius:999px;
+  letter-spacing:.04em;
+}
+
+@media(max-width:600px){
+  .lightbox__nav{width:38px;height:38px;}
+  .lightbox__nav--prev{left:12px;}
+  .lightbox__nav--next{right:12px;}
+}
+
 /* ============ TARJETAS Y CARRUSELES: MICRO-INTERACCIONES ============ */
 .card{transition:transform .3s ease, box-shadow .3s ease;}
 .card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(59,19,56,.14);}
@@ -542,5 +580,5 @@ h1,h2,h3{font-family:var(--font-display);margin:0;color:var(--maroon-900);}
   .card, .catalog-mini-card, .reco-card, .event-list li, .event-highlight,
   .mini-carousel--gallery .mini-carousel__track > img,
   .catalog-mini-card__cover, .reco-card__cover, .event-date,
-  .lightbox, .lightbox__img{transition:none;}
+  .lightbox, .lightbox__img, .lightbox__nav{transition:none;}
 }

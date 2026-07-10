@@ -92,6 +92,8 @@ function renderValores(valores) {
   [...track.children].forEach((el, i) => makeReveal(el, i));
 }
 
+let TEAM_PHOTOS = [];
+
 function renderTeam(equipo) {
   const title = document.getElementById('teamTitle');
   const subtitle = document.getElementById('teamSubtitle');
@@ -102,9 +104,13 @@ function renderTeam(equipo) {
   if (subtitle) subtitle.textContent = equipo.subtitle;
 
   if (grid && equipo.miembros) {
-    grid.innerHTML = equipo.miembros.map(m => `
+    TEAM_PHOTOS = equipo.miembros.map(m => ({ src: m.photo, name: m.name }));
+
+    grid.innerHTML = equipo.miembros.map((m, i) => `
       <article class="team-card">
-        <img class="team-card__photo" src="${escapeHtml(m.photo)}" alt="Foto de ${escapeHtml(m.name)}">
+        <button type="button" class="team-card__photo-btn" data-index="${i}" aria-label="Ampliar foto de ${escapeHtml(m.name)}">
+          <img class="team-card__photo" src="${escapeHtml(m.photo)}" alt="Foto de ${escapeHtml(m.name)}">
+        </button>
         <div class="team-card__body">
           <h3 class="team-card__name">${escapeHtml(m.name)}</h3>
           <span class="team-card__role">${escapeHtml(m.role)}</span>
@@ -114,7 +120,54 @@ function renderTeam(equipo) {
     `).join('');
 
     [...grid.children].forEach((el, i) => makeReveal(el, i));
+
+    grid.querySelectorAll('.team-card__photo-btn').forEach(btn => {
+      btn.addEventListener('click', () => openLightbox(Number(btn.dataset.index)));
+    });
   }
+}
+
+// ---------------------------------------------------------------------
+// Lightbox: fotos del equipo
+// ---------------------------------------------------------------------
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxClose = document.getElementById('lightboxClose');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+const lightboxCounter = document.getElementById('lightboxCounter');
+
+let lightboxIndex = 0;
+
+function showLightboxPhoto(index) {
+  if (!TEAM_PHOTOS.length) return;
+  lightboxIndex = (index + TEAM_PHOTOS.length) % TEAM_PHOTOS.length;
+  const photo = TEAM_PHOTOS[lightboxIndex];
+  lightboxImg.src = photo.src;
+  lightboxImg.alt = `Foto de ${photo.name}`;
+  lightboxCounter.textContent = `${lightboxIndex + 1} / ${TEAM_PHOTOS.length}`;
+}
+
+function openLightbox(index) {
+  showLightboxPhoto(index);
+  lightbox.classList.add('is-open');
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('is-open');
+}
+
+if (lightbox) {
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightboxPrev.addEventListener('click', () => showLightboxPhoto(lightboxIndex - 1));
+  lightboxNext.addEventListener('click', () => showLightboxPhoto(lightboxIndex + 1));
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('is-open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') showLightboxPhoto(lightboxIndex - 1);
+    if (e.key === 'ArrowRight') showLightboxPhoto(lightboxIndex + 1);
+  });
 }
 
 function renderReglamento(reglamento, closingNote) {

@@ -124,10 +124,23 @@ function initStatsCounter() {
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
 const lightboxClose = document.getElementById('lightboxClose');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+const lightboxCounter = document.getElementById('lightboxCounter');
 
-function openLightbox(src, alt) {
+let lightboxIndex = 0;
+
+function showLightboxPhoto(index) {
+  lightboxIndex = (index + GALLERY_IMAGES.length) % GALLERY_IMAGES.length;
+  const src = GALLERY_IMAGES[lightboxIndex];
   lightboxImg.src = src;
-  lightboxImg.alt = alt || '';
+  lightboxImg.alt = `Foto de la galería ${lightboxIndex + 1}`;
+  lightboxCounter.textContent = `${lightboxIndex + 1} / ${GALLERY_IMAGES.length}`;
+}
+
+function openLightbox(src) {
+  const index = GALLERY_IMAGES.indexOf(src);
+  showLightboxPhoto(index === -1 ? 0 : index);
   lightbox.classList.add('is-open');
 }
 
@@ -136,8 +149,15 @@ function closeLightbox() {
 }
 
 lightboxClose.addEventListener('click', closeLightbox);
+lightboxPrev.addEventListener('click', () => showLightboxPhoto(lightboxIndex - 1));
+lightboxNext.addEventListener('click', () => showLightboxPhoto(lightboxIndex + 1));
 lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('is-open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') showLightboxPhoto(lightboxIndex - 1);
+  if (e.key === 'ArrowRight') showLightboxPhoto(lightboxIndex + 1);
+});
 
 // ---------------------------------------------------------------------
 // Carga del catálogo (destacados para el home)
@@ -326,11 +346,11 @@ function renderGallery() {
     img.src = src;
     img.alt = `Foto de la galería ${i + 1}`;
     img.tabIndex = 0;
-    img.addEventListener('click', () => openLightbox(src, img.alt));
+    img.addEventListener('click', () => openLightbox(src));
     img.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openLightbox(src, img.alt);
+        openLightbox(src);
       }
     });
     track.appendChild(img);
