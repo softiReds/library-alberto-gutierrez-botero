@@ -1,8 +1,6 @@
 // =====================================================================
 // Kiosco de auto-registro de asistencia
-// POST {baseUrl}/attendance (pública, sin token) — un solo propósito:
-// registrar visitas desde una tablet fija en recepción, sin login ni
-// navegación hacia el resto del sitio.
+// POST {baseUrl}/attendance (pública, sin token) 
 // =====================================================================
 
 (function () {
@@ -39,9 +37,7 @@
   });
 
   // ---------------------------------------------------------------------
-  // Restricciones de entrada: la edad no puede pasar de MAX_AGE, y el
-  // teléfono no acepta letras — se corrige en vivo mientras se escribe,
-  // no solo al enviar.
+  // Restricciones de entrada
   // ---------------------------------------------------------------------
   ageInput.addEventListener('input', () => {
     if (ageInput.value === '') return;
