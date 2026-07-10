@@ -18,6 +18,8 @@ public class LoansController(LibraryDbContext db) : ControllerBase
         [FromQuery] LoanStatus? status,
         [FromQuery(Name = "member_id")] Guid? memberId,
         [FromQuery(Name = "book_id")] Guid? bookId,
+        [FromQuery(Name = "return_date_from")] DateOnly? returnDateFrom,
+        [FromQuery(Name = "return_date_to")] DateOnly? returnDateTo,
         [FromQuery] int page = 1,
         [FromQuery(Name = "page_size")] int pageSize = 20)
     {
@@ -41,6 +43,16 @@ public class LoansController(LibraryDbContext db) : ControllerBase
         if (bookId is not null)
         {
             query = query.Where(l => l.BookId == bookId);
+        }
+
+        if (returnDateFrom is not null)
+        {
+            query = query.Where(l => l.ReturnDate >= returnDateFrom);
+        }
+
+        if (returnDateTo is not null)
+        {
+            query = query.Where(l => l.ReturnDate <= returnDateTo);
         }
 
         var total = await query.CountAsync();
@@ -136,7 +148,7 @@ public class LoansController(LibraryDbContext db) : ControllerBase
             return NotFound(ErrorResponse.Create("not_found", "El préstamo solicitado no existe."));
         }
 
-        if (loan.Status != LoanStatus.Prestado)
+        if (loan.Status == LoanStatus.Devuelto)
         {
             return BadRequest(ErrorResponse.Create(
                 "validation_error",

@@ -239,14 +239,16 @@
   </div>
 </div>
 
-<!-- ============ MODAL: REGISTRAR / EDITAR PRÉSTAMO ============ -->
+<!-- ============ MODAL: REGISTRAR PRÉSTAMO ============ -->
 <div class="modal modal--form" id="loanModal" hidden>
   <div class="modal__panel modal__panel--form">
     <button type="button" class="modal__close" id="loanModalClose" aria-label="Cerrar">✕</button>
     <h3 id="loanFormTitle">Registrar préstamo</h3>
-    <p>Completa la información del préstamo.</p>
+    <p>Completa la información del préstamo. La fecha de préstamo se asigna automáticamente a hoy.</p>
 
     <form class="book-form" id="loanForm">
+      <p class="form-error" id="loanFormError" hidden></p>
+
       <div class="form-row">
         <div class="form-field">
           <label for="loanBook">Libro *</label>
@@ -258,31 +260,44 @@
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-field">
-          <label for="loanDate">Fecha de préstamo *</label>
-          <input type="date" id="loanDate" required>
-        </div>
+      <div class="form-row form-row--single">
         <div class="form-field">
           <label for="loanDueDate">Fecha de devolución *</label>
           <input type="date" id="loanDueDate" required>
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-actions">
+        <button type="button" class="btn btn--outline" id="loanFormCancel">Cancelar</button>
+        <button type="submit" class="btn btn--primary" id="loanFormSubmit">Guardar préstamo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: MARCAR COMO DEVUELTO ============ -->
+<div class="modal modal--form" id="returnLoanModal" hidden>
+  <div class="modal__panel modal__panel--form">
+    <button type="button" class="modal__close" id="returnLoanModalClose" aria-label="Cerrar">✕</button>
+    <h3>Marcar como devuelto</h3>
+    <p>Registrar la devolución de <strong id="returnLoanName"></strong>. La fecha de retorno se asigna automáticamente a hoy.</p>
+
+    <form class="book-form" id="returnLoanForm">
+      <p class="form-error" id="returnLoanError" hidden></p>
+
+      <div class="form-row form-row--single">
         <div class="form-field">
-          <label for="loanReturnDate">Fecha de retorno <span class="hint">— si ya fue devuelto</span></label>
-          <input type="date" id="loanReturnDate">
-        </div>
-        <div class="form-field">
-          <label for="loanCondition">Condición al retorno</label>
-          <input type="text" id="loanCondition" placeholder="Ej. Bueno, Excelente, Leve desgaste">
+          <label for="returnCondition">Condición al retorno *</label>
+          <select id="returnCondition" required>
+            <option value="Bueno">Bueno</option>
+            <option value="Dañado">Dañado</option>
+          </select>
         </div>
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn btn--outline" id="loanFormCancel">Cancelar</button>
-        <button type="submit" class="btn btn--primary" id="loanFormSubmit">Guardar préstamo</button>
+        <button type="button" class="btn btn--outline" id="returnLoanCancel">Cancelar</button>
+        <button type="submit" class="btn btn--primary" id="returnLoanSubmit">Confirmar devolución</button>
       </div>
     </form>
   </div>
