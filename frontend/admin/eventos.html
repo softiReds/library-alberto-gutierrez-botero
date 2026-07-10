@@ -236,6 +236,8 @@
     <p>Completa la información del evento o taller.</p>
 
     <form class="book-form" id="eventForm">
+      <p class="form-error" id="eventFormError" hidden></p>
+
       <div class="form-row form-row--single">
         <div class="form-field">
           <label for="eventTitle">Título *</label>
@@ -266,12 +268,12 @@
 
       <div class="form-row">
         <div class="form-field">
-          <label for="eventStartTime">Hora de inicio *</label>
-          <input type="time" id="eventStartTime" required>
+          <label for="eventStartTime">Hora de inicio</label>
+          <input type="time" id="eventStartTime">
         </div>
         <div class="form-field">
-          <label for="eventEndTime">Hora de fin *</label>
-          <input type="time" id="eventEndTime" required>
+          <label for="eventEndTime">Hora de fin</label>
+          <input type="time" id="eventEndTime">
         </div>
       </div>
 
@@ -291,10 +293,11 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
     </span>
     <h3>Eliminar evento</h3>
-    <p>¿Seguro que quieres eliminar <strong id="deleteEventName"></strong>? Esta acción no se puede deshacer.</p>
+    <p>¿Seguro que quieres eliminar <strong id="deleteEventName"></strong>? A diferencia de dar de baja un libro, esto borra el evento por completo de la base de datos — no queda ningún registro y no se puede deshacer.</p>
+    <p class="form-error" id="deleteEventError" hidden></p>
     <div class="form-actions">
       <button type="button" class="btn btn--outline" id="deleteEventCancel">Cancelar</button>
-      <button type="button" class="btn btn--danger" id="deleteEventConfirm">Eliminar</button>
+      <button type="button" class="btn btn--danger" id="deleteEventConfirm">Eliminar permanentemente</button>
     </div>
   </div>
 </div>
