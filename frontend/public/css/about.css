@@ -112,6 +112,29 @@
 .valor-item:nth-child(even) .valor-icon{background:var(--maroon-900);}
 .valor-label{font-size:.8rem;font-weight:600;color:var(--maroon-900);text-align:center;}
 
+/* ============ NUESTRO EQUIPO ============ */
+.team-section{padding:0 0 56px;}
+.team-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px;
+}
+.team-card{
+  display:flex;gap:20px;align-items:flex-start;
+  background:#fff;border:1px solid var(--border);border-radius:20px;
+  padding:28px;box-shadow:var(--shadow);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.team-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(59,19,56,.14);}
+.team-card__photo{
+  width:96px;height:96px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  box-shadow:0 4px 10px rgba(59,19,56,.14);
+}
+.team-card__name{font-size:1.1rem;margin:0 0 2px;color:var(--maroon-900);}
+.team-card__role{
+  display:block;color:var(--orange-600);font-weight:600;font-size:.86rem;margin-bottom:10px;
+}
+.team-card__body p{color:var(--muted);font-size:.88rem;line-height:1.65;margin:0 0 10px;text-align:justify;}
+.team-card__body p:last-child{margin-bottom:0;}
+
 /* ============ REGLAMENTO ============ */
 .reglamento-section{padding:0 0 64px;}
 .reglamento-box{
@@ -150,6 +173,7 @@
   .about-hero__inner{grid-template-columns:1fr;}
   .mv-grid{grid-template-columns:1fr;}
   .reglamento-grid{grid-template-columns:1fr;}
+  .team-grid{grid-template-columns:1fr;}
 }
 @media(max-width:700px){
   .valores-timeline{display:grid;grid-template-columns:repeat(2,1fr);gap:28px 16px;}
@@ -161,6 +185,7 @@
 }
 @media(max-width:480px){
   .about-hero__copy h1{font-size:2rem;}
+  .team-card{flex-direction:column;align-items:center;text-align:center;}
 }
 
 @media (prefers-reduced-motion: reduce){

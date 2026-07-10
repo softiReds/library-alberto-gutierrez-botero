@@ -39,6 +39,30 @@
     { "icon": "group", "label": "Compromiso Social" },
     { "icon": "book", "label": "Aprendizaje Permanente" }
   ],
+  "equipo": {
+    "title": "Nuestro equipo",
+    "subtitle": "Conoce a las personas que hacen posible el funcionamiento de la biblioteca.",
+    "miembros": [
+      {
+        "photo": "assets/gallery/gallery-staff-1.png",
+        "name": "Astrid Rodríguez Peña",
+        "role": "Coordinadora de Biblioteca",
+        "paragraphs": [
+          "Bibliotecóloga y Coordinadora de la Biblioteca Alberto Gutiérrez Botero desde 2022, Especialista (en formación) en Gerencia de Proyectos – UNIMINUTO. Lidera el fortalecimiento de los servicios bibliotecarios mediante la gestión de proyectos, la promoción de la lectura, la alfabetización digital y el desarrollo de programas culturales dirigidos a niños, jóvenes, adultos y personas mayores.",
+          "Su trayectoria se distingue por el liderazgo, la innovación y el compromiso con la transformación social, promoviendo la biblioteca como un espacio de aprendizaje, inclusión y construcción de comunidad a través del acceso al conocimiento, la cultura y la educación."
+        ]
+      },
+      {
+        "photo": "assets/gallery/gallery-staff-2.png",
+        "name": "Olga Arias",
+        "role": "Auxiliar de Biblioteca",
+        "paragraphs": [
+          "Hace parte del equipo de la Biblioteca Alberto Gutiérrez Botero, brindando apoyo en la atención a usuarios, la organización de las colecciones, el préstamo de material bibliográfico y el desarrollo de actividades culturales y educativas.",
+          "Se caracteriza por su compromiso con el servicio, la responsabilidad y el trabajo en equipo, contribuyendo a que la biblioteca sea un espacio organizado, acogedor e incluyente. Su labor fortalece el acceso a la información, la lectura y el aprendizaje mediante una atención cercana y de calidad para toda la comunidad."
+        ]
+      }
+    ]
+  },
   "reglamento": {
     "title": "Reglamento de la biblioteca",
     "subtitle": "Reglamento de servicios — Biblioteca Alberto Gutiérrez Botero, Ricaurte",

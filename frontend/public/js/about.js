@@ -36,6 +36,7 @@ async function loadAbout() {
   renderQuienesSomos(data.quienesSomos);
   renderMisionVision(data.mision, data.vision);
   renderValores(data.valores);
+  renderTeam(data.equipo);
   renderReglamento(data.reglamento, data.closingNote);
 
   initStaticReveals();
@@ -89,6 +90,31 @@ function renderValores(valores) {
   `).join('');
 
   [...track.children].forEach((el, i) => makeReveal(el, i));
+}
+
+function renderTeam(equipo) {
+  const title = document.getElementById('teamTitle');
+  const subtitle = document.getElementById('teamSubtitle');
+  const grid = document.getElementById('teamGrid');
+  if (!equipo) return;
+
+  if (title) title.textContent = equipo.title;
+  if (subtitle) subtitle.textContent = equipo.subtitle;
+
+  if (grid && equipo.miembros) {
+    grid.innerHTML = equipo.miembros.map(m => `
+      <article class="team-card">
+        <img class="team-card__photo" src="${escapeHtml(m.photo)}" alt="Foto de ${escapeHtml(m.name)}">
+        <div class="team-card__body">
+          <h3 class="team-card__name">${escapeHtml(m.name)}</h3>
+          <span class="team-card__role">${escapeHtml(m.role)}</span>
+          ${m.paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('')}
+        </div>
+      </article>
+    `).join('');
+
+    [...grid.children].forEach((el, i) => makeReveal(el, i));
+  }
 }
 
 function renderReglamento(reglamento, closingNote) {
