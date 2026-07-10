@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Registro de visita | Biblioteca Alberto Gutiérrez Botero</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/kiosk.css">
+</head>
+<body>
+
+<main class="kiosk">
+
+  <!-- ============ PANTALLA: FORMULARIO ============ -->
+  <section class="kiosk-screen" id="formScreen">
+    <div class="kiosk-card">
+      <h1 class="kiosk-title">Biblioteca Alberto Gutiérrez Botero</h1>
+      <p class="kiosk-subtitle">Toca la pantalla para registrar tu visita</p>
+
+      <form id="attendanceForm" novalidate>
+        <div class="kiosk-field">
+          <label for="visitorName">Nombre <span class="kiosk-optional">(opcional)</span></label>
+          <input type="text" id="visitorName" autocomplete="off">
+        </div>
+
+        <div class="kiosk-field">
+          <label for="visitorPhone">Teléfono <span class="kiosk-optional">(opcional)</span></label>
+          <input type="tel" id="visitorPhone" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <div class="kiosk-field">
+          <label for="visitorAge">Edad</label>
+          <input type="number" id="visitorAge" inputmode="numeric" min="0" max="120" autocomplete="off">
+        </div>
+
+        <div class="kiosk-field">
+          <span class="kiosk-field__label">Género</span>
+          <div class="kiosk-gender-group" id="genderGroup" role="radiogroup" aria-label="Género">
+            <button type="button" class="kiosk-gender-btn" data-value="Femenino">Femenino</button>
+            <button type="button" class="kiosk-gender-btn" data-value="Masculino">Masculino</button>
+            <button type="button" class="kiosk-gender-btn" data-value="Otro">Otro</button>
+          </div>
+        </div>
+
+        <p class="kiosk-error" id="kioskError" hidden></p>
+
+        <button type="submit" class="kiosk-submit" id="submitBtn">Registrar visita</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ PANTALLA: AGRADECIMIENTO ============ -->
+  <section class="kiosk-screen kiosk-screen--thanks" id="thanksScreen" hidden>
+    <div class="kiosk-card kiosk-card--center">
+      <span class="kiosk-check">
+        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m8 12 2.5 2.5L16 9"/></svg>
+      </span>
+      <h1 class="kiosk-title">¡Gracias por tu visita!</h1>
+      <p class="kiosk-subtitle">Disfruta tu tiempo en la biblioteca</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/kiosk.js"></script>
+</body>
+</html>

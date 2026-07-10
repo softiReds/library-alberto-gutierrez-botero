@@ -57,7 +57,10 @@ public class AttendanceController(LibraryDbContext db) : ControllerBase
         });
     }
 
+    // Pública: la usa el kiosco de auto-registro de asistencia en recepción,
+    // sin sesión de la coordinadora.
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult<AttendanceDto>> CreateAttendance(CreateAttendanceRequest request)
     {
         var attendance = new Domain.Entities.Attendance

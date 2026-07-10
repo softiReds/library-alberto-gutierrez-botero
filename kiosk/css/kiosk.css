@@ -1,0 +1,212 @@
+/* =====================================================================
+   Kiosco de auto-registro de asistencia — pensado para una tablet fija
+   en orientación vertical (portrait) montada en la recepción.
+   Hoja de estilos autocontenida: no depende de frontend/public ni
+   frontend/admin.
+   ===================================================================== */
+
+:root{
+  --maroon-900:#3B1338;
+  --maroon-800:#4A1942;
+  --orange-600:#F4791E;
+  --orange-100:#FDEEE1;
+  --green-600:#1E8E3E;
+  --green-100:#E5F4EA;
+  --danger-600:#C0392B;
+  --danger-100:#FBEAEA;
+  --border:#E4DCE0;
+  --muted:#8A7E85;
+  --font-display:'Poppins', system-ui, sans-serif;
+  --font-body:'Inter', system-ui, sans-serif;
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+  overflow:hidden; /* el kiosco no se desplaza: todo cabe en una pantalla */
+  background:var(--maroon-900);
+  font-family:var(--font-body);
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+
+.kiosk{
+  height:100%;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:4vh 5vw;
+}
+
+.kiosk-screen{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.kiosk-card{
+  background:#fff;
+  border-radius:28px;
+  padding:5vh 6vw;
+  width:100%;
+  max-width:640px;
+  max-height:100%;
+  overflow-y:auto;
+  box-shadow:0 30px 60px rgba(0,0,0,.25);
+}
+
+.kiosk-card--center{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.kiosk-title{
+  font-family:var(--font-display);
+  font-weight:800;
+  color:var(--maroon-900);
+  font-size:clamp(1.5rem, 3.4vw, 2.1rem);
+  line-height:1.2;
+  margin:0 0 10px;
+  text-align:center;
+}
+
+.kiosk-subtitle{
+  font-size:clamp(1rem, 2.2vw, 1.25rem);
+  color:var(--muted);
+  text-align:center;
+  margin:0 0 5vh;
+}
+
+/* ---------- Campos del formulario ---------- */
+
+.kiosk-field{
+  margin-bottom:3.2vh;
+}
+
+.kiosk-field label,
+.kiosk-field__label{
+  display:block;
+  font-size:clamp(1rem, 2.1vw, 1.15rem);
+  font-weight:700;
+  color:var(--maroon-900);
+  margin-bottom:10px;
+}
+
+.kiosk-optional{
+  font-weight:400;
+  color:var(--muted);
+  font-size:.85em;
+}
+
+.kiosk-field input{
+  width:100%;
+  font-size:clamp(1.1rem, 2.4vw, 1.35rem);
+  font-family:inherit;
+  padding:18px 20px;
+  border:2px solid var(--border);
+  border-radius:16px;
+  outline:none;
+  background:#fff;
+  color:var(--maroon-900);
+}
+
+.kiosk-field input:focus{
+  border-color:var(--orange-600);
+  box-shadow:0 0 0 4px var(--orange-100);
+}
+
+.kiosk-field input.is-invalid{
+  border-color:var(--danger-600);
+  box-shadow:0 0 0 4px var(--danger-100);
+}
+
+/* ---------- Selector de género (botones grandes) ---------- */
+
+.kiosk-gender-group{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+}
+
+.kiosk-gender-btn{
+  font-family:inherit;
+  font-size:clamp(.95rem, 2vw, 1.1rem);
+  font-weight:600;
+  padding:18px 8px;
+  border:2px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+  color:var(--maroon-900);
+  cursor:pointer;
+}
+
+.kiosk-gender-btn.is-selected{
+  border-color:var(--orange-600);
+  background:var(--orange-100);
+  color:var(--orange-600);
+}
+
+.kiosk-gender-btn.is-invalid{
+  border-color:var(--danger-600);
+}
+
+/* ---------- Error ---------- */
+
+.kiosk-error{
+  background:var(--danger-100);
+  color:var(--danger-600);
+  border-radius:14px;
+  padding:16px 18px;
+  font-size:clamp(.95rem, 2vw, 1.05rem);
+  margin:0 0 3vh;
+  text-align:center;
+}
+
+/* ---------- Botón de enviar ---------- */
+
+.kiosk-submit{
+  width:100%;
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(1.2rem, 2.6vw, 1.5rem);
+  padding:22px;
+  border:none;
+  border-radius:18px;
+  background:var(--orange-600);
+  color:#fff;
+  cursor:pointer;
+}
+
+.kiosk-submit:active{background:#D9670F;}
+
+.kiosk-submit:disabled{
+  background:var(--border);
+  color:var(--muted);
+  cursor:default;
+}
+
+/* ---------- Pantalla de agradecimiento ---------- */
+
+.kiosk-check{
+  color:var(--green-600);
+  background:var(--green-100);
+  border-radius:50%;
+  width:110px;
+  height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:4vh;
+}
+
+.kiosk-screen--thanks .kiosk-title{margin-bottom:14px;}
