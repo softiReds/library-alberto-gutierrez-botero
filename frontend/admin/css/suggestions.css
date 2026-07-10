@@ -77,6 +77,7 @@
 .suggestion-status--nueva{background:var(--blue-100,#E7EDFC);color:var(--blue-600,#3E6FE0);}
 .suggestion-status--en-revision{background:var(--orange-100);color:var(--orange-600);}
 .suggestion-status--atendida{background:#E5F4EA;color:#1E8E3E;}
+.suggestion-status--leida{background:#E5F4EA;color:#1E8E3E;}
 
 .suggestion-status-select{
   border:none;
