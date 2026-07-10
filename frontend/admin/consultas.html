@@ -209,7 +209,6 @@
               <th>ID Consulta</th>
               <th>Libro</th>
               <th>Fecha de lectura</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="readingsTableBody"></tbody>
@@ -242,6 +241,8 @@
     <p>Registra una consulta de material realizada en sala.</p>
 
     <form class="book-form" id="readingForm">
+      <p class="form-error" id="readingFormError" hidden></p>
+
       <div class="form-row form-row--single">
         <div class="form-field">
           <label for="readingBook">Libro</label>
