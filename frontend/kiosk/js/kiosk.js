@@ -11,6 +11,7 @@
   const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
   const ATTENDANCE_URL = `${API_BASE_URL}/attendance`;
   const THANKS_DURATION_MS = 3500;
+  const MAX_AGE = 110;
 
   const form = document.getElementById('attendanceForm');
   const nameInput = document.getElementById('visitorName');
@@ -35,6 +36,23 @@
       genderButtons.forEach(b => b.classList.toggle('is-selected', b === btn));
       genderGroup.classList.remove('is-invalid');
     });
+  });
+
+  // ---------------------------------------------------------------------
+  // Restricciones de entrada: la edad no puede pasar de MAX_AGE, y el
+  // teléfono no acepta letras — se corrige en vivo mientras se escribe,
+  // no solo al enviar.
+  // ---------------------------------------------------------------------
+  ageInput.addEventListener('input', () => {
+    if (ageInput.value === '') return;
+    const digitsOnly = ageInput.value.replace(/\D/g, '');
+    const clamped = digitsOnly === '' ? '' : String(Math.min(Number(digitsOnly), MAX_AGE));
+    if (ageInput.value !== clamped) ageInput.value = clamped;
+  });
+
+  phoneInput.addEventListener('input', () => {
+    const digitsOnly = phoneInput.value.replace(/\D/g, '');
+    if (phoneInput.value !== digitsOnly) phoneInput.value = digitsOnly;
   });
 
   // ---------------------------------------------------------------------
@@ -82,7 +100,7 @@
     const ageRaw = ageInput.value.trim();
     let valid = true;
 
-    if (!ageRaw || Number(ageRaw) < 0 || Number(ageRaw) > 120) {
+    if (!ageRaw || Number(ageRaw) < 0 || Number(ageRaw) > MAX_AGE) {
       ageInput.classList.add('is-invalid');
       valid = false;
     } else {
