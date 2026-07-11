@@ -196,7 +196,7 @@
 }
 
 /* ============ CAMPOS DE RECURRENCIA (MODAL DE EVENTO) ============ */
-#eventRecurrenceFields{
+#eventRecurrenceFields:not([hidden]){
   display:flex;
   flex-direction:column;
   gap:16px;

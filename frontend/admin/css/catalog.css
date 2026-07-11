@@ -587,8 +587,15 @@ body.admin-body{
   background:#fff;
   width:100%;
 }
+.form-field select{
+  appearance:none;-webkit-appearance:none;
+  padding-right:34px;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B5B68' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+  cursor:pointer;
+}
 .form-field input:focus,
 .form-field select:focus{outline:none;border-color:var(--orange-500);}
+.form-field select:hover{border-color:var(--orange-500);}
 .form-field input:disabled{background:var(--cream);color:var(--muted);}
 
 .form-check{
