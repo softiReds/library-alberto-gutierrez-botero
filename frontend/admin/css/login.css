@@ -259,13 +259,6 @@
   outline-offset:2px;
 }
 
-.login-form__forgot{
-  font-size:.93rem;
-  font-weight:500;
-  color:var(--ink);
-}
-.login-form__forgot:hover{color:var(--orange-600);text-decoration:underline;}
-
 .login-form__submit{
   width:100%;
   font-size:1.05rem;

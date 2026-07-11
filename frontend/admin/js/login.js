@@ -73,7 +73,6 @@
     const toggleBtn   = document.getElementById('togglePassword');
     const eyeOn       = toggleBtn.querySelector('.field__toggle-eye');
     const eyeOff      = toggleBtn.querySelector('.field__toggle-eye-off');
-    const forgotLink  = document.getElementById('forgotLink');
 
     /* ---------- Estado inicial ---------- */
 
@@ -177,13 +176,6 @@
       } finally {
         setLoading(false);
       }
-    });
-
-    /* ---------- Recuperación de contraseña (pendiente de endpoint) ---------- */
-
-    forgotLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      showAlert('Para restablecer tu contraseña, comunícate con la administración de la Fundación Servimos.');
     });
   }
 
