@@ -2,10 +2,8 @@
 // Galería — mosaico + lightbox con navegación
 // =====================================================================
 
-const GALLERY_PATH = 'assets/gallery/';
-const GALLERY_PREFIX = 'galeria-';
-const GALLERY_EXT = '.jpeg';
-const GALLERY_MAX = 60;
+const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
+const GALLERY_URL = `${API_BASE_URL}/gallery`;
 
 const MOSAIC_PATTERN = ['big', '', '', 'tall', '', '', 'wide', '', '', 'tall'];
 
@@ -23,26 +21,18 @@ const lightboxNext = document.getElementById('lightboxNext');
 const lightboxCounter = document.getElementById('lightboxCounter');
 
 // ---------------------------------------------------------------------
-// Detección automática de fotos
+// Carga de fotos desde la API
 // ---------------------------------------------------------------------
-function probeImage(src) {
-  return new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    img.src = src;
-  });
-}
-
-async function discoverPhotos() {
-  const photos = [];
-  for (let i = 1; i <= GALLERY_MAX; i++) {
-    const src = `${GALLERY_PATH}${GALLERY_PREFIX}${i}${GALLERY_EXT}`;
-    const exists = await probeImage(src);
-    if (!exists) break;
-    photos.push(src);
+async function loadPhotos() {
+  try {
+    const res = await fetch(GALLERY_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const photos = await res.json();
+    return photos.map(photo => API_BASE_URL + photo.image_url);
+  } catch (err) {
+    console.error('No se pudieron cargar las fotos de la galería.', err);
+    return [];
   }
-  return photos;
 }
 
 // ---------------------------------------------------------------------
@@ -126,7 +116,7 @@ document.getElementById('navSearchToggle').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 initStaticReveals();
 
-discoverPhotos().then(photos => {
+loadPhotos().then(photos => {
   PHOTOS = photos;
   renderMosaic();
 });

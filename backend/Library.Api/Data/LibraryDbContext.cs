@@ -14,6 +14,7 @@ public class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbCo
     public DbSet<Attendance> Attendance => Set<Attendance>();
     public DbSet<Suggestion> Suggestions => Set<Suggestion>();
     public DbSet<SiteVisitCounter> SiteVisitCounters => Set<SiteVisitCounter>();
+    public DbSet<GalleryPhoto> GalleryPhotos => Set<GalleryPhoto>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

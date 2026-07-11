@@ -1,0 +1,52 @@
+/* =====================================================================
+   Panel Admin — Galería
+   Reutiliza tokens y componentes base de ../css/styles.css y catalog.css
+   (--maroon-900, --orange-600, .btn, .modal, .form-error…)
+   ===================================================================== */
+
+.gallery-admin-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+  gap:16px;
+}
+
+.gallery-admin-tile{
+  position:relative;
+  aspect-ratio:1;
+  border-radius:var(--radius-md);
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#fff;
+}
+.gallery-admin-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.gallery-admin-tile__delete{
+  position:absolute;
+  top:8px;right:8px;
+  width:32px;height:32px;
+  border-radius:8px;
+  border:none;
+  background:rgba(59,19,56,.6);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;
+  transition:opacity .15s ease, background .15s ease;
+}
+.gallery-admin-tile:hover .gallery-admin-tile__delete,
+.gallery-admin-tile__delete:focus-visible{opacity:1;}
+.gallery-admin-tile__delete:hover{background:#D64545;}
+
+.gallery-admin-empty{
+  color:var(--muted);
+  text-align:center;
+  padding:60px 20px;
+  font-size:.92rem;
+}
+
+@media(max-width:480px){
+  .gallery-admin-grid{grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));}
+}
