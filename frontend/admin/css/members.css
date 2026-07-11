@@ -61,6 +61,10 @@
 
 #filterRowExtra[hidden]{display:none;}
 
+/* ============ MODAL: CAMPO "OTRO (ESPECIFICAR)" ============ */
+.form-field__other{margin-top:8px;}
+.form-field__other[hidden]{display:none;}
+
 /* ============ TABLA ============ */
 .members-table td:first-child{font-weight:600;color:var(--maroon-900);white-space:nowrap;}
 .members-table td:nth-child(5){white-space:nowrap;}

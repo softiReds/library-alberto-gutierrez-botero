@@ -271,34 +271,46 @@
         </div>
         <div class="form-field">
           <label for="memberGender">Género</label>
-          <input type="text" id="memberGender" list="genderOptions" placeholder="Ej. Femenino">
-          <datalist id="genderOptions"></datalist>
+          <select id="memberGender">
+            <option value="">Selecciona…</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Masculino">Masculino</option>
+            <option value="No binario">No binario</option>
+            <option value="Prefiero no decirlo">Prefiero no decirlo</option>
+          </select>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-field">
           <label for="memberOccupation">Ocupación</label>
-          <input type="text" id="memberOccupation" list="occupationOptions">
-          <datalist id="occupationOptions"></datalist>
+          <select id="memberOccupation"></select>
+          <input type="text" id="memberOccupationOther" class="form-field__other" placeholder="Escribe la ocupación" hidden>
         </div>
         <div class="form-field">
           <label for="memberEducation">Nivel educativo</label>
-          <input type="text" id="memberEducation" list="educationOptions">
-          <datalist id="educationOptions"></datalist>
+          <select id="memberEducation">
+            <option value="">Selecciona…</option>
+            <option value="Primaria">Primaria</option>
+            <option value="Secundaria">Secundaria</option>
+            <option value="Técnica">Técnica</option>
+            <option value="Tecnológica">Tecnológica</option>
+            <option value="Universitaria">Universitaria</option>
+            <option value="Posgrado">Posgrado</option>
+            <option value="Ninguno">Ninguno</option>
+          </select>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-field">
           <label for="memberLocality">Localidad</label>
-          <input type="text" id="memberLocality" list="localityOptions">
-          <datalist id="localityOptions"></datalist>
+          <select id="memberLocality"></select>
         </div>
         <div class="form-field">
           <label for="memberNeighborhood">Barrio</label>
-          <input type="text" id="memberNeighborhood" list="neighborhoodOptions">
-          <datalist id="neighborhoodOptions"></datalist>
+          <select id="memberNeighborhood"></select>
+          <input type="text" id="memberNeighborhoodOther" class="form-field__other" placeholder="Escribe el barrio" hidden>
         </div>
       </div>
 

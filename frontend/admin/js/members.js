@@ -13,6 +13,16 @@
 
   const SEARCH_DEBOUNCE_MS = 350;
 
+  // Misma lista oficial de localidades de Bogotá usada en el formulario
+  // público de afiliación (frontend/public/js/affiliation.js), para que el
+  // modal del panel ofrezca siempre las mismas opciones.
+  const LOCALIDADES_BOGOTA = [
+    'Usaquén', 'Chapinero', 'Santa Fe', 'San Cristóbal', 'Usme', 'Tunjuelito', 'Bosa',
+    'Kennedy', 'Fontibón', 'Engativá', 'Suba', 'Barrios Unidos', 'Teusaquillo',
+    'Los Mártires', 'Antonio Nariño', 'Puente Aranda', 'La Candelaria',
+    'Rafael Uribe Uribe', 'Ciudad Bolívar', 'Sumapaz', 'Otra'
+  ];
+
   let MEMBERS = [];       // solo los afiliados de la página actual
   let currentPage = 1;
   let currentPageSize = 10;
@@ -110,6 +120,16 @@
 
   const memberDetailModal = document.getElementById('memberDetailModal');
 
+  // Valores conocidos para los selects abiertos del modal (Ocupación,
+  // Barrio) — se usan tanto para poblar el <select> como para decidir, al
+  // editar un afiliado, si su valor actual ya está en la lista o si hay
+  // que mostrarlo en el input "Otro (especificar)". Género, Nivel educativo
+  // y Localidad no lo necesitan: son listas fijas (iguales a las del
+  // formulario público de afiliación).
+  const OTHER_VALUE = '__other__';
+  let knownOccupations = [];
+  let knownNeighborhoods = [];
+
   /* ============ Carga de opciones de filtro (GET /members/filters) ============ */
 
   function fillSelect(selectEl, values, allLabel) {
@@ -119,8 +139,12 @@
     if (values.includes(current)) selectEl.value = current;
   }
 
-  function fillDatalist(id, values) {
-    document.getElementById(id).innerHTML = values.map(v => `<option value="${escapeHtml(v)}"></option>`).join('');
+  function fillModalSelect(selectEl, values, otherLabel) {
+    const current = selectEl.value;
+    selectEl.innerHTML = `<option value="">Selecciona…</option>` +
+      values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('') +
+      `<option value="${OTHER_VALUE}">${escapeHtml(otherLabel)}</option>`;
+    if (values.includes(current) || current === OTHER_VALUE) selectEl.value = current;
   }
 
   async function loadFilterOptions() {
@@ -139,11 +163,56 @@
     fillSelect(localitySelect, opts.localities, 'Todas');
     fillSelect(neighborhoodSelect, opts.neighborhoods, 'Todos');
 
-    fillDatalist('genderOptions', opts.genders);
-    fillDatalist('occupationOptions', opts.occupations);
-    fillDatalist('educationOptions', opts.education_levels);
-    fillDatalist('localityOptions', opts.localities);
-    fillDatalist('neighborhoodOptions', opts.neighborhoods);
+    knownOccupations = opts.occupations;
+    knownNeighborhoods = opts.neighborhoods;
+
+    fillModalSelect(document.getElementById('memberOccupation'), knownOccupations, 'Otra (especificar)');
+    fillModalSelect(document.getElementById('memberNeighborhood'), knownNeighborhoods, 'Otro (especificar)');
+  }
+
+  // Localidad usa la misma lista fija del formulario público — se puebla
+  // una sola vez, no depende de los datos de afiliados existentes.
+  function fillMemberLocalitySelect() {
+    const selectEl = document.getElementById('memberLocality');
+    selectEl.innerHTML = `<option value="">Selecciona…</option>` +
+      LOCALIDADES_BOGOTA.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  }
+
+  /* ============ Selects del modal con opción "Otro (especificar)" ============ */
+
+  function initOtherToggle(selectId, otherId) {
+    const selectEl = document.getElementById(selectId);
+    const otherEl = document.getElementById(otherId);
+    selectEl.addEventListener('change', () => {
+      const isOther = selectEl.value === OTHER_VALUE;
+      otherEl.hidden = !isOther;
+      if (isOther) otherEl.focus();
+      else otherEl.value = '';
+    });
+  }
+
+  // Al editar, si el valor guardado no está entre los conocidos, se
+  // selecciona "Otro (especificar)" y se precarga ese valor en el input.
+  function setSelectOrOther(selectId, otherId, knownValues, value) {
+    const selectEl = document.getElementById(selectId);
+    const otherEl = document.getElementById(otherId);
+    if (value && !knownValues.includes(value)) {
+      selectEl.value = OTHER_VALUE;
+      otherEl.hidden = false;
+      otherEl.value = value;
+    } else {
+      selectEl.value = value || '';
+      otherEl.hidden = true;
+      otherEl.value = '';
+    }
+  }
+
+  function getSelectOrOtherValue(selectId, otherId) {
+    const selectEl = document.getElementById(selectId);
+    if (selectEl.value === OTHER_VALUE) {
+      return document.getElementById(otherId).value.trim() || null;
+    }
+    return selectEl.value.trim() || null;
   }
 
   /* ============ Carga y render de la tabla ============ */
@@ -380,10 +449,10 @@
       document.getElementById('memberPhone').value = m.contact_phone || '';
       document.getElementById('memberBirthDate').value = m.birth_date ? m.birth_date.slice(0, 10) : '';
       document.getElementById('memberGender').value = m.gender || '';
-      document.getElementById('memberOccupation').value = m.occupation || '';
       document.getElementById('memberEducation').value = m.education_level || '';
       document.getElementById('memberLocality').value = m.locality || '';
-      document.getElementById('memberNeighborhood').value = m.neighborhood || '';
+      setSelectOrOther('memberOccupation', 'memberOccupationOther', knownOccupations, m.occupation);
+      setSelectOrOther('memberNeighborhood', 'memberNeighborhoodOther', knownNeighborhoods, m.neighborhood);
       document.getElementById('memberAddress').value = m.address || '';
       document.getElementById('memberEmergencyName').value = m.emergency_contact_name || '';
       document.getElementById('memberEmergencyPhone').value = m.emergency_contact_phone || '';
@@ -395,6 +464,9 @@
       document.getElementById('memberDocType').value = 'CC';
       document.getElementById('memberCreatedAt').value = '';
       document.getElementById('memberCreatedAt').placeholder = 'Se asigna automáticamente al guardar';
+      ['memberOccupationOther', 'memberNeighborhoodOther'].forEach(otherId => {
+        document.getElementById(otherId).hidden = true;
+      });
     }
 
     document.getElementById('memberCreatedAt').disabled = true;
@@ -436,10 +508,10 @@
       contact_phone: document.getElementById('memberPhone').value.trim() || null,
       birth_date: document.getElementById('memberBirthDate').value || null,
       gender: document.getElementById('memberGender').value.trim() || null,
-      occupation: document.getElementById('memberOccupation').value.trim() || null,
       education_level: document.getElementById('memberEducation').value.trim() || null,
       locality: document.getElementById('memberLocality').value.trim() || null,
-      neighborhood: document.getElementById('memberNeighborhood').value.trim() || null,
+      occupation: getSelectOrOtherValue('memberOccupation', 'memberOccupationOther'),
+      neighborhood: getSelectOrOtherValue('memberNeighborhood', 'memberNeighborhoodOther'),
       address: document.getElementById('memberAddress').value.trim() || null,
       emergency_contact_name: document.getElementById('memberEmergencyName').value.trim() || null,
       emergency_contact_phone: document.getElementById('memberEmergencyPhone').value.trim() || null,
@@ -500,6 +572,10 @@
 
     document.getElementById('memberDetailModalClose').addEventListener('click', closeMemberDetailModal);
     initModalDismiss(memberDetailModal, closeMemberDetailModal);
+
+    initOtherToggle('memberOccupation', 'memberOccupationOther');
+    initOtherToggle('memberNeighborhood', 'memberNeighborhoodOther');
+    fillMemberLocalitySelect();
 
     await loadFilterOptions();
     await loadMembers();
