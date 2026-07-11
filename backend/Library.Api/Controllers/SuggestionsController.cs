@@ -1,7 +1,6 @@
 using Library.Api.Common;
 using Library.Api.Data;
 using Library.Api.Domain.Entities;
-using Library.Api.Email;
 using Library.Api.Suggestions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +10,7 @@ namespace Library.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/suggestions")]
-public class SuggestionsController(LibraryDbContext db, IEmailService emailService) : ControllerBase
+public class SuggestionsController(LibraryDbContext db) : ControllerBase
 {
     [HttpPost]
     [AllowAnonymous]
@@ -26,21 +25,6 @@ public class SuggestionsController(LibraryDbContext db, IEmailService emailServi
 
         db.Suggestions.Add(suggestion);
         await db.SaveChangesAsync();
-
-        // IEmailService.SendAsync never throws (it logs and swallows failures internally),
-        // so a broken/unconfigured SMTP setup can never fail this request — the suggestion
-        // is already committed to the database by this point, which is the whole point of
-        // the dual save-then-notify flow.
-        await emailService.SendAsync(
-            "Nueva sugerencia recibida",
-            $"""
-             Se recibió una nueva sugerencia en la Biblioteca Alberto Gutiérrez Botero.
-
-             Mensaje: {suggestion.Message}
-             Nombre: {suggestion.VisitorName ?? "(anónimo)"}
-             Correo: {suggestion.VisitorEmail ?? "(no proporcionado)"}
-             Fecha: {suggestion.SubmittedAt:yyyy-MM-dd HH:mm} UTC
-             """);
 
         return Created(
             $"/api/v1/suggestions/{suggestion.Id}",
