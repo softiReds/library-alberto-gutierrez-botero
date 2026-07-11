@@ -142,6 +142,16 @@ public class MembersController(LibraryDbContext db) : ControllerBase
         });
     }
 
+    /// <summary>Pública: solo el total de afiliados, para el stat de la home pública —
+    /// nunca expone datos individuales, a diferencia del resto de este controller.</summary>
+    [HttpGet("count")]
+    [AllowAnonymous]
+    public async Task<ActionResult> GetMembersCount()
+    {
+        var total = await db.Members.CountAsync();
+        return Ok(new { Total = total });
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MemberDto>> GetMember(Guid id)
     {

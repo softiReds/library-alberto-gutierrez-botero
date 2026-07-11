@@ -6,6 +6,8 @@ const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
 const BOOKS_URL = `${API_BASE_URL}/books`;
 const FEATURED_BOOKS_URL = `${API_BASE_URL}/books/featured`;
 const FEATURED_EVENTS_URL = `${API_BASE_URL}/events/featured`;
+const EVENTS_URL = `${API_BASE_URL}/events`;
+const MEMBERS_COUNT_URL = `${API_BASE_URL}/members/count`;
 const SEARCH_DEBOUNCE_MS = 350;
 
 const FALLBACK_COVERS = [
@@ -13,11 +15,6 @@ const FALLBACK_COVERS = [
   'assets/home/book-cover-2.png',
   'assets/home/book-cover-3.png'
 ];
-
-const STATIC_STATS = {
-  workshops: 85,
-  users: 3214
-};
 
 const MESES_ABREV = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -205,7 +202,6 @@ async function loadEvents() {
   }
 
   renderEvents();
-  renderWorkshopsStat();
   renderRecommendedEvent();
 }
 
@@ -301,27 +297,40 @@ function renderEvents() {
   });
 }
 
-function renderWorkshopsStat() {
-  const currentYear = new Date().getFullYear();
-  const count = EVENTS.filter(ev => new Date(`${ev.event_date}T00:00:00`).getFullYear() === currentYear).length;
-  const value = count || STATIC_STATS.workshops;
-  setCounterTarget('statWorkshops', value);
+// "Próximos talleres" — cuenta TODOS los eventos futuros (GET /events,
+// no /events/featured), independiente de los destacados que arma el
+// carrusel. GET /events público no da eventos pasados de este año, así
+// que la tarjeta muestra "próximos", no "este año".
+async function loadWorkshopsTotal() {
+  try {
+    const res = await fetch(EVENTS_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const events = await res.json();
+    setCounterTarget('statWorkshops', events.length || 0);
+  } catch (err) {
+    console.error('No se pudo obtener el total de próximos talleres.', err);
+  }
+}
+
+// "Usuarios registrados" — GET /members/count, endpoint público de
+// solo conteo (nunca expone datos individuales de afiliados).
+async function loadUsersTotal() {
+  try {
+    const res = await fetch(MEMBERS_COUNT_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const data = await res.json();
+    setCounterTarget('statUsers', data.total || 0);
+  } catch (err) {
+    console.error('No se pudo obtener el total de usuarios registrados.', err);
+  }
 }
 
 // ---------------------------------------------------------------------
-// Estadísticas
-// ---------------------------------------------------------------------
-function renderStats() {
-  // statBooks lo pone loadBooksTotal() (GET /books, campo "total").
-  // statWorkshops lo pone renderWorkshopsStat() (a partir de EVENTS).
-  setCounterTarget('statUsers', STATIC_STATS.users);
-  // statVisits no se setea acá: js/visit-counter.js dispara
-  // "bagb:visits-updated" con el total real apenas responde la API
-  // (ver el listener más abajo).
-}
-
-// ---------------------------------------------------------------------
-// Contador de visitas real (ver js/visit-counter.js)
+// Estadísticas: statBooks lo pone loadBooksTotal() (GET /books, campo
+// "total"), statWorkshops lo pone loadWorkshopsTotal() (GET /events),
+// statUsers lo pone loadUsersTotal() (GET /members/count), y statVisits
+// lo pone js/visit-counter.js disparando "bagb:visits-updated" con el
+// total real apenas responde la API (ver el listener abajo).
 // ---------------------------------------------------------------------
 window.addEventListener('bagb:visits-updated', e => {
   setCounterTarget('statVisits', e.detail);
@@ -546,8 +555,9 @@ document.getElementById('navSearchToggle').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 initStaticReveals();
 initStatsCounter();
-renderStats();
 renderGallery();
 loadBooksTotal();
+loadWorkshopsTotal();
+loadUsersTotal();
 loadCatalog();
 loadEvents();
