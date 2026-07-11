@@ -147,8 +147,16 @@
       <div class="admin-grid" id="catalogGrid"></div>
 
       <div class="admin-grid-footer">
-        <nav class="pagination" id="pagination" aria-label="Paginación de resultados"></nav>
         <span class="admin-grid-footer__range" id="resultsRange"></span>
+        <nav class="pagination" id="pagination" aria-label="Paginación de resultados"></nav>
+        <label class="admin-grid-footer__pagesize">
+          Mostrar
+          <select class="chart-select" id="pageSizeSelect">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </label>
       </div>
 
     </main>

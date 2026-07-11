@@ -130,7 +130,17 @@
 
       <div class="catalog-grid" id="catalogGrid"></div>
 
-      <nav class="pagination" id="pagination" aria-label="Paginación de resultados"></nav>
+      <div class="catalog-footer">
+        <nav class="pagination" id="pagination" aria-label="Paginación de resultados"></nav>
+        <label class="catalog-sort catalog-footer__pagesize">
+          Mostrar
+          <select id="pageSizeSelect">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+      </div>
     </div>
 
   </div>

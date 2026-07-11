@@ -5,7 +5,7 @@
 const API_BASE_URL = (window.LIBRARY_API && window.LIBRARY_API.baseUrl) || '';
 const BOOKS_URL = `${API_BASE_URL}/books`;
 const SEARCH_DEBOUNCE_MS = 350;
-const PAGE_SIZE = 10;
+let currentPageSize = 10;
 
 const FALLBACK_COVERS = [
   'assets/home/book-cover-1.png',
@@ -25,6 +25,7 @@ const paginationEl = document.getElementById('pagination');
 const filterGroupsEl = document.getElementById('filterGroups');
 const searchInput = document.getElementById('filterSearch');
 const sortSelect = document.getElementById('sortSelect');
+const pageSizeSelect = document.getElementById('pageSizeSelect');
 const bookModal = document.getElementById('bookModal');
 const bookDetailEl = document.getElementById('bookDetail');
 
@@ -183,7 +184,7 @@ async function loadCatalog() {
 
   const params = new URLSearchParams({
     page: String(currentPage),
-    page_size: String(PAGE_SIZE)
+    page_size: String(currentPageSize)
   });
   if (q) params.set('search', q);
   FILTER_FACETS.forEach(facet => {
@@ -341,7 +342,7 @@ document.addEventListener('keydown', e => {
 // ---------------------------------------------------------------------
 function renderPagination() {
   paginationEl.innerHTML = '';
-  const totalPages = Math.ceil(currentTotal / PAGE_SIZE);
+  const totalPages = Math.ceil(currentTotal / currentPageSize);
   if (totalPages <= 1) return;
 
   function addBtn(label, page, { active = false, disabled = false, ariaLabel = null } = {}) {
@@ -397,6 +398,12 @@ searchInput.addEventListener('input', () => {
 
 sortSelect.addEventListener('change', () => {
   currentSort = sortSelect.value;
+  loadCatalog();
+});
+
+pageSizeSelect.addEventListener('change', () => {
+  currentPageSize = Number(pageSizeSelect.value);
+  currentPage = 1;
   loadCatalog();
 });
 

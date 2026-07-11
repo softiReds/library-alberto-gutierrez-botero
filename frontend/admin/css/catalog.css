@@ -494,14 +494,28 @@ body.admin-body{
 
 .admin-grid-footer{
   display:flex;
-  flex-direction:column;
   align-items:center;
-  gap:6px;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
   margin-top:8px;
 }
 .admin-grid-footer__range{
   font-size:.82rem;
   color:var(--muted);
+}
+.admin-grid-footer__pagesize{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.85rem;
+  color:var(--muted);
+  flex-shrink:0;
+}
+.admin-grid-footer__pagesize .chart-select{padding:8px 26px 8px 12px;}
+
+@media(max-width:760px){
+  .admin-grid-footer{flex-direction:column;align-items:stretch;}
 }
 
 /* ============ MODAL DE DETALLE DE LIBRO ============ */
