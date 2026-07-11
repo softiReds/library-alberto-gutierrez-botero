@@ -20,7 +20,18 @@ const MESES_ABREV = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT'
 const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
 let CATALOG = [];
+let RANDOM_BOOKS = [];
 let EVENTS = [];
+let ALL_EVENTS = [];
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 // ---------------------------------------------------------------------
 // Portada de libro
@@ -169,8 +180,26 @@ async function loadCatalog() {
     CATALOG = [];
   }
 
-  renderFeaturedBookCarousel();
   renderRecommended();
+}
+
+// ---------------------------------------------------------------------
+// Carrusel "Catálogo" de la portada — no son los destacados, sino ~10
+// libros al azar de todo el catálogo, para dar variedad cada vez que se
+// carga la página.
+// ---------------------------------------------------------------------
+async function loadRandomBooks() {
+  try {
+    const res = await fetch(`${BOOKS_URL}?page=1&page_size=50`);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    const data = await res.json();
+    RANDOM_BOOKS = shuffleArray(data.data || []).slice(0, 10);
+  } catch (err) {
+    console.error('No se pudieron cargar libros del catálogo.', err);
+    RANDOM_BOOKS = [];
+  }
+
+  renderFeaturedBookCarousel();
 }
 
 // ---------------------------------------------------------------------
@@ -189,7 +218,8 @@ async function loadBooksTotal() {
 }
 
 // ---------------------------------------------------------------------
-// Carga de eventos y talleres (destacados para el home)
+// Evento destacado (GET /events/featured) — para la tarjeta de "Evento
+// recomendado" en la sección "Recomendados para ti".
 // ---------------------------------------------------------------------
 async function loadEvents() {
   try {
@@ -201,8 +231,26 @@ async function loadEvents() {
     EVENTS = [];
   }
 
-  renderEvents();
   renderRecommendedEvent();
+}
+
+// ---------------------------------------------------------------------
+// Lista "Próximos eventos y talleres" — todos los eventos futuros (GET
+// /events, no solo los destacados), ordenados por fecha, hasta 10. El
+// mismo total también alimenta la estadística "Próximos talleres".
+// ---------------------------------------------------------------------
+async function loadAllEvents() {
+  try {
+    const res = await fetch(EVENTS_URL);
+    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
+    ALL_EVENTS = await res.json();
+  } catch (err) {
+    console.error('No se pudieron cargar los eventos.', err);
+    ALL_EVENTS = [];
+  }
+
+  setCounterTarget('statWorkshops', ALL_EVENTS.length || 0);
+  renderEvents();
 }
 
 // ---------------------------------------------------------------------
@@ -269,14 +317,16 @@ function renderEvents() {
   const list = document.getElementById('eventsList');
   list.innerHTML = '';
 
-  if (!EVENTS.length) {
-    list.innerHTML = '<li class="search-results__empty">Aún no hay eventos destacados por ahora.</li>';
+  if (!ALL_EVENTS.length) {
+    list.innerHTML = '<li class="search-results__empty">Aún no hay eventos programados por ahora.</li>';
     return;
   }
 
-  // /events/featured ya viene filtrado a próximos + destacados y ordenado
-  // por fecha ascendente — no hace falta volver a ordenar ni filtrar acá.
-  const toShow = EVENTS.slice(0, 3);
+  // GET /events no garantiza orden — se ordena por fecha (y hora) ascendente
+  // para mostrar primero los próximos, y se limita a 10.
+  const toShow = [...ALL_EVENTS]
+    .sort((a, b) => `${a.event_date}T${a.start_time || ''}`.localeCompare(`${b.event_date}T${b.start_time || ''}`))
+    .slice(0, 10);
 
   toShow.forEach((ev, i) => {
     const li = document.createElement('li');
@@ -297,21 +347,6 @@ function renderEvents() {
   });
 }
 
-// "Próximos talleres" — cuenta TODOS los eventos futuros (GET /events,
-// no /events/featured), independiente de los destacados que arma el
-// carrusel. GET /events público no da eventos pasados de este año, así
-// que la tarjeta muestra "próximos", no "este año".
-async function loadWorkshopsTotal() {
-  try {
-    const res = await fetch(EVENTS_URL);
-    if (!res.ok) throw new Error(`El servidor respondió con el código ${res.status}.`);
-    const events = await res.json();
-    setCounterTarget('statWorkshops', events.length || 0);
-  } catch (err) {
-    console.error('No se pudo obtener el total de próximos talleres.', err);
-  }
-}
-
 // "Usuarios registrados" — GET /members/count, endpoint público de
 // solo conteo (nunca expone datos individuales de afiliados).
 async function loadUsersTotal() {
@@ -327,7 +362,7 @@ async function loadUsersTotal() {
 
 // ---------------------------------------------------------------------
 // Estadísticas: statBooks lo pone loadBooksTotal() (GET /books, campo
-// "total"), statWorkshops lo pone loadWorkshopsTotal() (GET /events),
+// "total"), statWorkshops lo pone loadAllEvents() (GET /events),
 // statUsers lo pone loadUsersTotal() (GET /members/count), y statVisits
 // lo pone js/visit-counter.js disparando "bagb:visits-updated" con el
 // total real apenas responde la API (ver el listener abajo).
@@ -375,12 +410,12 @@ function renderFeaturedBookCarousel() {
   const track = document.getElementById('featuredBookTrack');
   track.innerHTML = '';
 
-  if (!CATALOG.length) {
+  if (!RANDOM_BOOKS.length) {
     track.innerHTML = '<p class="search-results__empty">Aún no hay libros en el catálogo.</p>';
     return;
   }
 
-  CATALOG.forEach((book, i) => {
+  RANDOM_BOOKS.forEach((book, i) => {
     const card = document.createElement('div');
     card.className = 'catalog-mini-card';
 
@@ -400,18 +435,18 @@ function renderFeaturedBookCarousel() {
     makeReveal(card, i);
   });
 
-  setupDots(track, document.getElementById('featuredBookDots'), CATALOG.length);
+  setupDots(track, document.getElementById('featuredBookDots'), RANDOM_BOOKS.length);
 }
 
 // ---------------------------------------------------------------------
-// Recomendados
+// Recomendados — se muestran TODOS los libros destacados (GET
+// /books/featured), sin límite de 3.
 // ---------------------------------------------------------------------
 function renderRecommended() {
   const track = document.getElementById('recommendedTrack');
   track.innerHTML = '';
 
-  // CATALOG ya viene de GET /books/featured — nada que filtrar de nuevo.
-  const featured = CATALOG.slice(0, 3);
+  const featured = CATALOG;
 
   if (!featured.length) {
     track.innerHTML = '<p class="search-results__empty">No hay libros destacados por ahora.</p>';
@@ -557,7 +592,8 @@ initStaticReveals();
 initStatsCounter();
 renderGallery();
 loadBooksTotal();
-loadWorkshopsTotal();
 loadUsersTotal();
 loadCatalog();
+loadRandomBooks();
 loadEvents();
+loadAllEvents();

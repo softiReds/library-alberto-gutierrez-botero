@@ -8,7 +8,7 @@ if (!token) {
   window.location.replace('index.html');
 }
 
-const PAGE_SIZE = 10;
+let currentPageSize = 10;
 const SEARCH_DEBOUNCE_MS = 350;
 
 const FALLBACK_COVERS = [
@@ -65,6 +65,7 @@ const filterToggleBtn = document.getElementById('filterToggle');
 const filterCountBadge = document.getElementById('filterCount');
 const searchInput = document.getElementById('filterSearch');
 const sortSelect = document.getElementById('sortSelect');
+const pageSizeSelect = document.getElementById('pageSizeSelect');
 const statTotalEl = document.getElementById('statTotal');
 
 const bookModal = document.getElementById('bookModal');
@@ -220,7 +221,7 @@ async function loadCatalog() {
     data = await api.list({
       search: searchInput.value.trim(),
       page: currentPage,
-      pageSize: PAGE_SIZE,
+      pageSize: currentPageSize,
       facets: activeFacets
     });
   } catch (err) {
@@ -245,8 +246,8 @@ async function loadCatalog() {
   countEl.textContent = currentTotal.toLocaleString('es-CO');
 
   if (currentTotal) {
-    const start = (currentPage - 1) * PAGE_SIZE + 1;
-    const end = Math.min(currentPage * PAGE_SIZE, currentTotal);
+    const start = (currentPage - 1) * currentPageSize + 1;
+    const end = Math.min(currentPage * currentPageSize, currentTotal);
     rangeEl.textContent = `Mostrando ${start} – ${end} de ${currentTotal.toLocaleString('es-CO')} libros`;
   } else {
     rangeEl.textContent = 'Sin resultados';
@@ -623,7 +624,7 @@ document.getElementById('clearFilters').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 function renderPagination() {
   paginationEl.innerHTML = '';
-  const totalPages = Math.ceil(currentTotal / PAGE_SIZE);
+  const totalPages = Math.ceil(currentTotal / currentPageSize);
   if (totalPages <= 1) return;
 
   function addBtn(label, page, { active = false, disabled = false, ariaLabel = null } = {}) {
@@ -679,6 +680,12 @@ searchInput.addEventListener('input', () => {
 sortSelect.addEventListener('change', () => {
   currentSort = sortSelect.value;
   renderBooks(applySort(CATALOG));
+});
+
+pageSizeSelect.addEventListener('change', () => {
+  currentPageSize = Number(pageSizeSelect.value);
+  currentPage = 1;
+  loadCatalog();
 });
 
 // ---------------------------------------------------------------------
