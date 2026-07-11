@@ -28,14 +28,48 @@ const sortSelect = document.getElementById('sortSelect');
 const bookModal = document.getElementById('bookModal');
 const bookDetailEl = document.getElementById('bookDetail');
 
-// El backend (GET /books) busca por título O autor combinados y no
-// soporta facetas (tipo de material, público, ubicación, disponibilidad)
-// ni orden por parámetro — filtrar por esas facetas requeriría traer
-// todo el catálogo a memoria, que es justo lo que la paginación del
-// servidor busca evitar. Por ahora dejamos el panel de filtros vacío;
-// el orden se aplica solo sobre la página ya cargada.
-if (filterGroupsEl) {
-  filterGroupsEl.innerHTML = '<p class="filters-empty">Los filtros por categoría no están disponibles todavía.</p>';
+// ---------------------------------------------------------------------
+// Filtros por faceta — mismos valores usados al crear libros desde el
+// panel de gestión (frontend/admin/js/catalog.js), para que el filtro
+// siempre coincida con lo que hay realmente en los datos.
+// GET /books soporta un valor exacto por faceta (no selección múltiple).
+// ---------------------------------------------------------------------
+const FILTER_FACETS = [
+  { key: 'target_audience', label: 'Público objetivo', options: ['Adolescente', 'Adulto', 'Especializada', 'General', 'Infantil', 'Juvenil', 'Preadolescente', 'Preescolar', 'Primaria'] },
+  { key: 'material_type', label: 'Tipo de material', options: ['CD', 'DVD', 'Folletos', 'Libro General', 'Libro Infantil', 'Libro Juvenil', 'Referencia'] },
+  { key: 'location', label: 'Ubicación', options: ['General', 'Infantil', 'No disponible', 'Videoteca'] },
+  { key: 'status', label: 'Disponibilidad', options: ['Disponible', 'Prestado'] }
+];
+
+const activeFacets = {};
+
+function buildFilterGroups() {
+  if (!filterGroupsEl) return;
+
+  filterGroupsEl.innerHTML = FILTER_FACETS.map(facet => `
+    <div class="filter-group">
+      <span class="filter-group__label">${facet.label}</span>
+      <select class="filter-facet-select" data-key="${facet.key}">
+        <option value="">Todos</option>
+        ${facet.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+
+  filterGroupsEl.querySelectorAll('.filter-facet-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      activeFacets[sel.dataset.key] = sel.value;
+      currentPage = 1;
+      loadCatalog();
+    });
+  });
+}
+
+function resetFilterGroups() {
+  FILTER_FACETS.forEach(facet => { activeFacets[facet.key] = ''; });
+  if (filterGroupsEl) {
+    filterGroupsEl.querySelectorAll('.filter-facet-select').forEach(sel => { sel.value = ''; });
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -152,6 +186,9 @@ async function loadCatalog() {
     page_size: String(PAGE_SIZE)
   });
   if (q) params.set('search', q);
+  FILTER_FACETS.forEach(facet => {
+    if (activeFacets[facet.key]) params.set(facet.key, activeFacets[facet.key]);
+  });
 
   try {
     const res = await fetch(`${BOOKS_URL}?${params.toString()}`);
@@ -368,6 +405,7 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   sortSelect.value = 'relevance';
   currentSort = 'relevance';
   currentPage = 1;
+  resetFilterGroups();
   loadCatalog();
 });
 
@@ -390,4 +428,5 @@ document.getElementById('navSearchToggle').addEventListener('click', () => {
 // Init
 // ---------------------------------------------------------------------
 initStaticReveals();
+buildFilterGroups();
 loadCatalog();

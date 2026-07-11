@@ -17,6 +17,10 @@ public class BooksController(LibraryDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetBooks(
         [FromQuery] string? search,
+        [FromQuery(Name = "material_type")] string? materialType,
+        [FromQuery(Name = "target_audience")] string? targetAudience,
+        [FromQuery] string? location,
+        [FromQuery] BookStatus? status,
         [FromQuery] int page = 1,
         [FromQuery(Name = "page_size")] int pageSize = 20,
         [FromQuery(Name = "include_retired")] bool includeRetired = false)
@@ -41,6 +45,26 @@ public class BooksController(LibraryDbContext db) : ControllerBase
             query = query.Where(b =>
                 EF.Functions.ILike(b.Title, $"%{search}%") ||
                 EF.Functions.ILike(b.Author, $"%{search}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(materialType))
+        {
+            query = query.Where(b => b.MaterialType == materialType);
+        }
+
+        if (!string.IsNullOrWhiteSpace(targetAudience))
+        {
+            query = query.Where(b => b.TargetAudience == targetAudience);
+        }
+
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            query = query.Where(b => b.Location == location);
+        }
+
+        if (status is not null)
+        {
+            query = query.Where(b => b.Status == status);
         }
 
         var total = await query.CountAsync();

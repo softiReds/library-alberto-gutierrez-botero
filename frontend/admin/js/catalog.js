@@ -25,6 +25,23 @@ const STATUS_LABELS = {
   baja: 'Dado de baja'
 };
 
+// Valores estándar de catálogo — los mismos en el formulario de alta/edición
+// (para que todo libro nuevo ya quede estandarizado) y en los filtros del
+// catálogo público (frontend/public/js/catalog.js), así el filtro siempre
+// coincide con lo que hay realmente en los datos.
+const MATERIAL_TYPE_OPTIONS = ['CD', 'DVD', 'Folletos', 'Libro General', 'Libro Infantil', 'Libro Juvenil', 'Referencia'];
+const TARGET_AUDIENCE_OPTIONS = ['Adolescente', 'Adulto', 'Especializada', 'General', 'Infantil', 'Juvenil', 'Preadolescente', 'Preescolar', 'Primaria'];
+const LOCATION_OPTIONS = ['General', 'Infantil', 'No disponible', 'Videoteca'];
+
+const FILTER_FACETS = [
+  { key: 'target_audience', label: 'Público objetivo', options: TARGET_AUDIENCE_OPTIONS },
+  { key: 'material_type', label: 'Tipo de material', options: MATERIAL_TYPE_OPTIONS },
+  { key: 'location', label: 'Ubicación', options: LOCATION_OPTIONS },
+  { key: 'status', label: 'Disponibilidad', options: [{ value: 'disponible', label: 'Disponible' }, { value: 'prestado', label: 'Prestado' }] }
+];
+
+const activeFacets = {};
+
 let CATALOG = [];        // solo los libros de la página actual
 let currentPage = 1;
 let currentTotal = 0;
@@ -69,7 +86,7 @@ const deleteConfirmBtn = document.getElementById('deleteConfirm');
 // (agrega el token y parsea los errores automáticamente)
 // ---------------------------------------------------------------------
 const api = {
-  async list({ search, page, pageSize }) {
+  async list({ search, page, pageSize, facets }) {
     const params = new URLSearchParams({
       page: String(page),
       page_size: String(pageSize),
@@ -79,6 +96,9 @@ const api = {
       include_retired: 'true'
     });
     if (search) params.set('search', search);
+    Object.entries(facets || {}).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
     return window.BAGBApi.apiFetch(`/books?${params.toString()}`);
   },
   async create(payload) {
@@ -200,7 +220,8 @@ async function loadCatalog() {
     data = await api.list({
       search: searchInput.value.trim(),
       page: currentPage,
-      pageSize: PAGE_SIZE
+      pageSize: PAGE_SIZE,
+      facets: activeFacets
     });
   } catch (err) {
     if (requestId !== loadRequestId) return;
@@ -216,7 +237,6 @@ async function loadCatalog() {
   CATALOG = data.data;
   currentTotal = data.total;
 
-  buildDatalists();
   renderBooks(applySort(CATALOG));
   renderPagination();
   updateFilterBadge();
@@ -234,38 +254,45 @@ async function loadCatalog() {
 }
 
 // ---------------------------------------------------------------------
-// Filtros por categoría — el backend de gestión solo soporta buscar por
-// título/autor y traer o no los dados de baja (include_retired), así
-// que los filtros por tipo de material / público / ubicación /
-// disponibilidad no están disponibles todavía (requerirían traer todo
-// el catálogo de una vez, lo que anula la paginación del servidor).
+// Filtros por categoría — un valor exacto por faceta (GET /books ahora
+// soporta material_type/target_audience/location/status como filtros
+// reales, cada uno combinado con AND sobre la búsqueda de texto).
 // ---------------------------------------------------------------------
 function buildFilterGroups() {
-  filterGroupsEl.innerHTML = '<p class="filters-empty">Los filtros por categoría no están disponibles todavía.</p>';
+  filterGroupsEl.innerHTML = FILTER_FACETS.map(facet => {
+    const options = facet.options.map(opt =>
+      typeof opt === 'string' ? { value: opt, label: opt } : opt
+    );
+    return `
+      <div class="form-field">
+        <label for="facet-${facet.key}">${escapeHtml(facet.label)}</label>
+        <select id="facet-${facet.key}" class="filter-facet-select" data-key="${facet.key}">
+          <option value="">Todos</option>
+          ${options.map(o => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  }).join('');
+
+  filterGroupsEl.querySelectorAll('.filter-facet-select').forEach(sel => {
+    sel.addEventListener('change', () => {
+      activeFacets[sel.dataset.key] = sel.value;
+      currentPage = 1;
+      updateFilterBadge();
+      loadCatalog();
+    });
+  });
+}
+
+function resetFilterFacets() {
+  FILTER_FACETS.forEach(facet => { activeFacets[facet.key] = ''; });
+  filterGroupsEl.querySelectorAll('.filter-facet-select').forEach(sel => { sel.value = ''; });
 }
 
 function updateFilterBadge() {
-  filterCountBadge.hidden = true;
-  filterCountBadge.textContent = '0';
-}
-
-// ---------------------------------------------------------------------
-// Listas para los <datalist> del formulario. Solo se derivan de la
-// página actualmente cargada (el backend no expone un endpoint de
-// valores distintos), así que son sugerencias de mejor esfuerzo, no
-// el listado completo de categorías usadas en todo el catálogo.
-// ---------------------------------------------------------------------
-function buildDatalists() {
-  const distinct = key => [...new Set(CATALOG.map(b => b[key]).filter(Boolean))].sort();
-
-  fillDatalist('materialTypeOptions', distinct('material_type'));
-  fillDatalist('audienceOptions', distinct('target_audience'));
-  fillDatalist('locationOptions', distinct('location'));
-}
-
-function fillDatalist(id, values) {
-  const el = document.getElementById(id);
-  el.innerHTML = values.map(v => `<option value="${escapeHtml(v)}"></option>`).join('');
+  const count = Object.values(activeFacets).filter(Boolean).length;
+  filterCountBadge.hidden = count === 0;
+  filterCountBadge.textContent = String(count);
 }
 
 // ---------------------------------------------------------------------
@@ -411,7 +438,6 @@ function showFormError(message) {
 }
 
 function openFormModal(book) {
-  buildDatalists();
   bookForm.reset();
   hideFormError();
   document.getElementById('bookStatus').value = 'disponible';
@@ -587,6 +613,8 @@ document.getElementById('clearFilters').addEventListener('click', () => {
   sortSelect.value = 'recent';
   currentSort = 'recent';
   currentPage = 1;
+  resetFilterFacets();
+  updateFilterBadge();
   loadCatalog();
 });
 
@@ -654,7 +682,23 @@ sortSelect.addEventListener('change', () => {
 });
 
 // ---------------------------------------------------------------------
+// Selects estandarizados del formulario de alta/edición (mismos valores
+// que las facetas de filtro — ver FILTER_FACETS más arriba)
+// ---------------------------------------------------------------------
+function populateBookFormSelects() {
+  const fill = (id, values) => {
+    const el = document.getElementById(id);
+    el.innerHTML = '<option value="">Selecciona</option>' +
+      values.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+  };
+  fill('bookMaterialType', MATERIAL_TYPE_OPTIONS);
+  fill('bookAudience', TARGET_AUDIENCE_OPTIONS);
+  fill('bookLocation', LOCATION_OPTIONS);
+}
+
+// ---------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------
+populateBookFormSelects();
 buildFilterGroups();
 loadCatalog();
