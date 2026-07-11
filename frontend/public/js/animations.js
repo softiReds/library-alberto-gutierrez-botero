@@ -28,3 +28,36 @@ function initStaticReveals() {
     revealObserver.observe(el);
   });
 }
+
+// ---------------------------------------------------------------------
+// Navegación móvil (menú hamburguesa del header)
+// ---------------------------------------------------------------------
+function initMobileNav() {
+  const toggleBtn = document.getElementById('navMobileToggle');
+  const nav = document.querySelector('.main-nav');
+  if (!toggleBtn || !nav) return;
+
+  function closeNav() {
+    nav.classList.remove('is-open');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = nav.classList.toggle('is-open');
+    toggleBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeNav));
+
+  document.addEventListener('click', (e) => {
+    if (nav.classList.contains('is-open') && !nav.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+      closeNav();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNav();
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initMobileNav);

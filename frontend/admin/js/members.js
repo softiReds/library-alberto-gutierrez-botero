@@ -13,9 +13,6 @@
 
   const SEARCH_DEBOUNCE_MS = 350;
 
-  // Misma lista oficial de localidades de Bogotá usada en el formulario
-  // público de afiliación (frontend/public/js/affiliation.js), para que el
-  // modal del panel ofrezca siempre las mismas opciones.
   const LOCALIDADES_BOGOTA = [
     'Usaquén', 'Chapinero', 'Santa Fe', 'San Cristóbal', 'Usme', 'Tunjuelito', 'Bosa',
     'Kennedy', 'Fontibón', 'Engativá', 'Suba', 'Barrios Unidos', 'Teusaquillo',
@@ -23,13 +20,13 @@
     'Rafael Uribe Uribe', 'Ciudad Bolívar', 'Sumapaz', 'Otra'
   ];
 
-  let MEMBERS = [];       // solo los afiliados de la página actual
+  let MEMBERS = [];       
   let currentPage = 1;
   let currentPageSize = 10;
   let currentTotal = 0;
   let loadRequestId = 0;
   let searchDebounceTimer = null;
-  let editingId = null;   // id del afiliado en edición (null = creando uno nuevo)
+  let editingId = null; 
 
   const filters = {
     search: '',
@@ -170,8 +167,7 @@
     fillModalSelect(document.getElementById('memberNeighborhood'), knownNeighborhoods, 'Otro (especificar)');
   }
 
-  // Localidad usa la misma lista fija del formulario público — se puebla
-  // una sola vez, no depende de los datos de afiliados existentes.
+
   function fillMemberLocalitySelect() {
     const selectEl = document.getElementById('memberLocality');
     selectEl.innerHTML = `<option value="">Selecciona…</option>` +
@@ -191,8 +187,6 @@
     });
   }
 
-  // Al editar, si el valor guardado no está entre los conocidos, se
-  // selecciona "Otro (especificar)" y se precarga ese valor en el input.
   function setSelectOrOther(selectId, otherId, knownValues, value) {
     const selectEl = document.getElementById(selectId);
     const otherEl = document.getElementById(otherId);
@@ -233,7 +227,7 @@
       return;
     }
 
-    if (requestId !== loadRequestId) return; // respuesta obsoleta, se descarta
+    if (requestId !== loadRequestId) return; 
 
     MEMBERS = data.data;
     currentTotal = data.total;
@@ -518,9 +512,6 @@
       wants_cultural_agenda: document.getElementById('memberCulturalAgenda').checked,
       nationality_country: existing ? existing.nationality_country : null,
       contact_name: existing ? existing.contact_name : null,
-      // El acuerdo de responsabilidad ya se firmó al afiliarse (o la
-      // coordinadora lo tiene en físico si registra desde el panel);
-      // este formulario no vuelve a pedirlo.
       agreement_accepted: existing ? existing.agreement_accepted : true
     };
 

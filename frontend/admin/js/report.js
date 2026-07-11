@@ -16,8 +16,6 @@
   const MONTHS_LONG = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-  // Mismos 5 rangos que ya usa el backend (coinciden con el Excel de
-  // la coordinadora) — no se reagrupan ni se inventan otros acá.
   const AGE_RANGE_ORDER = ['0-5', '6-15', '16-30', '31-50', '51-99'];
 
   const COLORS = {
@@ -71,11 +69,6 @@
 
   /* ============ Selects de mes / año ============ */
 
-  // Últimos `count` meses contando desde el mes actual hacia atrás,
-  // como "YYYY-MM" (más reciente primero) — no hay un endpoint que
-  // diga "qué meses tienen datos", así que se ofrece una ventana
-  // razonable y GET /reports/attendance simplemente da 0 en los que
-  // no tengan actividad.
   function buildRecentMonthOptions(count) {
     const now = new Date();
     const options = [];
@@ -160,7 +153,6 @@
     container.innerHTML = svg;
   }
 
-  // Línea/área para una sola serie con puntos. labels: eje X (día o mes).
   function renderAreaLineChart(container, labels, data, opts = {}) {
     if (labels.length === 0) { emptyMessage(container, 'No hay datos para este período.'); return; }
     const width = opts.width || 640, height = opts.height || 240;
@@ -260,12 +252,7 @@
     document.getElementById('statVisitsUpdated').textContent = `Datos consultados el ${formatNow()}`;
   }
 
-  /* ============ Card: asistencia por edad y género (GET /attendance) ============
-     GET /reports/attendance solo da dos desgloses independientes
-     (by_gender, by_age_range), no un cruce edad×género. Para mostrar
-     un único gráfico de barras agrupadas (edad en X, una barra por
-     género) se piden los registros individuales del mes vía
-     GET /attendance (paginando hasta traerlos todos) y se cruzan acá. ============ */
+  /* ============ Card: asistencia por edad y género (GET /attendance) ============ */
 
   function ageRangeBucket(age) {
     if (age <= 5) return '0-5';
@@ -357,10 +344,7 @@
     renderAttendanceYearChart(select.value);
   }
 
-  /* ============ Card: libros prestados en el mes (GET /reports/catalog) ============
-     El backend solo da un total mensual (loans_count), no un
-     desglose por día, así que no hay una vista diaria que dibujar —
-     se muestra únicamente el total. ============ */
+  /* ============ Card: libros prestados en el mes (GET /reports/catalog) ============ */
 
   async function renderLoansMonthCard(monthKey) {
     const [year, month] = monthKey.split('-').map(Number);
@@ -390,11 +374,7 @@
     renderLoansMonthCard(select.value);
   }
 
-  /* ============ Card: libros perdidos (snapshot actual, no por mes) ============
-     lost_books_count es el estado ACTUAL de la base de datos, no
-     depende del mes/año que se le pasa a GET /reports/catalog — por
-     eso esta tarjeta no tiene selector de período. El backend tampoco
-     expone el detalle libro por libro, solo el total. ============ */
+  /* ============ Card: libros perdidos (snapshot actual, no por mes) ============ */
 
   async function initLostBooksCard() {
     const tbody = document.getElementById('lostBooksBody');
@@ -416,12 +396,7 @@
     tbody.innerHTML = `<tr><td colspan="3" class="chart-empty">El backend solo expone el total de libros perdidos, no el detalle por libro.</td></tr>`;
   }
 
-  /* ============ Card: consultas en sala vs. libros prestados ============
-     Ambos números vienen del mismo GET /reports/attendance?month&year
-     (in_house_reading_count y loans_count). El backend no da un
-     desglose diario, así que en vez de una tendencia por día se
-     muestra la comparación de los dos totales del mes (barras +
-     dona), que es lo que sí se puede respaldar con datos reales. ============ */
+  /* ============ Card: consultas en sala vs. libros prestados  ============ */
 
   async function renderCompareChart(monthNum, year) {
     const chartEl = document.getElementById('chartCompare');

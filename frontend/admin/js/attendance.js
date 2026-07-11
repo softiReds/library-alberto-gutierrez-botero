@@ -153,7 +153,7 @@
       return;
     }
 
-    if (requestId !== loadRequestId) return; // respuesta obsoleta, se descarta
+    if (requestId !== loadRequestId) return; 
 
     ATTENDANCE = data.data;
     currentTotal = data.total;
@@ -325,8 +325,6 @@
     }
 
     const payload = { age: Number(ageRaw), gender };
-    // visitor_name, visitor_phone y visit_date son opcionales — solo
-    // se incluyen en el body si la coordinadora los llenó.
     if (name) payload.visitor_name = name;
     if (phone) payload.visitor_phone = phone;
     if (visitDate) payload.visit_date = visitDate;
