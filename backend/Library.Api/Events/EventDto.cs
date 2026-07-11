@@ -11,6 +11,7 @@ public class EventDto
     public TimeOnly? StartTime { get; set; }
     public TimeOnly? EndTime { get; set; }
     public bool Featured { get; set; }
+    public Guid? RecurrenceGroupId { get; set; }
 
     public static EventDto FromEntity(Event ev) => new()
     {
@@ -20,6 +21,7 @@ public class EventDto
         EventDate = ev.EventDate,
         StartTime = ev.StartTime,
         EndTime = ev.EndTime,
-        Featured = ev.Featured
+        Featured = ev.Featured,
+        RecurrenceGroupId = ev.RecurrenceGroupId
     };
 }

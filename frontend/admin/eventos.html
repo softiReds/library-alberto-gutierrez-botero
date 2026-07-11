@@ -277,6 +277,42 @@
         </div>
       </div>
 
+      <div class="form-row form-row--single" id="eventRecurringRow">
+        <label class="form-check">
+          <input type="checkbox" id="eventRecurring">
+          Es un evento recurrente (crea varias fechas de una vez)
+        </label>
+      </div>
+
+      <div id="eventRecurrenceFields" hidden>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="eventRecurrenceFrequency">Se repite</label>
+            <select id="eventRecurrenceFrequency">
+              <option value="weekly">Cada semana</option>
+              <option value="monthly">Cada mes</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="eventRecurrenceEndType">Termina</label>
+            <select id="eventRecurrenceEndType">
+              <option value="count">Después de un número de veces</option>
+              <option value="date">En una fecha</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field" id="eventRecurrenceCountField">
+            <label for="eventRecurrenceCount">Número de repeticiones <span class="hint">— incluye la primera fecha</span></label>
+            <input type="number" id="eventRecurrenceCount" min="2" max="104" value="6">
+          </div>
+          <div class="form-field" id="eventRecurrenceEndDateField" hidden>
+            <label for="eventRecurrenceEndDate">Última fecha</label>
+            <input type="date" id="eventRecurrenceEndDate">
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="btn btn--outline" id="eventFormCancel">Cancelar</button>
         <button type="submit" class="btn btn--primary" id="eventFormSubmit">Guardar evento</button>

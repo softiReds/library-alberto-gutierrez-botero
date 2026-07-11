@@ -157,7 +157,7 @@
         <tr data-id="${ev.id}" data-date="${ev.event_date}">
           <td>
             <div class="events-table__title">
-              <strong>${escapeHtml(ev.title)}${ev.featured ? '<span class="featured-chip">★ Destacado</span>' : ''}</strong>
+              <strong>${escapeHtml(ev.title)}${ev.featured ? '<span class="featured-chip">★ Destacado</span>' : ''}${ev.recurrence_group_id ? '<span class="featured-chip featured-chip--recurring">↻ Recurrente</span>' : ''}</strong>
               ${ev.description ? `<span>${escapeHtml(ev.description)}</span>` : ''}
             </div>
           </td>
@@ -382,6 +382,15 @@
     form.reset();
     hideFormError();
 
+    // Editar solo afecta esa fecha puntual (nunca el resto de la serie), así
+    // que la opción de "hacerlo recurrente" solo tiene sentido al crear.
+    const recurringRow = document.getElementById('eventRecurringRow');
+    const recurrenceFields = document.getElementById('eventRecurrenceFields');
+    recurringRow.hidden = !!editingEventId;
+    recurrenceFields.hidden = true;
+    document.getElementById('eventRecurring').checked = false;
+    syncRecurrenceEndFields();
+
     if (editingEventId) {
       const ev = EVENTS_PAGE.find(e => e.id === editingEventId) || CALENDAR_EVENTS.find(e => e.id === editingEventId);
       title.textContent = 'Editar evento o taller';
@@ -397,6 +406,18 @@
 
     modal.hidden = false;
   }
+
+  function syncRecurrenceEndFields() {
+    const isDate = document.getElementById('eventRecurrenceEndType').value === 'date';
+    document.getElementById('eventRecurrenceCountField').hidden = isDate;
+    document.getElementById('eventRecurrenceEndDateField').hidden = !isDate;
+  }
+
+  document.getElementById('eventRecurring').addEventListener('change', e => {
+    document.getElementById('eventRecurrenceFields').hidden = !e.target.checked;
+  });
+
+  document.getElementById('eventRecurrenceEndType').addEventListener('change', syncRecurrenceEndFields);
 
   function closeEventModal() {
     document.getElementById('eventModal').hidden = true;
@@ -427,6 +448,23 @@
       end_time: endTime || null,
       featured: document.getElementById('eventFeatured').checked
     };
+
+    const isRecurring = !editingEventId && document.getElementById('eventRecurring').checked;
+    if (isRecurring) {
+      payload.recurring = true;
+      payload.recurrence_frequency = document.getElementById('eventRecurrenceFrequency').value;
+
+      if (document.getElementById('eventRecurrenceEndType').value === 'date') {
+        const recurrenceEndDate = document.getElementById('eventRecurrenceEndDate').value;
+        if (!recurrenceEndDate) {
+          showFormError('Indica la última fecha de la recurrencia.');
+          return;
+        }
+        payload.recurrence_end_date = recurrenceEndDate;
+      } else {
+        payload.recurrence_count = Number(document.getElementById('eventRecurrenceCount').value);
+      }
+    }
 
     const submitBtn = document.getElementById('eventFormSubmit');
     submitBtn.disabled = true;

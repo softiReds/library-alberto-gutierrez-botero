@@ -12,4 +12,11 @@ public class EventCreateRequest
     public TimeOnly? StartTime { get; set; }
     public TimeOnly? EndTime { get; set; }
     public bool Featured { get; set; }
+
+    /// <summary>When true, RecurrenceFrequency and exactly one of RecurrenceEndDate /
+    /// RecurrenceCount are required — see EventsController.CreateEvent.</summary>
+    public bool Recurring { get; set; }
+    public RecurrenceFrequency? RecurrenceFrequency { get; set; }
+    public DateOnly? RecurrenceEndDate { get; set; }
+    public int? RecurrenceCount { get; set; }
 }

@@ -191,6 +191,10 @@
   vertical-align:middle;
 }
 
+.featured-chip--recurring{
+  background:var(--purple-100,#E7EDFC);color:var(--blue-600,#3E6FE0);
+}
+
 @media(max-width:760px){
   .events-top-toolbar{flex-direction:column;align-items:stretch;}
   .filters-card__daterow{grid-template-columns:1fr;}
