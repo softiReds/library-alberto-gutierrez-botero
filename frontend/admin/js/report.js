@@ -260,19 +260,47 @@
     document.getElementById('statVisitsUpdated').textContent = `Datos consultados el ${formatNow()}`;
   }
 
-  /* ============ Card: asistencia por edad y género (GET /reports/attendance) ============
-     El backend da dos desgloses independientes (by_gender, by_age_range),
-     no un cruce edad×género — se muestran como dos gráficas de barras
-     separadas dentro de la misma tarjeta, tal como se pidió. ============ */
+  /* ============ Card: asistencia por edad y género (GET /attendance) ============
+     GET /reports/attendance solo da dos desgloses independientes
+     (by_gender, by_age_range), no un cruce edad×género. Para mostrar
+     un único gráfico de barras agrupadas (edad en X, una barra por
+     género) se piden los registros individuales del mes vía
+     GET /attendance (paginando hasta traerlos todos) y se cruzan acá. ============ */
+
+  function ageRangeBucket(age) {
+    if (age <= 5) return '0-5';
+    if (age <= 15) return '6-15';
+    if (age <= 30) return '16-30';
+    if (age <= 50) return '31-50';
+    return '51-99';
+  }
+
+  async function fetchAllAttendance(from, to) {
+    const pageSize = 200;
+    let page = 1;
+    let all = [];
+    while (true) {
+      const params = new URLSearchParams({ page: String(page), page_size: String(pageSize), from, to });
+      const data = await window.BAGBApi.apiFetch(`/attendance?${params.toString()}`);
+      all = all.concat(data.data);
+      if (all.length >= data.total || data.data.length === 0) break;
+      page++;
+    }
+    return all;
+  }
 
   async function renderAgeGenderChart(monthKey) {
     const [year, month] = monthKey.split('-').map(Number);
     const container = document.getElementById('chartAgeGender');
     const legendEl = document.getElementById('legendAgeGender');
 
-    let data;
+    const from = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const to = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+    let records;
     try {
-      data = await api.attendanceReport(month, year);
+      records = await fetchAllAttendance(from, to);
     } catch (err) {
       console.error('No se pudo cargar el reporte de asistencia.', err);
       emptyMessage(container, 'No se pudo cargar el reporte.');
@@ -280,28 +308,17 @@
       return;
     }
 
-    container.innerHTML = `
-      <p class="chart-subtitle">Por género</p>
-      <div class="chart-svg-wrap" id="miniChartGender"></div>
-      <p class="chart-subtitle">Por rango de edad</p>
-      <div class="chart-svg-wrap" id="miniChartAge"></div>
-    `;
+    const genderOrder = ['Femenino', 'Masculino', 'Otro'];
+    const genderNames = genderOrder.filter(g => records.some(r => r.gender === g));
 
-    const genderNames = Object.keys(data.by_gender);
-    const genderSeries = [{
-      name: 'Visitantes',
-      color: COLORS.purple,
-      data: genderNames.map(g => data.by_gender[g])
-    }];
-    renderGroupedBarChart(document.getElementById('miniChartGender'), genderNames, genderSeries, { height: 180 });
+    const series = genderNames.map((g, i) => ({
+      name: g,
+      color: GENDER_COLORS[g] || FALLBACK_COLORS[i % FALLBACK_COLORS.length],
+      data: AGE_RANGE_ORDER.map(range => records.filter(r => r.gender === g && ageRangeBucket(r.age) === range).length)
+    }));
+
+    renderGroupedBarChart(container, AGE_RANGE_ORDER, series, { height: 220 });
     renderLegend(legendEl, genderNames.map((g, i) => ({ name: g, color: GENDER_COLORS[g] || FALLBACK_COLORS[i % FALLBACK_COLORS.length] })));
-
-    const ageSeries = [{
-      name: 'Visitantes',
-      color: COLORS.blue,
-      data: AGE_RANGE_ORDER.map(range => data.by_age_range[range] || 0)
-    }];
-    renderGroupedBarChart(document.getElementById('miniChartAge'), AGE_RANGE_ORDER, ageSeries, { height: 180 });
   }
 
   function initAgeGenderCard() {

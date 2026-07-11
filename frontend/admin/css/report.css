@@ -141,14 +141,6 @@
   color:var(--muted);
   font-size:.86rem;
 }
-.chart-subtitle{
-  margin:10px 0 2px;
-  font-size:.78rem;
-  font-weight:600;
-  color:var(--muted);
-}
-.chart-subtitle:first-child{margin-top:0;}
-
 /* ============ TABLA DE LIBROS PERDIDOS ============ */
 .lost-books-table-wrap{flex:1;min-width:220px;}
 .lost-books-table{
