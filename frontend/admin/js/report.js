@@ -143,7 +143,11 @@
         const barH = (val / niceMax) * chartH;
         const x = padL + ci * groupW + si * barW + barW * 0.12;
         const y = padT + chartH - barH;
-        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${s.color}"/>`;
+        // s.colors permite un color distinto por categoría dentro de la
+        // misma serie (ej. "Consultas en sala" vs. "Libros prestados"),
+        // en vez del único s.color aplicado a todas las barras.
+        const fill = (Array.isArray(s.colors) ? s.colors[ci] : null) || s.color;
+        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${fill}"/>`;
       });
       const xLabel = padL + ci * groupW + groupW / 2;
       svg += `<text x="${xLabel.toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis-label">${cat}</text>`;
@@ -419,7 +423,7 @@
     document.getElementById('statCompareLoans').textContent = totalLoans.toLocaleString('es-CO');
 
     const categories = ['Consultas en sala', 'Libros prestados'];
-    const series = [{ name: 'Total del mes', color: COLORS.purple, data: [totalReading, totalLoans] }];
+    const series = [{ name: 'Total del mes', colors: [COLORS.green, COLORS.purple], data: [totalReading, totalLoans] }];
     renderGroupedBarChart(chartEl, categories, series, { height: 200 });
     renderLegend(legendEl, [
       { name: 'Consultas en sala', color: COLORS.green },
