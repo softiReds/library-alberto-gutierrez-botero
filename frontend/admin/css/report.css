@@ -132,9 +132,27 @@
 }
 .chart-axis-label{
   font-family:var(--font-body);
-  font-size:9px;
+  font-size:15px;
   fill:var(--muted);
 }
+.chart-svg-wrap rect,
+.chart-svg-wrap circle{cursor:default;}
+
+/* ============ TOOLTIP DE GRÁFICAS ============ */
+.chart-tooltip{
+  position:fixed;
+  z-index:200;
+  background:var(--maroon-900);
+  color:#fff;
+  font-size:.78rem;
+  font-weight:600;
+  padding:6px 11px;
+  border-radius:8px;
+  pointer-events:none;
+  white-space:nowrap;
+  box-shadow:0 6px 16px rgba(0,0,0,.2);
+}
+.chart-tooltip[hidden]{display:none;}
 .chart-empty{
   padding:30px 10px;
   text-align:center;

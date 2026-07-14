@@ -28,6 +28,23 @@
   const GENDER_COLORS = { Femenino: COLORS.pink, Masculino: COLORS.blue };
   const FALLBACK_COLORS = [COLORS.orange, COLORS.purple, COLORS.green];
 
+  // Último dato renderizado por cada tarjeta — se usa únicamente para
+  // armar el CSV de "Exportar" con lo que se está viendo en pantalla,
+  // sin tener que volver a pedirle nada al backend.
+  const lastData = {
+    visitsTotal: null,
+    ageGenderMonthLabel: '',
+    ageGenderSeries: [],
+    attendanceYear: null,
+    attendanceYearCounts: [],
+    loansMonthLabel: '',
+    loansCount: null,
+    lostBooksTotal: null,
+    compareMonthLabel: '',
+    compareReading: null,
+    compareLoans: null
+  };
+
   /* ============ API — apiFetch agrega el token y parsea errores ============ */
 
   const api = {
@@ -43,6 +60,32 @@
   };
 
   /* ============ Utilidades ============ */
+
+  function escapeAttr(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  // Tooltip compartido para todas las gráficas SVG del reporte — un solo
+  // <div> flotante que se reposiciona según el elemento con
+  // data-tooltip que esté bajo el mouse. Se usa data-tooltip en vez del
+  // <title> nativo de SVG porque ese tiene mucho retraso y no siempre
+  // aparece.
+  const chartTooltip = document.createElement('div');
+  chartTooltip.className = 'chart-tooltip';
+  chartTooltip.hidden = true;
+  document.body.appendChild(chartTooltip);
+
+  document.addEventListener('mousemove', (e) => {
+    const target = e.target.closest && e.target.closest('[data-tooltip]');
+    if (!target) {
+      if (!chartTooltip.hidden) chartTooltip.hidden = true;
+      return;
+    }
+    chartTooltip.textContent = target.dataset.tooltip;
+    chartTooltip.hidden = false;
+    chartTooltip.style.left = `${e.clientX + 14}px`;
+    chartTooltip.style.top = `${e.clientY + 14}px`;
+  });
 
   function niceCeiling(value) {
     if (value <= 0) return 5;
@@ -147,7 +190,8 @@
         // misma serie (ej. "Consultas en sala" vs. "Libros prestados"),
         // en vez del único s.color aplicado a todas las barras.
         const fill = (Array.isArray(s.colors) ? s.colors[ci] : null) || s.color;
-        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${fill}"/>`;
+        const tooltip = series.length > 1 ? `${s.name} · ${cat}: ${val}` : `${cat}: ${val}`;
+        svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(barW * 0.76).toFixed(1)}" height="${barH.toFixed(1)}" rx="3" fill="${fill}" data-tooltip="${escapeAttr(tooltip)}"/>`;
       });
       const xLabel = padL + ci * groupW + groupW / 2;
       svg += `<text x="${xLabel.toFixed(1)}" y="${height - 8}" text-anchor="middle" class="chart-axis-label">${cat}</text>`;
@@ -190,8 +234,9 @@
 
     svg += `<path d="${areaPath}" fill="${color}" opacity="0.12" stroke="none"/>`;
     svg += `<path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.2"/>`;
-    points.forEach(([x, y]) => {
-      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${color}"/>`;
+    points.forEach(([x, y], i) => {
+      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="transparent" data-tooltip="${escapeAttr(`${labels[i]}: ${data[i]}`)}"/>`;
+      svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${color}" style="pointer-events:none"/>`;
     });
 
     labels.forEach((label, i) => {
@@ -246,6 +291,7 @@
     try {
       const data = await api.siteVisits();
       document.getElementById('statVisitsTotal').textContent = data.total_visits.toLocaleString('es-CO');
+      lastData.visitsTotal = data.total_visits;
     } catch (err) {
       console.error('No se pudo cargar el contador de visitas.', err);
       document.getElementById('statVisitsTotal').textContent = '–';
@@ -310,6 +356,9 @@
 
     renderGroupedBarChart(container, AGE_RANGE_ORDER, series, { height: 220 });
     renderLegend(legendEl, genderNames.map((g, i) => ({ name: g, color: GENDER_COLORS[g] || FALLBACK_COLORS[i % FALLBACK_COLORS.length] })));
+
+    lastData.ageGenderMonthLabel = `${MONTHS_LONG[month - 1]} ${year}`;
+    lastData.ageGenderSeries = series.map(s => ({ name: s.name, data: s.data }));
   }
 
   function initAgeGenderCard() {
@@ -339,6 +388,9 @@
     const counts = results.map(v => v ?? 0);
 
     renderAreaLineChart(container, MONTHS_SHORT, counts, { color: COLORS.purple });
+
+    lastData.attendanceYear = year;
+    lastData.attendanceYearCounts = counts;
   }
 
   function initAttendanceYearCard() {
@@ -367,6 +419,9 @@
     document.getElementById('statLoansMonth').textContent = data.loans_count.toLocaleString('es-CO');
     document.getElementById('loansMonthTitle').textContent = `Libros prestados en ${MONTHS_LONG[month - 1]} ${year}`;
     emptyMessage(chartEl, 'El backend solo expone el total del mes, no un desglose diario.');
+
+    lastData.loansMonthLabel = `${MONTHS_LONG[month - 1]} ${year}`;
+    lastData.loansCount = data.loans_count;
 
     return data;
   }
@@ -398,6 +453,8 @@
 
     document.getElementById('statLostTotal').textContent = data.lost_books_count.toLocaleString('es-CO');
     tbody.innerHTML = `<tr><td colspan="3" class="chart-empty">El backend solo expone el total de libros perdidos, no el detalle por libro.</td></tr>`;
+
+    lastData.lostBooksTotal = data.lost_books_count;
   }
 
   /* ============ Card: consultas en sala vs. libros prestados  ============ */
@@ -421,6 +478,10 @@
 
     document.getElementById('statCompareReading').textContent = totalReading.toLocaleString('es-CO');
     document.getElementById('statCompareLoans').textContent = totalLoans.toLocaleString('es-CO');
+
+    lastData.compareMonthLabel = `${MONTHS_LONG[monthNum - 1]} ${year}`;
+    lastData.compareReading = totalReading;
+    lastData.compareLoans = totalLoans;
 
     const categories = ['Consultas en sala', 'Libros prestados'];
     const series = [{ name: 'Total del mes', colors: [COLORS.green, COLORS.purple], data: [totalReading, totalLoans] }];
@@ -468,6 +529,68 @@
     yearSelect.addEventListener('change', update);
     update();
   }
+
+  /* ============ Exportar (CSV con lo que está en pantalla) ============ */
+
+  function csvRow(cells) {
+    return cells.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
+  }
+
+  // Excel reinterpreta valores tipo "6-15" como fecha (día 15 de junio)
+  // al abrir el CSV. Este truco (fórmula que solo devuelve el texto)
+  // evita esa auto-conversión sin tocar lo que se ve en pantalla.
+  function csvForceText(value) {
+    return `="${String(value).replace(/"/g, '""')}"`;
+  }
+
+  function exportReportCSV() {
+    const lines = [];
+    lines.push(csvRow(['Reporte — Biblioteca Alberto Gutiérrez Botero']));
+    lines.push(csvRow([`Generado el ${formatNow()}`]));
+    lines.push('');
+
+    lines.push(csvRow(['Visitas a la página pública']));
+    lines.push(csvRow(['Total de visitas', lastData.visitsTotal]));
+    lines.push('');
+
+    lines.push(csvRow([`Asistencia por edad y género — ${lastData.ageGenderMonthLabel}`]));
+    lines.push(csvRow(['Rango de edad', ...lastData.ageGenderSeries.map(s => s.name)]));
+    AGE_RANGE_ORDER.forEach((range, i) => {
+      lines.push(csvRow([csvForceText(range), ...lastData.ageGenderSeries.map(s => s.data[i] || 0)]));
+    });
+    lines.push('');
+
+    lines.push(csvRow([`Asistencia total por mes — ${lastData.attendanceYear}`]));
+    lines.push(csvRow(['Mes', 'Visitas']));
+    MONTHS_LONG.forEach((name, i) => {
+      lines.push(csvRow([name, lastData.attendanceYearCounts[i] ?? 0]));
+    });
+    lines.push('');
+
+    lines.push(csvRow([`Libros prestados — ${lastData.loansMonthLabel}`]));
+    lines.push(csvRow(['Total', lastData.loansCount]));
+    lines.push('');
+
+    lines.push(csvRow(['Libros perdidos (no devueltos)']));
+    lines.push(csvRow(['Total', lastData.lostBooksTotal]));
+    lines.push('');
+
+    lines.push(csvRow([`Consultas en sala vs. libros prestados — ${lastData.compareMonthLabel}`]));
+    lines.push(csvRow(['Consultas en sala', lastData.compareReading]));
+    lines.push(csvRow(['Libros prestados', lastData.compareLoans]));
+
+    // El BOM al inicio es necesario para que Excel detecte UTF-8 y no
+    // rompa las tildes/eñes (si no, "Botero" se lee "BotÃ©ro").
+    const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', exportReportCSV);
 
   /* ============ Cerrar sesión ============ */
 
