@@ -16,11 +16,14 @@
   const MESES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-  // Cuántos eventos se traen de una sola vez para armar el calendario
-  // (GET /events/all no tiene filtro por mes/rango de fechas, así que
-  // esto es un "traer casi todo" de mejor esfuerzo, no una garantía
-  // de completitud si la biblioteca llega a tener más de esta
-  // cantidad de eventos históricos + futuros).
+  const SEARCH_DEBOUNCE_MS = 350;
+
+  // Cuántos eventos se traen de una sola vez para armar el calendario.
+  // El calendario intencionalmente ignora los filtros de la tabla (siempre
+  // muestra "casi todos" los eventos) para que siga sirviendo como vista
+  // general de navegación por fecha; esto es un "traer casi todo" de mejor
+  // esfuerzo, no una garantía de completitud si la biblioteca llega a tener
+  // más de esta cantidad de eventos históricos + futuros.
   const CALENDAR_FETCH_SIZE = 100;
 
   let EVENTS_PAGE = [];    // solo los eventos de la página actual de la tabla
@@ -33,11 +36,26 @@
   let calYear, calMonth;
   let selectedDateKey = null;
 
+  // Filtros de la tabla (el calendario, en cambio, siempre trae el set
+  // "casi completo" sin filtrar — ver loadCalendarData).
+  let filterSearch = '';
+  let filterRange = 'todos';     // 'todos' | 'proximos' | 'mes' | 'pasados'
+  let filterFeatured = '';       // '' | 'featured' | 'regular'
+  let filterDateFrom = '';
+  let filterDateTo = '';
+  let searchDebounceTimer = null;
+
   /* ============ API — apiFetch agrega el token y parsea errores ============ */
 
   const api = {
     async listPage(page, pageSize) {
-      return window.BAGBApi.apiFetch(`/events/all?page=${page}&page_size=${pageSize}`);
+      const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+      if (filterSearch) params.set('search', filterSearch);
+      if (filterRange && filterRange !== 'todos') params.set('range', filterRange);
+      if (filterFeatured) params.set('featured', filterFeatured === 'featured' ? 'true' : 'false');
+      if (filterDateFrom) params.set('from', filterDateFrom);
+      if (filterDateTo) params.set('to', filterDateTo);
+      return window.BAGBApi.apiFetch(`/events/all?${params.toString()}`);
     },
     async listForCalendar() {
       return window.BAGBApi.apiFetch(`/events/all?page=1&page_size=${CALENDAR_FETCH_SIZE}`);
@@ -89,20 +107,81 @@
   }
 
   /* ============ Búsqueda, rango (próximos/mes/pasados/destacados) y
-     fecha desde/hasta: GET /events/all no soporta ningún filtro más
-     allá de page/page_size, así que se deshabilitan en vez de simular
-     un filtro que solo miraría la página ya cargada. ============ */
-  function disableUnsupportedFilters() {
-    const ids = ['filterSearchTop', 'filterSearchPanel', 'filterDateFrom', 'filterDateTo'];
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      el.disabled = true;
-    });
-    document.getElementById('filterSearchTop').placeholder = 'Búsqueda no disponible todavía';
-    document.getElementById('filterSearchPanel').placeholder = 'Búsqueda no disponible todavía';
+     fecha desde/hasta — GET /events/all soporta search/range/featured/from/to.
+     El toolbar superior y el panel lateral son dos vistas del mismo estado:
+     "destacados" (solo existe arriba) equivale a featured=true + rango "todos". ============ */
+  function syncFilterControls() {
+    document.getElementById('filterRangeTop').value =
+      filterFeatured === 'featured' ? 'destacados' : filterRange;
+    document.getElementById('filterRangePanel').value = filterRange;
+    document.getElementById('filterFeatured').value = filterFeatured;
+  }
 
-    ['filterRangeTop', 'filterRangePanel', 'filterFeatured'].forEach(id => {
-      document.getElementById(id).disabled = true;
+  function applyFiltersAndReload() {
+    currentPage = 1;
+    loadTable();
+  }
+
+  function initFilters() {
+    const searchTop = document.getElementById('filterSearchTop');
+    const searchPanel = document.getElementById('filterSearchPanel');
+    const rangeTop = document.getElementById('filterRangeTop');
+    const rangePanel = document.getElementById('filterRangePanel');
+    const featuredSelect = document.getElementById('filterFeatured');
+    const dateFrom = document.getElementById('filterDateFrom');
+    const dateTo = document.getElementById('filterDateTo');
+
+    function onSearchInput(e) {
+      filterSearch = e.target.value.trim();
+      searchTop.value = filterSearch;
+      searchPanel.value = filterSearch;
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(applyFiltersAndReload, SEARCH_DEBOUNCE_MS);
+    }
+    searchTop.addEventListener('input', onSearchInput);
+    searchPanel.addEventListener('input', onSearchInput);
+
+    function onRangeChange(value) {
+      if (value === 'destacados') {
+        filterFeatured = 'featured';
+        filterRange = 'todos';
+      } else {
+        filterRange = value;
+        if (filterFeatured === 'featured') filterFeatured = '';
+      }
+      syncFilterControls();
+      applyFiltersAndReload();
+    }
+    rangeTop.addEventListener('change', () => onRangeChange(rangeTop.value));
+    rangePanel.addEventListener('change', () => onRangeChange(rangePanel.value));
+
+    featuredSelect.addEventListener('change', () => {
+      filterFeatured = featuredSelect.value;
+      syncFilterControls();
+      applyFiltersAndReload();
+    });
+
+    dateFrom.addEventListener('change', () => {
+      filterDateFrom = dateFrom.value;
+      applyFiltersAndReload();
+    });
+    dateTo.addEventListener('change', () => {
+      filterDateTo = dateTo.value;
+      applyFiltersAndReload();
+    });
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+      filterSearch = '';
+      filterRange = 'todos';
+      filterFeatured = '';
+      filterDateFrom = '';
+      filterDateTo = '';
+      searchTop.value = '';
+      searchPanel.value = '';
+      dateFrom.value = '';
+      dateTo.value = '';
+      syncFilterControls();
+      applyFiltersAndReload();
     });
   }
 
@@ -574,7 +653,7 @@
     calYear = now.getFullYear();
     calMonth = now.getMonth();
 
-    disableUnsupportedFilters();
+    initFilters();
 
     document.getElementById('calPrev').addEventListener('click', () => changeMonth(-1));
     document.getElementById('calNext').addEventListener('click', () => changeMonth(1));
