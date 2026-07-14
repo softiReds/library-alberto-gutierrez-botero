@@ -16,7 +16,7 @@ public class EventsController(LibraryDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetUpcomingEvents()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
 
         var events = await db.Events
             .Where(e => e.EventDate >= today)
@@ -30,7 +30,7 @@ public class EventsController(LibraryDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetFeaturedEvents()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
 
         var events = await db.Events
             .Where(e => e.Featured && e.EventDate >= today)
@@ -43,6 +43,11 @@ public class EventsController(LibraryDbContext db) : ControllerBase
     [HttpGet("all")]
     [Authorize]
     public async Task<ActionResult<PagedResult<EventDto>>> GetAllEvents(
+        [FromQuery] string? search,
+        [FromQuery] string? range,
+        [FromQuery] bool? featured,
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
         [FromQuery(Name = "page_size")] int pageSize = 20)
     {
@@ -50,6 +55,44 @@ public class EventsController(LibraryDbContext db) : ControllerBase
         pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
 
         var query = db.Events.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(e =>
+                EF.Functions.ILike(e.Title, $"%{search}%") ||
+                (e.Description != null && EF.Functions.ILike(e.Description, $"%{search}%")));
+        }
+
+        if (featured is not null)
+        {
+            query = query.Where(e => e.Featured == featured.Value);
+        }
+
+        var today = LibraryClock.Today;
+        switch (range)
+        {
+            case "proximos":
+                query = query.Where(e => e.EventDate >= today);
+                break;
+            case "pasados":
+                query = query.Where(e => e.EventDate < today);
+                break;
+            case "mes":
+                var firstOfMonth = new DateOnly(today.Year, today.Month, 1);
+                var firstOfNextMonth = firstOfMonth.AddMonths(1);
+                query = query.Where(e => e.EventDate >= firstOfMonth && e.EventDate < firstOfNextMonth);
+                break;
+        }
+
+        if (from is not null)
+        {
+            query = query.Where(e => e.EventDate >= from);
+        }
+
+        if (to is not null)
+        {
+            query = query.Where(e => e.EventDate <= to);
+        }
 
         var total = await query.CountAsync();
 

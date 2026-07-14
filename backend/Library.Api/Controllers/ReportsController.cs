@@ -1,3 +1,4 @@
+using Library.Api.Common;
 using Library.Api.Data;
 using Library.Api.Domain.Enums;
 using Library.Api.Reports;
@@ -26,9 +27,9 @@ public class ReportsController(LibraryDbContext db) : ControllerBase
         [FromQuery] int? month,
         [FromQuery] int? year)
     {
-        var now = DateTime.UtcNow;
-        var m = month ?? now.Month;
-        var y = year ?? now.Year;
+        var today = LibraryClock.Today;
+        var m = month ?? today.Month;
+        var y = year ?? today.Year;
 
         if (m is < 1 or > 12)
         {
@@ -71,9 +72,9 @@ public class ReportsController(LibraryDbContext db) : ControllerBase
         [FromQuery] int? month,
         [FromQuery] int? year)
     {
-        var now = DateTime.UtcNow;
-        var m = month ?? now.Month;
-        var y = year ?? now.Year;
+        var today = LibraryClock.Today;
+        var m = month ?? today.Month;
+        var y = year ?? today.Year;
 
         if (m is < 1 or > 12)
         {

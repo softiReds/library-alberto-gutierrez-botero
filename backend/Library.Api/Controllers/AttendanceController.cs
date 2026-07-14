@@ -65,7 +65,7 @@ public class AttendanceController(LibraryDbContext db) : ControllerBase
     {
         var attendance = new Domain.Entities.Attendance
         {
-            VisitDate = request.VisitDate ?? DateOnly.FromDateTime(DateTime.UtcNow),
+            VisitDate = request.VisitDate ?? LibraryClock.Today,
             Age = request.Age,
             Gender = request.Gender,
             VisitorName = request.VisitorName,
