@@ -1,3 +1,4 @@
+using Library.Api.Common;
 using Library.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ public static class LoanMaintenance
 {
     public static async Task MarkOverdueLoansAsync(LibraryDbContext db)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
         await db.Loans
             .Where(l => l.Status == LoanStatus.Prestado && l.DueDate < today)
             .ExecuteUpdateAsync(setters => setters.SetProperty(l => l.Status, LoanStatus.Vencido));

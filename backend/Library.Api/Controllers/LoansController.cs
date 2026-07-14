@@ -89,7 +89,7 @@ public class LoansController(LibraryDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<LoanDto>> CreateLoan(CreateLoanRequest request)
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
 
         if (request.DueDate <= today)
         {
@@ -155,7 +155,7 @@ public class LoansController(LibraryDbContext db) : ControllerBase
                 $"Este préstamo ya figura como '{loan.Status.ToSpanishLabel()}' y no puede devolverse de nuevo."));
         }
 
-        loan.ReturnDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        loan.ReturnDate = LibraryClock.Today;
         loan.Status = LoanStatus.Devuelto;
         loan.ConditionAtReturn = request.ConditionAtReturn;
         loan.Book!.Status = BookStatus.Disponible;

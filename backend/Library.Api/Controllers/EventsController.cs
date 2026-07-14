@@ -16,7 +16,7 @@ public class EventsController(LibraryDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetUpcomingEvents()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
 
         var events = await db.Events
             .Where(e => e.EventDate >= today)
@@ -30,7 +30,7 @@ public class EventsController(LibraryDbContext db) : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetFeaturedEvents()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
 
         var events = await db.Events
             .Where(e => e.Featured && e.EventDate >= today)
@@ -68,7 +68,7 @@ public class EventsController(LibraryDbContext db) : ControllerBase
             query = query.Where(e => e.Featured == featured.Value);
         }
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = LibraryClock.Today;
         switch (range)
         {
             case "proximos":

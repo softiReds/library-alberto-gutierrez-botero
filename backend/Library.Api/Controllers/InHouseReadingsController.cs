@@ -75,7 +75,7 @@ public class InHouseReadingsController(LibraryDbContext db) : ControllerBase
         {
             BookId = book?.Id,
             BookTitleFallback = request.BookTitleFallback,
-            ReadingDate = request.ReadingDate ?? DateOnly.FromDateTime(DateTime.UtcNow)
+            ReadingDate = request.ReadingDate ?? LibraryClock.Today
         };
 
         db.InHouseReadings.Add(reading);
